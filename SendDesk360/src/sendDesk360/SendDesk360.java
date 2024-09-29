@@ -22,9 +22,6 @@ public class SendDesk360 extends Application {
     	PrimaryButton seconadryButton = new PrimaryButton("label test", PrimaryButton.ButtonVariant.ACCENT, customHandler);
     	PrimaryButton textOnly = new PrimaryButton("label test", PrimaryButton.ButtonVariant.TEXT_ONLY, customHandler);
 
-
-    	
-
  
         // Set up a layout
     	VBox layout = new VBox(button, seconadryButton, textOnly); // textOnly is being used here
