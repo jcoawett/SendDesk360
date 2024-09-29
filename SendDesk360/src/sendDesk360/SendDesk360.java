@@ -27,7 +27,7 @@ public class SendDesk360 extends Application {
 
  
         // Set up a layout
-        VBox layout = new VBox(button, seconadryButton, textOnly);
+    	VBox layout = new VBox(button, seconadryButton, textOnly); // textOnly is being used here
         VBox.setVgrow(button, Priority.ALWAYS);
         layout.setAlignment(Pos.CENTER);
         layout.setSpacing(48);
