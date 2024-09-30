@@ -11,13 +11,16 @@ import javafx.stage.Stage;
 import sendDesk360.Styles.RadialGradientBackground;
 
 
+// TODO: make page routing with the stage prop
+
+
 public class LoginPage extends VBox {
-    private Stage primaryStage;
+    private Stage currentView;
 
-    public LoginPage(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public LoginPage(Stage stage) {
+        this.currentView = stage;
 
-        // CONTAINER FOR LOGO + TITLE
+        // WRAPPER FOR LOGO + TITLE
         // ----------------------------------------------//
         ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("Assets/Send Desk Logo.png")));
         logo.setFitWidth(100); // Set the width of the logo

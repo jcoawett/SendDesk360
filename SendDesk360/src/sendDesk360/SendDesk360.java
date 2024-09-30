@@ -4,6 +4,9 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+
+// TODO: Page routing and logic
+
 public class SendDesk360 extends Application {
 
     @Override
@@ -11,13 +14,16 @@ public class SendDesk360 extends Application {
     	
         // PAGES
         // ----------------------------------------------//
-        LoginPage loginPage = new LoginPage(stage);
+//        LoginPage loginPage = new LoginPage(stage);
+        OneTimeCodePage oneTimeCode = new OneTimeCodePage(stage);
         // ----------------------------------------------//
         
         
         // SCENE
         // ----------------------------------------------//
-        Scene scene = new Scene(loginPage, 1600, 980);
+//        Scene scene = new Scene(loginPage, 1600, 980);
+        Scene scene = new Scene(oneTimeCode, 1600, 980);
+
         
         String cssPath = getClass().getResource("Styles/styles.css").toExternalForm();
         scene.getStylesheets().add(cssPath);

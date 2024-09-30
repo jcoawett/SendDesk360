@@ -117,9 +117,11 @@ public class PrimaryField extends VBox {
     public StringProperty getUserInput() {
         return fieldComponent.textProperty();
     }
-   
-    // If its a single digit handle that
-   
+    
+    // Method to get the field component
+    public TextInputControl getFieldComponent() {
+        return fieldComponent;
+    }
     
     
     // MAIN constructor
