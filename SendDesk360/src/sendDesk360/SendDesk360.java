@@ -18,29 +18,33 @@ public class SendDesk360 extends Application {
             System.out.println("Button clicked!");
         };
     	
-    	PrimaryButton button = new PrimaryButton("label test", PrimaryButton.ButtonVariant.FILLED, customHandler);
-    	PrimaryButton seconadryButton = new PrimaryButton("label test", PrimaryButton.ButtonVariant.ACCENT, customHandler);
-    	PrimaryButton textOnly = new PrimaryButton("label test", PrimaryButton.ButtonVariant.TEXT_ONLY, customHandler);
+    	PrimaryButton buttonFilled = new PrimaryButton("label test", PrimaryButton.ButtonVariant.FILLED, customHandler);
+    	PrimaryButton buttonAccent = new PrimaryButton("Label Test", PrimaryButton.ButtonVariant.ACCENT, customHandler);
+    	PrimaryButton buttonTextOnly = new PrimaryButton("label test", PrimaryButton.ButtonVariant.TEXT_ONLY, customHandler);
 
  
         // Set up a layout
-    	VBox layout = new VBox(button, seconadryButton, textOnly); // textOnly is being used here
-        VBox.setVgrow(button, Priority.ALWAYS);
+    	VBox layout = new VBox(buttonFilled, buttonAccent, buttonTextOnly); 
+        VBox.setVgrow(buttonFilled, Priority.ALWAYS);
+        VBox.setVgrow(buttonTextOnly, Priority.ALWAYS);
+        
         layout.setAlignment(Pos.CENTER);
-        layout.setSpacing(48);
-        button.setMaxWidth(464);
-        seconadryButton.setMaxWidth(464);// Let the button fill the available width
+        layout.setSpacing(16);
+        
+        buttonFilled.setMaxWidth(464);
+        buttonAccent.setMaxWidth(464);
+        buttonTextOnly.setMaxWidth(464);
+        
+        
+        
 
         // Create a scene
         Scene scene = new Scene(layout, 1600, 980);
 
-
-
-
         // Set the scene to the stage
         stage.setScene(scene);
         scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
-        stage.setTitle("PP poop check");
+        stage.setTitle("Send Desk");
         stage.show();
     }
 

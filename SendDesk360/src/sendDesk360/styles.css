@@ -1,6 +1,3 @@
-
-
-/* Apply this gradient to the root node or any container */
 .root {
     -fx-background-color: radial-gradient(
         focus-angle 0deg,
@@ -12,89 +9,74 @@
     ), #080808;
 }
 
-/* BUTTON COMPONENT STYLES */
+/* BUTTON COMPONENT */
 /* ----------------------- */
 
-/* Accent Button */
+/* Accent Button Variant */
 .primary-button-variant-ACCENT {
 	
-	-fx-text-alignment: center;
-	
-	/* Button Text */
+    /* Text */
 	-fx-font-size: 16px;
 	-fx-font-weight: 700;
-    -fx-padding: 18px 32px; /* Set padding with a default */
-    -fx-alignment: center; /* Center alignment for contents */
-
-    -fx-text-fill: white;  /* Set text color to white */
-    -fx-alignment: center;
-    -fx-background-color: #4A6EF2; /* Background color */
-    -fx-border-radius: 8px; /* Border radius */
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(248, 248, 248, 0.24); /* Border color */
-    -fx-border-width: 1px;
-    
-    /* Add drop shadow */
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6); /* Box shadow equivalent */
-
-    /* Adjust spacing for internal elements (like icons/text) */
-    -fx-spacing: 8px; /* Equivalent to gap */
-}
-
-/* Filled Button */
-.primary-button-variant-FILLED {
-	
-	-fx-text-alignment: center;
-	
-	/* Button Text */
-	-fx-font-size: 16px;
-	-fx-font-weight: 700;
-    -fx-padding: 18px 32px; /* Set padding with a default */
-    -fx-alignment: center; /* Center alignment for contents */
-
-    -fx-text-fill: white;  /* Set text color to white */
-    -fx-alignment: center;
-    -fx-background-color: #1E2025; /* Background color */
-    -fx-border-radius: 8px; /* Border radius */
-    -fx-background-radius: 8px;
-    -fx-border-color: #28292E; /* Border color */
-    -fx-border-width: 1px; /* Border width */
-    
-    /* Add drop shadow */
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6); /* Box shadow equivalent */
-
-    /* Adjust spacing for internal elements (like icons/text) */
-    -fx-spacing: 8px; /* Equivalent to gap */
-}
-
-
-/* Text-Only Button */
-.primary-button-variant-TEXT_ONLY {
     -fx-text-alignment: center;
-
-    /* Button Text */
-    -fx-font-size: 16px;
-    -fx-font-weight: 700;
-    -fx-padding: 18px 32px; /* Set padding with a default */
-    -fx-alignment: center; /* Center alignment for contents */
-
-    -fx-text-fill: #969799;  /* Set text color to gray */
-    -fx-background-color: transparent; /* Transparent background */
-    -fx-border-radius: 8px; /* Border radius */
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent; /* Transparent border */
-    -fx-border-width: 1px; /* Border width */
+    -fx-text-fill: white;
     
-    /* Add drop shadow */
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6); /* Box shadow equivalent */
-
-    /* Adjust spacing for internal elements (like icons/text) */
-    -fx-spacing: 8px; /* Equivalent to gap */
+    /* Layout */
+    -fx-padding: 18px 32px;
+    -fx-alignment: center;
+    
+    /* Styles */
+    -fx-background-color: #4A6EF2;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(248, 248, 248, 0.24);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6);
+    
 }
 
-/* Hover state */
-.primary-button-variant:hover {
-    -fx-background-color: 
-        rgba(255, 255, 255, 0.16), /* 16% white overlay */
-        #1E2025; /* The original background color for filled variant */
+
+/* Filled Button Variant */
+.primary-button-variant-FILLED {
+		
+	/* Text */
+	-fx-font-size: 16px;
+	-fx-font-weight: 700;
+    -fx-text-alignment: center;
+    -fx-text-fill: white;
+    
+    /* Layout */
+    -fx-padding: 18px 32px;
+    -fx-alignment: center;
+    
+    /* Styles */
+    -fx-background-color: #1E2025;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #28292E;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6);
+    
+}
+
+
+/* Text-Only Button Variant */
+.primary-button-variant-TEXT_ONLY {
+
+    /* Text */
+	-fx-font-size: 16px;
+	-fx-font-weight: 700;
+    -fx-text-alignment: center;
+    -fx-text-fill: #969799;
+    
+    /* Layout */
+    -fx-padding: 18px 32px;
+    -fx-alignment: center;
+    
+    /* Styles */
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;    
 }
