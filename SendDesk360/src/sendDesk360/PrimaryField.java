@@ -36,7 +36,22 @@ public class PrimaryField extends VBox {
     private void initializeFieldComponent(FieldVariant variant) {
         if (variant == FieldVariant.PASSWORD) {
             fieldComponent = new PasswordField();
-        } else {
+        } 
+        
+        else if (variant == FieldVariant.NUMBER_ONLY) {
+            fieldComponent = new TextField();
+            
+            // Restrict input to one digit
+            fieldComponent.textProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue.matches("\\d?")) {  // Only allow one digit (or empty)
+                    fieldComponent.setText(newValue);  // Accept the input
+                } else {
+                    fieldComponent.setText(oldValue);  // Revert to previous value if more than one digit
+                }
+            });
+        }
+        
+        else {
             fieldComponent = new TextField();
         }
         
