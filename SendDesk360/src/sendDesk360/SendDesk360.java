@@ -11,14 +11,18 @@ public class SendDesk360 extends Application {
     	
         // PAGES
         // ----------------------------------------------//
-        LoginPage loginPage = new LoginPage();
+        LoginPage loginPage = new LoginPage(stage);
         // ----------------------------------------------//
         
         
         // SCENE
         // ----------------------------------------------//
         Scene scene = new Scene(loginPage, 1600, 980);
-        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+        
+        String cssPath = getClass().getResource("Styles/styles.css").toExternalForm();
+        scene.getStylesheets().add(cssPath);
+        
+        
         stage.setScene(scene);
         stage.setTitle("Send Desk 360");
         stage.show();

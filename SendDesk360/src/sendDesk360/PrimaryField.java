@@ -6,15 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 
-
-// TODO: Issues
-// After editing the text stay hovered style unless typed text is ""
-// Error label appear, with error message passed as a prop
-// Single Digit Field Styling
-// Single Digit Functionality
-// Error Digit (same as nomalfield but applied here)
 
 public class PrimaryField extends VBox {
 
