@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 import sendDesk360.Styles.RadialGradientBackground;
 
 
@@ -21,10 +20,8 @@ import sendDesk360.Styles.RadialGradientBackground;
 // - All or nothing fields. if one field is wrong all should have an error state
 
 public class OneTimeCodePage extends VBox {
-    private Stage currentView;
 	
-	public OneTimeCodePage(Stage primaryStage) {
-        this.currentView = primaryStage;
+	public OneTimeCodePage() {
         
         // WRAPPER FOR LOGO + TEXT WRAPPER
         // ----------------------------------------------//

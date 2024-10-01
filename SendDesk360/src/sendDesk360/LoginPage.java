@@ -7,7 +7,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 import sendDesk360.Styles.RadialGradientBackground;
 
 
@@ -15,10 +14,14 @@ import sendDesk360.Styles.RadialGradientBackground;
 
 
 public class LoginPage extends VBox {
-    private Stage currentView;
+	
+    private SendDesk360 mainApp;
 
-    public LoginPage(Stage stage) {
-        this.currentView = stage;
+
+    public LoginPage(SendDesk360 mainApp) {
+    	
+        this.mainApp = mainApp;
+
 
         // WRAPPER FOR LOGO + TITLE
         // ----------------------------------------------//
@@ -34,6 +37,7 @@ public class LoginPage extends VBox {
         topContent.setAlignment(Pos.CENTER);
         topContent.setSpacing(40);
         // ----------------------------------------------//
+        
 
         // CONTENT WRAPPER (FIELDS AND BUTTONS)
         // ----------------------------------------------//
@@ -42,10 +46,11 @@ public class LoginPage extends VBox {
 
         HBox.setHgrow(emailField, Priority.ALWAYS);
         HBox.setHgrow(passwordField, Priority.ALWAYS);
+        
 
         // BUTTONS
         PrimaryButton loginButton = new PrimaryButton(PrimaryButton.ButtonVariant.FILLED, "Login", event -> handleLogin(emailField, passwordField));
-        PrimaryButton createAccountButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Create an account", event -> handleCreateAccount());
+        PrimaryButton createAccountButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Create an account", event -> goToCreateAccount());
 
         HBox.setHgrow(loginButton, Priority.ALWAYS);
         HBox.setHgrow(createAccountButton, Priority.ALWAYS);
@@ -59,6 +64,7 @@ public class LoginPage extends VBox {
         contentWrapper.setSpacing(8); // 16px space between fields and buttons
         contentWrapper.setAlignment(Pos.CENTER);
         // ----------------------------------------------//
+        
         
         // CONTAINER (TOP CONTENT + CONTENT WRAPPER)
         // ----------------------------------------------//
@@ -106,7 +112,8 @@ public class LoginPage extends VBox {
         }
     }
 
-    private void handleCreateAccount() {
+    private void goToCreateAccount() {
         System.out.println("Switch to create account");
+        mainApp.showSignUpPage();
     }
 }

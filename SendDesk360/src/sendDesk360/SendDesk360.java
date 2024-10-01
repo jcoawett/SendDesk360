@@ -1,6 +1,7 @@
 package sendDesk360;
 
 import javafx.application.Application;
+import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -9,31 +10,41 @@ import javafx.stage.Stage;
 
 public class SendDesk360 extends Application {
 
+    private Stage primaryStage;
+    private Scene scene;
+
     @Override
     public void start(Stage stage) {
-    	
-        // PAGES
-        // ----------------------------------------------//
-//        LoginPage loginPage = new LoginPage(stage);
-        OneTimeCodePage oneTimeCode = new OneTimeCodePage(stage);
-        // ----------------------------------------------//
-        
-        
-        // SCENE
-        // ----------------------------------------------//
-//        Scene scene = new Scene(loginPage, 1600, 980);
-        Scene scene = new Scene(oneTimeCode, 1600, 980);
+        this.primaryStage = stage;
 
-        
+        // Initialize the scene with an empty root
+        scene = new Scene(new VBox(), 1600, 980);
+        applyStyles(scene);
+
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Send Desk 360");
+        primaryStage.show();
+
+        // Show the initial page
+        showLoginPage();
+    }
+
+    private void applyStyles(Scene scene) {
         String cssPath = getClass().getResource("Styles/styles.css").toExternalForm();
         scene.getStylesheets().add(cssPath);
-        
-        
-        stage.setScene(scene);
-        stage.setTitle("Send Desk 360");
-        stage.show();
-        // ----------------------------------------------//
     }
+
+    public void showLoginPage() {
+        LoginPage loginPage = new LoginPage(this);
+        scene.setRoot(loginPage);
+    }
+
+    public void showSignUpPage() {
+        SignUpPage signUpPage = new SignUpPage(this);
+        scene.setRoot(signUpPage);
+    }
+
+    // Implement other navigation methods as needed
 
     public static void main(String[] args) {
         launch(args);
