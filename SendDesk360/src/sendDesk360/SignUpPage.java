@@ -1,5 +1,7 @@
 package sendDesk360;
 
+import java.util.Vector;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -19,7 +21,9 @@ public class SignUpPage extends VBox {
         USERNAME,
         PASSWORD,
         FIRSTNAME,
+        MIDDLENAME,
         LASTNAME,
+        PREFNAME,
         EMAIL,
         COMPLETED
     }
@@ -123,10 +127,22 @@ public class SignUpPage extends VBox {
                 textField = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Enter your first name...");
                 fieldWrapper.getChildren().add(textField);
                 break;
+            
+            case MIDDLENAME:
+                heading.setText("What's your middle name?");
+                textField = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Enter your middle name...");
+                fieldWrapper.getChildren().add(textField);
+                break;
 
             case LASTNAME:
                 heading.setText("Enter Your last name?");
                 textField = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Enter your last name...");
+                fieldWrapper.getChildren().add(textField);
+                break;
+                
+            case PREFNAME:
+                heading.setText("What's your preferred name?");
+                textField = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Enter your preferred name...");
                 fieldWrapper.getChildren().add(textField);
                 break;
 
@@ -153,53 +169,74 @@ public class SignUpPage extends VBox {
     // Method to process input and advance to the next step
     private void processInput() {
         boolean validInput = false;
-
         switch (collectionStep) {
             case USERNAME:
-                String username = textField.getUserInput().get();
+            	
+            	String username = textField.getUserInput().get();
                 if (!username.isEmpty()) {
-                    newUser.setUsername(username); //TODO: Set username
                     validInput = true;
                 } else {
                     // Show error message (implement as needed)
                     System.out.println("Username cannot be empty.");
                 }
+                newUser.username = username;
                 break;
 
             case PASSWORD:
-                String password = passwordField.getUserInput().get();
+            	String password = passwordField.getUserInput().get();
                 if (!password.isEmpty()) {
-                    newUser.setPassword(password); //TODO: Set password
                     validInput = true;
                 } else {
                     System.out.println("Password cannot be empty.");
                 }
+                newUser.password = password; 
                 break;
 
             case FIRSTNAME:
-                String firstName = textField.getUserInput().get();
+            	String firstName = textField.getUserInput().get();
                 if (!firstName.isEmpty()) {
-                    newUser.setFirstName(firstName); //TODO: Set first Name
                     validInput = true;
                 } else {
                     System.out.println("First name cannot be empty.");
                 }
+                newUser.name.first = firstName;  
                 break;
-
+                
+            case MIDDLENAME:
+            	String middleName = newUser.name.middle = textField.getUserInput().get();
+            	if (!middleName.isEmpty()) {
+                    validInput = true;
+                } else {
+                    System.out.println("middle name cannot be empty.");
+                }
+            	newUser.name.middle = middleName; 
+            	break; 
+            	
             case LASTNAME:
-                String lastName = textField.getUserInput().get();
+            	String lastName = textField.getUserInput().get();
+
                 if (!lastName.isEmpty()) {
-                    newUser.setLastName(lastName); //TODO: Set lastname
                     validInput = true;
                 } else {
                     System.out.println("Last name cannot be empty.");
                 }
+                newUser.name.last = lastName;
                 break;
+                
+            case PREFNAME:
+            	String prefName = textField.getUserInput().get(); 
+                if (!prefName.isEmpty()) {
+                    validInput = true;
+                } else {
+                    System.out.println("Preferred name cannot be empty.");
+                }
+                newUser.name.pref = prefName;  
+                break;
+
 
             case EMAIL:
                 String email = textField.getUserInput().get();
                 if (!email.isEmpty() && email.contains("@")) {
-                    newUser.setEmail(email); //TODO: Set email
                     validInput = true;
                 } else {
                     System.out.println("Please enter a valid email address.");
@@ -208,7 +245,7 @@ public class SignUpPage extends VBox {
                 
             //TODO: you can add cases here if i missed other fields just make sure you create another Instance of UI to handle it, and another Enum for the step.
 
-            case COMPLETED:
+            case COMPLETED: 
                 // Proceed to the next part of your application
                 goToDashboard();
                 validInput = true; // To prevent blocking
@@ -235,12 +272,19 @@ public class SignUpPage extends VBox {
                 break;
 
             case FIRSTNAME:
-                collectionStep = SignUpStep.LASTNAME;
+                collectionStep = SignUpStep.MIDDLENAME;
                 break;
-
+                
+            case MIDDLENAME:
+            	collectionStep = SignUpStep.LASTNAME; 
+            	break; 
+            	
             case LASTNAME:
-                collectionStep = SignUpStep.EMAIL;
+                collectionStep = SignUpStep.PREFNAME;
                 break;
+                
+            case PREFNAME:
+            	collectionStep = SignUpStep.EMAIL;
 
             case EMAIL:
                 collectionStep = SignUpStep.COMPLETED;
