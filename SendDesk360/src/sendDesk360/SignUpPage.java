@@ -25,6 +25,7 @@ public class SignUpPage extends VBox {
         LASTNAME,
         PREFNAME,
         EMAIL,
+        ROLES,
         COMPLETED
     }
 
@@ -250,7 +251,7 @@ public class SignUpPage extends VBox {
                 }
                 break;
                 
-            //TODO: you can add cases here if i missed other fields just make sure you create another Instance of UI to handle it, and another Enum for the step.
+            //TODO: Roles case with a dropdown selector
 
             case COMPLETED: 
                 // Proceed to the next part of your application
