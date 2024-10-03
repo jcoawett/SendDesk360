@@ -28,7 +28,9 @@ public class SendDesk360 extends Application {
         // Show the initial page
         showLoginPage();
     }
+    
 
+    // PAGE ROUTING METHODS
     private void applyStyles(Scene scene) {
         String cssPath = getClass().getResource("Styles/styles.css").toExternalForm();
         scene.getStylesheets().add(cssPath);

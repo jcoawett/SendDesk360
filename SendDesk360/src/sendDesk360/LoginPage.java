@@ -52,6 +52,7 @@ public class LoginPage extends VBox {
         PrimaryButton loginButton = new PrimaryButton(PrimaryButton.ButtonVariant.FILLED, "Login", event -> handleLogin(emailField, passwordField));
         PrimaryButton createAccountButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Create an account", event -> goToCreateAccount());
 
+
         HBox.setHgrow(loginButton, Priority.ALWAYS);
         HBox.setHgrow(createAccountButton, Priority.ALWAYS);
         

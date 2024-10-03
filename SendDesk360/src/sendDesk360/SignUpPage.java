@@ -38,6 +38,7 @@ public class SignUpPage extends VBox {
     private VBox fieldWrapper;
     private PrimaryField textField;
     private PrimaryField passwordField;
+    private PrimaryField confirmPasswordField;
     private PrimaryButton continueButton;
     private PrimaryButton linkToLogin;
 
@@ -87,6 +88,7 @@ public class SignUpPage extends VBox {
         linkToLogin = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Back to login", event -> {
             goToLogin();
         });
+        
 
         continueButton.setMaxWidth(464);
         linkToLogin.setMaxWidth(464);
@@ -119,7 +121,9 @@ public class SignUpPage extends VBox {
             case PASSWORD:
                 heading.setText("Create a Password");
                 passwordField = new PrimaryField(PrimaryField.FieldVariant.PASSWORD, "Create a password...");
+                confirmPasswordField = new PrimaryField(PrimaryField.FieldVariant.PASSWORD, "Confirm your password...");
                 fieldWrapper.getChildren().add(passwordField);
+                fieldWrapper.getChildren().add(confirmPasswordField);
                 break;
 
             case FIRSTNAME:
@@ -177,7 +181,7 @@ public class SignUpPage extends VBox {
                     validInput = true;
                 } else {
                     // Show error message (implement as needed)
-                    System.out.println("Username cannot be empty.");
+                    textField.setErrorMessage("Choose a valid username.");
                 }
                 newUser.username = username;
                 break;
@@ -187,7 +191,10 @@ public class SignUpPage extends VBox {
                 if (!password.isEmpty()) {
                     validInput = true;
                 } else {
-                    System.out.println("Password cannot be empty.");
+                	
+                    passwordField.setErrorMessage("Choose a valid password.");
+                    confirmPasswordField.setErrorMessage("Passwords are not the same");
+                    //TODO: Replace with valid password checking method
                 }
                 newUser.password = password; 
                 break;
@@ -197,7 +204,7 @@ public class SignUpPage extends VBox {
                 if (!firstName.isEmpty()) {
                     validInput = true;
                 } else {
-                    System.out.println("First name cannot be empty.");
+                    textField.setErrorMessage("Enter a valid first name.");
                 }
                 newUser.name.first = firstName;  
                 break;
@@ -207,7 +214,7 @@ public class SignUpPage extends VBox {
             	if (!middleName.isEmpty()) {
                     validInput = true;
                 } else {
-                    System.out.println("middle name cannot be empty.");
+                    textField.setErrorMessage("Enter a valid middle name.");
                 }
             	newUser.name.middle = middleName; 
             	break; 
@@ -218,7 +225,7 @@ public class SignUpPage extends VBox {
                 if (!lastName.isEmpty()) {
                     validInput = true;
                 } else {
-                    System.out.println("Last name cannot be empty.");
+                    textField.setErrorMessage("Enter a valid last name.");
                 }
                 newUser.name.last = lastName;
                 break;
@@ -228,7 +235,7 @@ public class SignUpPage extends VBox {
                 if (!prefName.isEmpty()) {
                     validInput = true;
                 } else {
-                    System.out.println("Preferred name cannot be empty.");
+                    textField.setErrorMessage("Enter a valid prefered name.");
                 }
                 newUser.name.pref = prefName;  
                 break;
@@ -239,7 +246,7 @@ public class SignUpPage extends VBox {
                 if (!email.isEmpty() && email.contains("@")) {
                     validInput = true;
                 } else {
-                    System.out.println("Please enter a valid email address.");
+                    textField.setErrorMessage("Enter a valid email address.");
                 }
                 break;
                 
