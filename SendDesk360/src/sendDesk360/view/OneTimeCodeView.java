@@ -9,6 +9,9 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import sendDesk360.view.components.PrimaryButton;
+import sendDesk360.view.components.PrimaryField;
+import sendDesk360.view.components.RadialGradientBackground;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
 
 public class OneTimeCodeView extends VBox {
@@ -71,7 +74,7 @@ public class OneTimeCodeView extends VBox {
 
         // Error Label
         errorLabel = new Label();
-        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+        errorLabel.setStyle("-fx-text-fill: #FF9500; -fx-font-size: 14px;");
         errorLabel.textProperty().bind(viewModel.errorProperty());
 
         // BUTTON WRAPPER
@@ -100,10 +103,8 @@ public class OneTimeCodeView extends VBox {
     }
 
     private void handleCombineInput() {
-        if (viewModel.verifyCode()) {
-            // Proceed to reset password
-            viewModel.proceedToResetPassword();
-        } else {
+        // Verify the code; navigation is handled within the view model
+        if (!viewModel.verifyCode()) {
             // Show error state on all fields
             for (PrimaryField field : digitFields) {
                 field.setErrorMessage("");

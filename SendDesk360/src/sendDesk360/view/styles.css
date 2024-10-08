@@ -1,6 +1,43 @@
 
+.root {
+	-fx-background-color: #101011;
+}
 /* COMPONENTS */
 /* -------------------------------------------------------------------- */
+
+/* NAV-BUTTON */
+/* ----------------------- */
+.navbar-button {
+	
+    /* Layout */
+    -fx-padding: 6px 8px 6px 8px;
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    
+    /* Text */
+    -fx-text-fill: #F8F8F8;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    
+    /* Spacing between icon and text is set in the NavButton class */
+}
+
+.navbar-button:hover {
+	
+    /* Hover Styles */
+    -fx-background-color: #2A2D33; 
+}
+/* ----------------------- */
+
+
+/* NAV-BAR */
+/* ----------------------- */
+.navbar {
+	-fx-background-color: #080808;
+	-fx-padding: 24px 16px 24px 16px; /* top, right, bottom, left */
+}
+/* ----------------------- */
 
 /* BUTTONS */
 /* ----------------------- */

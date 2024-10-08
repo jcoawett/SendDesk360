@@ -1,4 +1,4 @@
-package sendDesk360.view;
+package sendDesk360.view.components;
 
 
 import javafx.scene.layout.HBox;

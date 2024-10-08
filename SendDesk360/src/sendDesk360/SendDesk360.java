@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import sendDesk360.view.DashboardView;
 import sendDesk360.view.LoginView;
 import sendDesk360.view.SignUpView;
 import sendDesk360.view.OneTimeCodeView;
@@ -59,15 +60,16 @@ public class SendDesk360 extends Application {
         scene.setRoot(signUpView);
     }
 
-    public void showOneTimeCodeView(String userEmail, String generatedCode) {
-        OneTimeCodeViewModel viewModel = new OneTimeCodeViewModel(this, userEmail, generatedCode);
+    public void showOneTimeCodeView(String generatedCode) {
+        OneTimeCodeViewModel viewModel = new OneTimeCodeViewModel(this, generatedCode);
         OneTimeCodeView oneTimeCodeView = new OneTimeCodeView(viewModel);
         scene.setRoot(oneTimeCodeView);
     }
 
 
     public void showDashboard() {
-        // Implement the logic for showing the dashboard here
+    	DashboardView dashboardView = new DashboardView(this);
+    	scene.setRoot(dashboardView);
     }
 
     public static void main(String[] args) {

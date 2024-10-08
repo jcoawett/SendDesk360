@@ -1,11 +1,18 @@
 package sendDesk360.view;
 
 import javafx.geometry.Pos;
+
+// TODO: Role Selector
+// 
+
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import sendDesk360.SendDesk360;
+import sendDesk360.view.components.PrimaryButton;
+import sendDesk360.view.components.PrimaryField;
+import sendDesk360.view.components.RadialGradientBackground;
 import sendDesk360.viewModel.LoginViewModel;
 
 public class LoginView extends VBox {
@@ -48,7 +55,6 @@ public class LoginView extends VBox {
             PrimaryButton.ButtonVariant.TEXT_ONLY, "Create an account",
             event -> loginViewModel.goToCreateAccount()
         );
-
         // Layout adjustments
         loginButton.setMaxWidth(464);
         createAccountButton.setMaxWidth(464);

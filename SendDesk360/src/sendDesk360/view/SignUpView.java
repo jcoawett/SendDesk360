@@ -9,8 +9,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import sendDesk360.SendDesk360;
-
-
+import sendDesk360.view.components.PrimaryButton;
+import sendDesk360.view.components.PrimaryField;
+import sendDesk360.view.components.RadialGradientBackground;
 // VIEWMODELS
 import sendDesk360.viewModel.SignUpViewModel;
 import sendDesk360.viewModel.SignUpViewModel.SignUpStep;
@@ -28,6 +29,7 @@ public class SignUpView extends VBox {
     private PrimaryField confirmPasswordField;
     private PrimaryButton continueButton;
     private PrimaryButton linkToLogin;
+    private PrimaryButton linkToOTC;
 
     public SignUpView(SendDesk360 mainApp, SignUpViewModel viewModel) {
 
@@ -68,11 +70,16 @@ public class SignUpView extends VBox {
         linkToLogin = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Back to login", event -> {
             signUpViewModel.goToLogin();
         });
+        linkToOTC = new PrimaryButton(
+	    	PrimaryButton.ButtonVariant.TEXT_ONLY, "Use one time code", event -> {
+	    	signUpViewModel.goToOTC();
+	    });
+
 
         continueButton.setMaxWidth(464);
         linkToLogin.setMaxWidth(464);
 
-        VBox buttonWrapper = new VBox(continueButton, linkToLogin);
+        VBox buttonWrapper = new VBox(continueButton, linkToLogin, linkToOTC);
         HBox.setHgrow(buttonWrapper, Priority.ALWAYS);
         buttonWrapper.setSpacing(16);
         buttonWrapper.setAlignment(Pos.CENTER);

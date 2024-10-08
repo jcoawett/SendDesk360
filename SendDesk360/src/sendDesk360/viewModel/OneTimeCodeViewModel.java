@@ -9,11 +9,9 @@ public class OneTimeCodeViewModel {
     private final StringProperty[] digitProperties;
     private final StringProperty errorProperty;
     private String generatedCode;
-    private String userEmail;
 
-    public OneTimeCodeViewModel(SendDesk360 mainApp, String userEmail, String generatedCode) {
+    public OneTimeCodeViewModel(SendDesk360 mainApp, String generatedCode) {
         this.mainApp = mainApp;
-        this.userEmail = userEmail;
         this.generatedCode = generatedCode;
 
         // Initialize properties for each digit
@@ -46,7 +44,8 @@ public class OneTimeCodeViewModel {
     public boolean verifyCode() {
         String inputCode = getCombinedInput();
         if (inputCode.equals(generatedCode)) {
-            // Code is correct, proceed to reset password
+            // Code is correct, proceed to dashboard
+            proceedToDashboard();
             return true;
         } else {
             errorProperty.set("Invalid code. Please try again.");
@@ -54,18 +53,13 @@ public class OneTimeCodeViewModel {
         }
     }
 
-    // Method to navigate to the password reset view
-    public void proceedToResetPassword() {
-//        mainApp.showPasswordResetView(userEmail);
+    // Method to navigate to the dashboard
+    public void proceedToDashboard() {
+        mainApp.showDashboard();
     }
 
     // Method to handle back to login
     public void goToLogin() {
         mainApp.showLoginView();
-    }
-
-    // Getter for userEmail
-    public String getUserEmail() {
-        return userEmail;
     }
 }

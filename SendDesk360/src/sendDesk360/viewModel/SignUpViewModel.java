@@ -217,6 +217,10 @@ public class SignUpViewModel {
     public void goToLogin() {
     	mainApp.showLoginView();
     }
+    
+    public void goToOTC() {
+    	mainApp.showOneTimeCodeView("101010"); // SET THE CODE TO THE CORRECT CODE FROM ADMIN OR DATABASE
+    }
 
     // Properties for binding with the UI
     public StringProperty usernameProperty() {
