@@ -1,4 +1,4 @@
-package sendDesk360;
+package sendDesk360.model;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;

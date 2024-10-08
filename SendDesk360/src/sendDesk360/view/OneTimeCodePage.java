@@ -1,4 +1,4 @@
-package sendDesk360;
+package sendDesk360.view;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import sendDesk360.Styles.RadialGradientBackground;
 
 
 // TODO:

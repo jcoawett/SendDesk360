@@ -1,4 +1,4 @@
-package sendDesk360.Styles;
+package sendDesk360.view;
 
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;

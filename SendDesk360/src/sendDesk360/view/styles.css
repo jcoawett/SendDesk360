@@ -138,4 +138,40 @@
 
 /* ----------------------- */
 
+
+
+
+
+/* ROLE PILL */
+/* ----------------------- */
+
+/* Default */
+.role-pill {
+    /* Text */
+	-fx-font-size: 16px;
+	-fx-font-weight: 400;
+    -fx-text-alignment: center;
+    
+    /* Layout */
+    -fx-padding: 6px 12px;
+    -fx-alignment: center;
+        
+    /* Styles */
+    -fx-background-color: transparent;
+    -fx-background-radius: 64px;
+    -fx-border-radius: 64px;
+    -fx-border-color: #28292E;
+    -fx-border-width: 1px;
+}
+
+/* Hover & Selected */
+.role-pill:pressed,
+.role-pill:hover {
+	-fx-background-color: rgba(30, 32, 37, 0.64); 
+	-fx-border-color: #404146;
+	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6);
+}
+/* ----------------------- */
+
+
 /* -------------------------------------------------------------------- */

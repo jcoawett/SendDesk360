@@ -1,4 +1,4 @@
-package sendDesk360;
+package sendDesk360.view;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

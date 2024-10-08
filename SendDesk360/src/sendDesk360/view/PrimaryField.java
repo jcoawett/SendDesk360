@@ -1,4 +1,4 @@
-package sendDesk360;
+package sendDesk360.view;
 
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.PasswordField;

@@ -1,9 +1,9 @@
-package sendDesk360;
+package sendDesk360.model;
 
 import java.util.Vector;
 import java.util.AbstractMap.SimpleEntry;
 
-import sendDesk360.User.Role;
+import sendDesk360.model.User;
 
 public class Admin extends User {
 	Instructor teacher = new Instructor(); 
@@ -30,11 +30,11 @@ public class Admin extends User {
 	public static boolean addOrRemoveRole(User user, Role role, boolean addOrRemove){
 		if (addOrRemove) 
 		{
-			user.roles.add(role); 
+//			user.getRole().add(role); 
 		}
 		else
 		{
-			user.roles.removeElement(role);
+//			user.roles.removeElement(role);
 		}
 		return true; 
 	}
