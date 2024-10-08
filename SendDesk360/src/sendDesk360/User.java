@@ -4,7 +4,7 @@ import java.util.Vector;
 
 import sendDesk360.User.Role;
 
-public class User {
+public abstract class User {
 	
 	public static class FullName
 	{
@@ -84,6 +84,15 @@ public class User {
 		this.roles.add(r); 
 	}
 	
+	/**
+	 * This method returns a string representing the information about all Users in a class 
+	 *
+	 * @return: A String formated as <username> , <name> , <roles> 
+	 */
+	
+	//TODO: implement the toString method in each subclass 
+	public abstract String toString();
+	
 	
 
 	/**
@@ -93,7 +102,7 @@ public class User {
 	 *
 	 * @param input The String input received by the user, representing a password to be tested 
 	 */
-	public static String evaluatePassword(String input) {
+	public String evaluatePassword(String input) {
 		
 		int passwordIndexofError = 0; //initialize the index in which the entered password broke on an error to be 0
 		String inputLine = input; //get the input from the user
@@ -116,22 +125,18 @@ public class User {
 		while (running) {
 			//check for upercase letter
 			if (currentChar >= 'A' && currentChar <= 'Z') {
-				System.out.println("Upper case letter found");
 				foundUpperCase = true; //set the flag for if we found an upercase letter to be true.
 				
 			//check for lowercase letter
 			} else if (currentChar >= 'a' && currentChar <= 'z') {
-				System.out.println("Lower case letter found");
 				foundLowerCase = true; //set the flag for if we found a lowercase letter to be true.
 			
 			//check for digit
 			} else if (currentChar >= '0' && currentChar <= '9') {
-				System.out.println("Digit found");
 				foundNumericDigit = true;
 				
 			//check for special character 
 			} else if ("~`!@#$%^&*()_-+={}[]|\\:;\"'<>,.?/".indexOf(currentChar) >= 0) {
-				System.out.println("Special character found");
 				foundSpecialChar = true; //set the flag for if we found a special character to be true.
 				
 			//If the character did not fit into a category above, it is invalid

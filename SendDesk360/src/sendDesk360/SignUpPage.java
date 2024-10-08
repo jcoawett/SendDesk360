@@ -184,10 +184,11 @@ public class SignUpPage extends VBox {
 
             case PASSWORD:
             	String password = passwordField.getUserInput().get();
-                if (!password.isEmpty()) {
+            	String err = newUser.evaluatePassword(password); 
+                if (!password.isEmpty() && err.isEmpty()) {
                     validInput = true;
                 } else {
-                    System.out.println("Password cannot be empty.");
+                    System.out.println(err);
                 }
                 newUser.password = password; 
                 break;
