@@ -1,0 +1,10 @@
+DONE: 
+1. Create methods to see created user
+2. Display errors on fields for login & signup
+
+
+TODO: 
+2. Create SQLite Database for user management
+3. Validator methods for loginView Model
+5. Figure out the flow for the OTC
+6. Set the user to admin based on requirements
