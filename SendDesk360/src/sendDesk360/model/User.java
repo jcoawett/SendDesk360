@@ -162,4 +162,22 @@ public class User {
     public void setExpireTime(long expireTime) {
         this.expireTime = expireTime;
     }
+    
+    public String toString()
+    {
+    	String result = String.format("Username: %s, Fullname: %s %s %s %s", this.getName().getFirst(), this.getName().getMiddle(), this.getName().getLast()); 
+    	
+    	result += rolesToString(this.getRoles()); 
+    	return result; 
+    }
+    
+    public String rolesToString(Vector<Role> roles)
+    {
+    	String result = "Roles: ";
+    	for (Role r : roles)
+    	{
+    		result += String.format("%i, ", r.priveledge); 
+    	}
+    	return result; 
+    }
 }
