@@ -53,6 +53,7 @@ public class User {
     }
 
     
+    
 	public static class Role
 	{
 		String name; 

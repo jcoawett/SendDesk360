@@ -175,7 +175,10 @@ public class SignUpView extends VBox {
             case COMPLETED:
                 heading.setText("Sign Up Complete!");
                 continueButton.setText("Go to Dashboard");
-                System.out.println(signUpViewModel.getUserDetails());
+                continueButton.setVariant(PrimaryButton.ButtonVariant.ACCENT);
+                continueButton.setOnAction(event -> {
+                    signUpViewModel.proceedToDashboard();
+                });
                 break;
 
             default:

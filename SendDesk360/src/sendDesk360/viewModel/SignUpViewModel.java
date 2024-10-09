@@ -3,6 +3,7 @@ package sendDesk360.viewModel;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import sendDesk360.model.Admin;
 import sendDesk360.model.User;
 import sendDesk360.model.User.Role;
 import sendDesk360.SendDesk360;
@@ -10,6 +11,7 @@ import sendDesk360.model.PasswordValidator;
 
 public class SignUpViewModel {
     private final User user;
+    private final Admin admin;
     private final SendDesk360 mainApp;
     private ObjectProperty<SignUpStep> collectionStep = new SimpleObjectProperty<>(SignUpStep.USERNAME);
 
@@ -38,7 +40,8 @@ public class SignUpViewModel {
 
     public SignUpViewModel(SendDesk360 mainApp, User user) {
     	
-    	this.mainApp = mainApp;
+    	this.admin = new Admin();
+		this.mainApp = mainApp;
         this.user = user;
         roles.addAll(user.getRoles());
         
@@ -212,6 +215,7 @@ public class SignUpViewModel {
                 break;
         }
     }
+
     
     // NAVIGATION
     public void goToLogin() {
@@ -219,7 +223,11 @@ public class SignUpViewModel {
     }
     
     public void goToOTC() {
-    	mainApp.showOneTimeCodeView("101010"); // SET THE CODE TO THE CORRECT CODE FROM ADMIN OR DATABASE
+    	mainApp.showOneTimeCodeView("101010");
+    }
+    
+    public void proceedToDashboard() {
+        mainApp.showDashboard();
     }
 
     // Properties for binding with the UI

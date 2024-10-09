@@ -2,6 +2,7 @@ package sendDesk360.viewModel;
 
 import javafx.beans.property.*;
 import sendDesk360.SendDesk360;
+import sendDesk360.model.Admin;
 
 public class OneTimeCodeViewModel {
 
@@ -9,7 +10,7 @@ public class OneTimeCodeViewModel {
     private final StringProperty[] digitProperties;
     private final StringProperty errorProperty;
     private String generatedCode;
-
+    
     public OneTimeCodeViewModel(SendDesk360 mainApp, String generatedCode) {
         this.mainApp = mainApp;
         this.generatedCode = generatedCode;
@@ -42,6 +43,8 @@ public class OneTimeCodeViewModel {
 
     // Method to verify the OTC
     public boolean verifyCode() {
+    	
+    	//TODO: Implement Lillis method for OTC here 
         String inputCode = getCombinedInput();
         if (inputCode.equals(generatedCode)) {
             // Code is correct, proceed to dashboard
