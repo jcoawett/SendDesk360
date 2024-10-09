@@ -78,8 +78,13 @@ public class SignUpView extends VBox {
 
         continueButton.setMaxWidth(464);
         linkToLogin.setMaxWidth(464);
+        
+        VBox linkWrapper = new VBox(linkToLogin, linkToOTC);
+        HBox.setHgrow(linkWrapper, Priority.ALWAYS);
+        linkWrapper.setSpacing(0);
+        linkWrapper.setAlignment(Pos.CENTER);
 
-        VBox buttonWrapper = new VBox(continueButton, linkToLogin, linkToOTC);
+        VBox buttonWrapper = new VBox(continueButton, linkWrapper);
         HBox.setHgrow(buttonWrapper, Priority.ALWAYS);
         buttonWrapper.setSpacing(16);
         buttonWrapper.setAlignment(Pos.CENTER);
