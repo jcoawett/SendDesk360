@@ -36,7 +36,7 @@ public class DashboardView extends VBox {
 
         userCardList = new VBox();
         userCardList.setAlignment(Pos.TOP_LEFT);
-        userCardList.setStyle("-fx-padding: 32px;");
+        userCardList.setStyle("-fx-padding: 32px 0px 32px 0px;");
         userCardList.setSpacing(16); // Add spacing between user cards
         HBox.setHgrow(userCardList, Priority.ALWAYS);
 

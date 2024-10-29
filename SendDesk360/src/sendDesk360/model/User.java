@@ -54,13 +54,30 @@ public class User {
 
     
     
-	public static class Role
-	{
-		String name; 
-		int priveledge;
-	}
+    public static class Role {
+        private String name;
+        private int privilege;
+
+        // Getters and Setters for Role
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getPrivilege() {
+            return privilege;
+        }
+
+        public void setPrivilege(int privilege) {
+            this.privilege = privilege;
+        }
+    }
 	
 
+    private long userID; // Added userID field
     private FullName name = new FullName();
     private Vector<Role> roles = new Vector<>();
     private String username;
@@ -81,10 +98,12 @@ public class User {
     // Overloaded Constructor
     public User(String nameID, String username, String email, String password, boolean flag, Vector<Role> roles) {
         String[] parts = nameID.split("-");
-        name.setFirst(parts[0]);
-        name.setMiddle(parts[1]);
-        name.setLast(parts[2]);
-        name.setPref(parts[3]);
+
+        name.setFirst(parts.length > 0 ? parts[0] : "");
+        name.setMiddle(parts.length > 1 ? parts[1] : "");
+        name.setLast(parts.length > 2 ? parts[2] : "");
+        name.setPref(parts.length > 3 ? parts[3] : ""); // Avoid IndexOutOfBoundsException
+
         this.username = username;
         this.email = email;
         this.password = password;
@@ -94,6 +113,14 @@ public class User {
     }
 
     // Getters and Setters for User fields
+    
+    public long getUserID() {
+        return userID;
+    }
+    
+    public void setUserID(long userID) {
+        this.userID = userID;
+    }
     
     // FULL NAME
     public FullName getName() {
@@ -164,21 +191,4 @@ public class User {
         this.expireTime = expireTime;
     }
     
-    public String toString()
-    {
-    	String result = String.format("Username: %s, Fullname: %s %s %s %s", this.getName().getFirst(), this.getName().getMiddle(), this.getName().getLast()); 
-    	
-    	result += rolesToString(this.getRoles()); 
-    	return result; 
-    }
-    
-    public String rolesToString(Vector<Role> roles)
-    {
-    	String result = "Roles: ";
-    	for (Role r : roles)
-    	{
-    		result += String.format("%i, ", r.priveledge); 
-    	}
-    	return result; 
-    }
 }

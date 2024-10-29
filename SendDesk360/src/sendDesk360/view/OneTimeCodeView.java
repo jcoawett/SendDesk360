@@ -111,6 +111,7 @@ public class OneTimeCodeView extends VBox {
             }
         }
     }
+    
 
     // Add key listeners for digit fields to handle auto-move between fields
     private void addDigitFieldKeyListeners(PrimaryField[] digitFields) {

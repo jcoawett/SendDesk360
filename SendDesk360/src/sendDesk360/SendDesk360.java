@@ -6,7 +6,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import sendDesk360.view.DashboardView;
 import sendDesk360.view.LoginView;
+import sendDesk360.view.TestPage;
 import sendDesk360.view.SignUpView;
+
 import sendDesk360.view.OneTimeCodeView;
 import sendDesk360.viewModel.SignUpViewModel;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
@@ -30,6 +32,7 @@ public class SendDesk360 extends Application {
 
         // Show the initial login page
         showLoginView();
+//        showTestView();
     }
 
     // Initialize the SignUpViewModel with a new User
@@ -70,6 +73,11 @@ public class SendDesk360 extends Application {
     public void showDashboard() {
     	DashboardView dashboardView = new DashboardView(this);
     	scene.setRoot(dashboardView);
+    }
+    
+    public void showTestView() {
+    	TestPage testView = new TestPage();
+    	scene.setRoot(testView);
     }
 
     public static void main(String[] args) {

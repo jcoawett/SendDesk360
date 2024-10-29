@@ -4,6 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.control.Label;
 
@@ -13,16 +14,13 @@ public class UserCard extends VBox {
 
         Label firstLetter = new Label();
         firstLetter.setText(iconLetter);
-        firstLetter.setStyle("-fx-text-fill: #000000;");
+        firstLetter.setStyle("-fx-text-fill: #000000; -fx-font-size: 16px; -fx-font-weight: 800;");
 
-        Circle profileBG = new Circle();
-        profileBG.setRadius(24);
-        profileBG.setStyle("-fx-background-color: #FFFFFF;");
-
-        firstLetter.toFront();
-
-        Pane profileIcon = new Pane();
-        profileIcon.getChildren().addAll(profileBG, firstLetter);
+        VBox profilePic = new VBox(firstLetter);
+        profilePic.setStyle("-fx-background-radius: 64px; -fx-background-color: white;");
+        profilePic.setAlignment(Pos.CENTER);
+        profilePic.setPrefWidth(32);
+        profilePic.setPrefHeight(32);
 
         Label username = new Label();
         username.setText(usernameText);
@@ -37,12 +35,12 @@ public class UserCard extends VBox {
         email.setText(emailText);
         email.setStyle(""
                 + "-fx-font-size: 16px;\n"
-                + "-fx-font-weight: 700;\n"
+                + "-fx-font-weight: 500;\n"
                 + "-fx-text-alignment: center;\n"
-                + "-fx-text-fill: white;"
+                + "-fx-text-fill: #969799;"
         );
 
-        HBox heading = new HBox(profileIcon, username);
+        HBox heading = new HBox(profilePic, username);
         heading.setSpacing(8);
 
         VBox contentWrapper = new VBox(heading, email);

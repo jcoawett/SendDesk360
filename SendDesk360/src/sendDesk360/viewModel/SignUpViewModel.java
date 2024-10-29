@@ -45,7 +45,11 @@ public class SignUpViewModel {
         this.user = user;
         roles.addAll(user.getRoles());
         
+        
+        
+        
     }
+    
 
     public String getUserDetails() {
         StringBuilder userDetails = new StringBuilder();
@@ -87,6 +91,7 @@ public class SignUpViewModel {
         this.collectionStep.set(step);
     }
 
+    
     // Validation and data processing methods
     public boolean processInput() {
         boolean validInput = false;

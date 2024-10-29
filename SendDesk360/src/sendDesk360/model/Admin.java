@@ -5,7 +5,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.security.SecureRandom;
 
 public class Admin extends User {
-	Instructor teacher = new Instructor(); 
 	
 	Classroom classroom = new Classroom();  
 	

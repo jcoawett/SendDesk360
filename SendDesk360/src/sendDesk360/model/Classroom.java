@@ -25,16 +25,13 @@ public class Classroom {
 	{
 		//create dummy role 
 		User.Role role = new User.Role(); 
-		role.name = "Student"; 
-		role.priveledge = 0;
-		
 		Vector<User.Role> roles = new Vector<User.Role>(); 
 		roles.add(role); 
 		
 		//Crreate the users 
-		User user1 = new User("Lilli-Elizabeth-Seebold", "lseebold", "lseebold@asu.edu", "*******", false, roles); 
-		User user2 = new User("Bryce-Middlename-Jackson", "bryceJackson@email.com", "bryce@gmail.com", "*********", false, roles); 
-		User user3 = new User("Jason-H.-Coawette", "JasonJasonJason", "jason@gmail.com", "**********", false, roles); 
+		User user1 = new User("Lilli-Elizabeth-Seebold-Liz", "lseebold", "lseebold@asu.edu", "*******", false, roles);
+	    User user2 = new User("Bryce-Middlename-Jackson-Bry", "bryceJackson", "bryce@gmail.com", "*********", false, roles);
+		User user3 = new User("Jason-H.-Coawette", "Jasoncoawette", "jason@gmail.com", "**********", false, roles); 
 		User user4 = new User("Jonathon-H.-McGhee", "JohnathonMchee", "John@gmail.com", "***********", false, roles); 
 		User user5 = new User("Alex-middlename-Palangian", "AlexP", "Alexp@gmail,com", "***********", false, roles); 
 		
