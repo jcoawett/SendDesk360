@@ -10,6 +10,10 @@ import sendDesk360.model.database.ArticleManager;
 import java.util.*;
 import java.sql.*;
 
+/**
+ * A console application for managing users and articles in the database.
+ * This application allows for user authentication, management, and article backup/restore.
+ */
 public class DatabaseConsoleApp {
 
     private static DatabaseManager dbManager;
@@ -17,6 +21,11 @@ public class DatabaseConsoleApp {
     private static ArticleManager articleManager;
     private static Scanner scanner = new Scanner(System.in);
 
+    /**
+     * The main method that initializes the application and opens the main menu.
+     *
+     * @param args Command-line arguments (not used).
+     */
     public static void main(String[] args) {
         try {
             // Initialize the DatabaseManager, UserManager, and ArticleManager
@@ -46,6 +55,9 @@ public class DatabaseConsoleApp {
     
     
     // MAIN TEST LOOP
+    /**
+     * Displays the main menu and handles user selections for various functionalities.
+     */
     private static void mainMenu() {
         boolean exit = false;
         while (!exit) {
@@ -74,6 +86,9 @@ public class DatabaseConsoleApp {
     }
     
     // DISPLAY MENU
+    /**
+     * Displays the options available in the main menu.
+     */
     private static void displayMenu() {
         System.out.println("=================================");
         System.out.println("Select an option:");
@@ -87,6 +102,9 @@ public class DatabaseConsoleApp {
     // ------------------------------------------------------------------------------- //
     
     // MANAGE USERS
+    /**
+     * Provides a menu for managing users, including creating, authenticating, updating, and deleting users.
+     */
     private static void manageUsers() {
         while (true) {
             System.out.println("====== Manage Users ======");
@@ -121,6 +139,9 @@ public class DatabaseConsoleApp {
     
 
     // CREATE USER
+    /**
+     * Prompts the user for details and creates a new user in the system.
+     */
     private static void createUser() {
         try {
             System.out.print("Enter username: ");
@@ -191,6 +212,9 @@ public class DatabaseConsoleApp {
     	
 
     // AUTHENTICATE USER
+    /**
+     * Authenticates the user using username and password
+     */
     private static void authenticateUser() {
         try {
             System.out.print("Enter username: ");
@@ -212,6 +236,9 @@ public class DatabaseConsoleApp {
     }
     
     // UPDATE USER
+    /**
+     * Updates the user using username, displays menu for the user to choose which aspect of a profile they would like to update
+     */
     private static void updateUser() {
         try {
             System.out.print("Enter the username of the user to update: ");
@@ -287,6 +314,9 @@ public class DatabaseConsoleApp {
     }
     
     // MANAGE USER ROLES
+    /**
+     * Displays a menu to manage user roles including the addition or removal of a role 
+     */
     private static void manageUserRoles(User user) {
         boolean managingRoles = true;
         while (managingRoles) {
@@ -338,6 +368,9 @@ public class DatabaseConsoleApp {
     	
 
     // DELETE USER
+    /**
+     * deletes a user using username 
+     */
     private static void deleteUser() {
         try {
             System.out.print("Enter the username of the user to delete: ");
@@ -364,7 +397,9 @@ public class DatabaseConsoleApp {
 
     
     // MANAGE ARTICLES
-    
+    /**
+     * Provides a menu to the user to allow them to manage articles by creating, viewing, updating, deleting, or listing articles 
+     */
     private static void manageArticles() {
         while (true) {
             System.out.println("====== Manage Articles ======");
@@ -401,6 +436,9 @@ public class DatabaseConsoleApp {
     }
     	
     // CREATE ARTICLE
+    /**
+     * Provides a menu to the user to allow them to create a new article with a title, description, difficulty, keywords, references, and article IDs
+     */
     private static void createArticle() {
         try {
             System.out.print("Enter article title: ");
@@ -454,6 +492,9 @@ public class DatabaseConsoleApp {
     }
     
     // VIEW ARTICLE
+    /**
+     * Provides a menu to the user to view an article using its article ID 
+     */
     private static void viewArticle() {
         try {
             System.out.print("Enter the article ID to view: ");
@@ -480,6 +521,9 @@ public class DatabaseConsoleApp {
    
 
     // DISPLAY ARTICLE DETAILS
+    /**
+     * Displays the details of an article 
+     */
     private static void displayArticle(Article article) {
         System.out.println("====== Article Details ======");
         System.out.println("Article ID: " + article.getArticleID());
@@ -494,6 +538,9 @@ public class DatabaseConsoleApp {
     }
     
     // UPDATE ARTICLE
+    /**
+     * Provides a menu to the user allowing them to choose what aspect of an article they would like to update, then handles the updating of that field by getting user input. 
+     */
     private static void updateArticle() {
         try {
             System.out.print("Enter the article ID to update: ");
@@ -590,7 +637,9 @@ public class DatabaseConsoleApp {
     }
     	
     
-    // DELETE ARTICLE
+    /**
+     * Deletes an article using its article ID
+     */
     private static void deleteArticle() {
         try {
             System.out.print("Enter the article ID to delete: ");
@@ -616,6 +665,9 @@ public class DatabaseConsoleApp {
     
 
     // LIST ARTICLES
+    /**
+     * lists all articles 
+     */
     private static void listArticles() {
         try {
             List<Article> articles = articleManager.getAllArticles();
@@ -635,6 +687,9 @@ public class DatabaseConsoleApp {
     
     
     // DISPLAY ARTICLE BRIEF
+    /**
+     * lists all articles, less verbose
+     */
     private static void displayArticleBrief(Article article) {
         System.out.println("-------------------------------------------------");
         System.out.println("Article ID: " + article.getArticleID());

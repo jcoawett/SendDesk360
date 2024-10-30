@@ -12,10 +12,20 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * Manages user-related database operations, including adding, retrieving,
+ * updating, authenticating, and deleting users, as well as handling user roles.
+ */
 public class UserManager {
     private Connection connection;
     private EncryptionHelper encryptionHelper;
 
+    /**
+     * Constructs a UserManager with a given DatabaseManager.
+     *
+     * @param dbManager the DatabaseManager instance to use for database connections
+     * @throws Exception if an error occurs while establishing a database connection
+     */
     public UserManager(DatabaseManager dbManager) throws Exception {
         this.connection = dbManager.getConnection();
         this.encryptionHelper = new EncryptionHelper();
@@ -23,7 +33,12 @@ public class UserManager {
     
     // USER FUNCTIONS
 
-    // Add a new user
+    /**
+     * Adds a new user to the database.
+     *
+     * @param user the User object containing the user's information
+     * @throws Exception if an error occurs while adding the user to the database
+     */
     public void addUser(User user) throws Exception {
         System.out.println("Attempting to add user: " + user.getUsername());
         String sql = "INSERT INTO Users (username, password, password_iv, email, flag, expireTime, firstName, middleName, lastName, preferredName) "
@@ -66,7 +81,13 @@ public class UserManager {
         }
     }
     
-    // Get userID by username
+    /**
+     * Retrieves the user ID for a given username.
+     *
+     * @param username the username of the user to retrieve
+     * @return the userID of the user, or -1 if not found
+     * @throws SQLException if an error occurs while querying the database
+     */
     private long getUserIDByUsername(String username) throws SQLException {
         String sql = "SELECT userID FROM Users WHERE username = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -85,7 +106,13 @@ public class UserManager {
     }
     
     
-    // Retrieve user information
+    /**
+     * Retrieves user information by username.
+     *
+     * @param username the username of the user to retrieve
+     * @return the User object containing user information, or null if not found
+     * @throws Exception if an error occurs while retrieving the user information
+     */
     public User getUserByUsername(String username) throws Exception {
         String sql = "SELECT * FROM Users WHERE username = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -122,7 +149,12 @@ public class UserManager {
         return null;
     }
     
-    // Update the user info
+    /**
+     * Updates the information of an existing user.
+     *
+     * @param user the User object containing the updated user information
+     * @throws Exception if an error occurs while updating the user information
+     */
     public void updateUser(User user) throws Exception {
         String sql = "UPDATE Users SET password = ?, password_iv = ?, email = ?, flag = ?, expireTime = ?, firstName = ?, middleName = ?, lastName = ?, preferredName = ? WHERE userID = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -154,7 +186,12 @@ public class UserManager {
         }
     }
     
-    // Check if its the first user
+    /**
+     * Checks if there are any users in the database.
+     *
+     * @return true if this is the first user, false otherwise
+     * @throws SQLException if an error occurs while querying the database
+     */
     public boolean isFirstUser() throws SQLException {
         String sql = "SELECT COUNT(*) AS user_count FROM Users;";
         try (Statement stmt = connection.createStatement();
@@ -168,7 +205,14 @@ public class UserManager {
     }
     
     
-    // Authenticate user
+    /**
+     * Authenticates a user by verifying the username and password.
+     *
+     * @param username the username of the user
+     * @param password the password of the user
+     * @return true if authentication is successful, false otherwise
+     * @throws Exception if an error occurs during authentication
+     */
     public boolean authenticateUser(String username, String password) throws Exception {
         String sql = "SELECT password, password_iv FROM Users WHERE username = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -195,6 +239,14 @@ public class UserManager {
         return false;
     }
     
+    /**
+     * Decrypts an encrypted password using the provided initialization vector (IV).
+     *
+     * @param encryptedPassword The encrypted password in Base64 format.
+     * @param ivBase64 The initialization vector (IV) used for decryption, also in Base64 format.
+     * @return The decrypted password as a String, or null if decryption fails.
+     * @throws Exception if there is an error during decryption.
+     */
     private String decryptPassword(String encryptedPassword, String ivBase64) throws Exception {
     	try {
             byte[] encryptedPasswordBytes = Base64.getDecoder().decode(encryptedPassword);
@@ -211,7 +263,12 @@ public class UserManager {
         return null;
     }
     
-    // Delete a user
+    /**
+     * Deletes a user from the database based on the provided username.
+     *
+     * @param username The username of the user to be deleted.
+     * @throws SQLException if there is an error during the deletion process.
+     */
     public void deleteUser(String username) throws SQLException {
         String sql = "DELETE FROM Users WHERE username = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -227,7 +284,12 @@ public class UserManager {
     
     // ROLES
 
-    // Add roles for a user
+    /**
+     * Adds roles for a specified user to the database.
+     *
+     * @param user The user object containing the roles to be added.
+     * @throws SQLException if there is an error during the addition of roles.
+     */
     public void addUserRoles(User user) throws SQLException {
         String sql = "INSERT INTO UserRoles (userID, roleID) VALUES (?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -243,7 +305,14 @@ public class UserManager {
         }
     }
 
-    // Get or create a role, return the roleID
+    /**
+     * Retrieves or creates a role based on the provided role information.
+     * If the role already exists, it returns the existing roleID. Otherwise, it creates a new role.
+     *
+     * @param role The role object containing the name and privilege level of the role.
+     * @return The roleID of the existing or newly created role.
+     * @throws SQLException if there is an error during the role retrieval or creation process.
+     */
     public long getOrCreateRole(Role role) throws SQLException {
         String selectSql = "SELECT roleID FROM Roles WHERE name = ? AND privilege = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(selectSql)) {
@@ -275,7 +344,14 @@ public class UserManager {
         throw new SQLException("Failed to insert role");
     }
 
-    // Change user roles
+    /**
+     * Changes the roles of a user identified by the given username.
+     * This method deletes the user's existing roles and assigns new roles from the provided vector.
+     *
+     * @param username The username of the user whose roles are to be changed.
+     * @param newRoles A vector of Role objects representing the new roles to be assigned to the user.
+     * @throws SQLException if there is an error during the process of changing user roles.
+     */
     public void changeUserRoles(String username, Vector<Role> newRoles) throws SQLException {
     	 try {
     	        long userID = getUserIDByUsername(username);
@@ -300,7 +376,13 @@ public class UserManager {
     	    }
     }
 
-    // Get User roles
+    /**
+     * Retrieves the roles associated with a user identified by the given userID.
+     *
+     * @param userID The ID of the user whose roles are to be retrieved.
+     * @return A vector of Role objects associated with the specified user.
+     * @throws SQLException if there is an error during the retrieval process.
+     */
     private Vector<Role> getRolesForUser(long userID) throws SQLException {
         String sql = "SELECT r.name, r.privilege FROM Roles r JOIN UserRoles ur ON r.roleID = ur.roleID WHERE ur.userID = ?;";
         Vector<Role> roles = new Vector<>();
@@ -321,7 +403,11 @@ public class UserManager {
     
     // DEBUGGING
     
-    
+    /**
+     * Prints a table of all users in the system, displaying user details and their roles.
+     *
+     * @throws Exception if there is an error during the retrieval or printing of users.
+     */
     public void printAllUsersTable() throws Exception {
         List<User> users = getAllUsers();
 
@@ -361,7 +447,12 @@ public class UserManager {
         System.out.format("+-------+-----------------+-----------------+------------+--------------------------------+-----------------+%n");
     }
 
-    // Helper method to get the highest privilege from roles
+    /**
+     * Helper method to determine the highest privilege level from a vector of roles.
+     *
+     * @param roles A vector of Role objects from which to determine the highest privilege.
+     * @return A string representation of the highest privilege level.
+     */
     private String getHighestPrivilege(Vector<Role> roles) {
         int highestPrivilege = 0;
         for (Role role : roles) {
@@ -372,7 +463,14 @@ public class UserManager {
         return String.valueOf(highestPrivilege);
     }
 
-    // Helper method to truncate strings to a certain length
+    /**
+     * Helper method to truncate a string to a specified length.
+     * If the string exceeds the length, it will be shortened and appended with "..." at the end.
+     *
+     * @param value The string value to be truncated.
+     * @param length The maximum length for the string.
+     * @return The truncated string if it exceeds the specified length; otherwise, the original string.
+     */
     private String truncate(String value, int length) {
         if (value.length() <= length) {
             return value;
@@ -381,7 +479,12 @@ public class UserManager {
         }
     }
 
-    // Existing method to get all users
+    /**
+     * Retrieves a list of all users from the database.
+     *
+     * @return A list of User objects representing all users in the system.
+     * @throws Exception if there is an error during the retrieval process.
+     */
     public List<User> getAllUsers() throws Exception {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM Users;";

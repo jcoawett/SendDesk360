@@ -8,16 +8,35 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * Manages the articles stored in the database and handles related operations,
+ * such as adding, removing, updating, and retrieving articles. 
+ * This class also supports encryption and decryption of sensitive article data.
+ */
 public class ArticleManager {
+	/** The database connection used for executing SQL operations. */
     private Connection connection;
+
+    /** Helper class used for encrypting and decrypting article data. */
     private EncryptionHelper encryptionHelper;
 
+    /**
+     * Constructs an ArticleManager with a database connection obtained from the provided DatabaseManager.
+     *
+     * @param dbManager the DatabaseManager instance used to obtain a database connection
+     * @throws Exception if an error occurs while establishing the connection
+     */
     public ArticleManager(DatabaseManager dbManager) throws Exception {
         this.connection = dbManager.getConnection();
         this.encryptionHelper = new EncryptionHelper();
     }
 
-    // Add a new article with encryption
+    /**
+     * Adds a new article to the data base, encrypting the information 
+     *
+     * @param article the article object to be added to the database
+     * @throws Exception if adding the article fails 
+     */
     public void addArticle(Article article) throws Exception {
         String sql = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -57,7 +76,12 @@ public class ArticleManager {
         }
     }
 
-    // Update an existing article with encryption
+    /**
+     * Update an existing article while keeping it encrypted  
+     *
+     * @param article the article object to be updated
+     * @throws Exception if updating the article fails 
+     */
     public void updateArticle(Article article) throws Exception {
         String sql = "UPDATE Articles SET "
                    + "title = ?, title_iv = ?, "
@@ -105,7 +129,12 @@ public class ArticleManager {
         }
     }
 
-    // Map article from ResultSet
+    /**
+     * Map article from result set   
+     *
+     * @param rs the result set from an SQL query on the article table 
+     * @throws SQLException if there is an error mapping the article from the ResultSet 
+     */
     private Article mapArticle(ResultSet rs) throws SQLException {
         Article article = new Article();
         try {
@@ -144,13 +173,26 @@ public class ArticleManager {
         return article;
     }
 
-    // Encryption helper methods
+    /**
+     * Encryption helper method, encrypts plainText into a Base64 encrypted string   
+     *
+     * @param plainText the field to be encrypted 
+     * @param  initialization vector (IV) used for encryption. 
+     * @throws Exception if there is an error encrypting the data
+     */
     private String encryptField(String plainText, byte[] iv) throws Exception {
         if (plainText == null) return null;
         byte[] encryptedBytes = encryptionHelper.encrypt(plainText.getBytes("UTF-8"), iv);
         return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
+    /**
+     * Encryption helper method, encrypts plainText into a Base64 encrypted string   
+     *
+     * @param  encryptedText the field to be decrypted, currently in non-readable format
+     * @param  The initialization vector (IV) in Base64 format, used during the encryption process. 
+     * @throws Exception if there is an error dencrypting the data
+     */
     private String decryptField(String encryptedText, String ivBase64) throws Exception {
         if (encryptedText == null || ivBase64 == null) return null;
         byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
@@ -159,7 +201,12 @@ public class ArticleManager {
         return new String(decryptedBytes, "UTF-8");
     }
 
-    // Delete an article
+    /**
+     * Deletes an article  
+     *
+     * @param  articleID  Article ID for the article to delete 
+     * @throws SQLException if there is an error deleting the article from the SQLdatabase 
+     */
     public void deleteArticle(long articleID) throws SQLException {
         String sql = "DELETE FROM Articles WHERE articleID = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -168,7 +215,12 @@ public class ArticleManager {
         }
     }
 
-    // Add keywords for an article
+    /**
+     * Add keywords for an article   
+     *
+     * @param  article article in which to add keywords 
+     * @throws SQLException if there is an error adding keywords into the keywords table  
+     */
     private void addKeywords(Article article) throws SQLException {
         String sql = "INSERT INTO Keywords (articleID, keyword) VALUES (?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -181,7 +233,12 @@ public class ArticleManager {
         }
     }
 
-    // Add references for an article
+    /**
+     * Add references for an article    
+     *
+     * @param  article article in which to add references
+     * @throws SQLException if there is an error adding references into the references table  
+     */
     private void addReferences(Article article) throws SQLException {
         String sql = "INSERT INTO References (articleID, referenceLink) VALUES (?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -194,7 +251,12 @@ public class ArticleManager {
         }
     }
 
-    // Add related articles
+    /**
+     * Add Related Articles section for an article   
+     *
+     * @param  article article in which to add related articles
+     * @throws SQLException if there is an error adding articles into the RelatedArticles table
+     */
     private void addRelatedArticles(Article article) throws SQLException {
         String sql = "INSERT INTO RelatedArticles (articleID, relatedArticleID) VALUES (?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -207,7 +269,13 @@ public class ArticleManager {
         }
     }
 
-    // Search articles by keyword or title
+    /**
+     * Search articles from the Article table using keywords  
+     *
+     * @param  searchTerm the keyword to be used in finding the article from the article table 
+     * @throws Exception if there is an error searching the db 
+     * @throws SQLException if there is an error writing and executing the search on the SQL database 
+     */
     public List<Article> searchArticles(String searchTerm) throws Exception {
         String sql = "SELECT * FROM Articles;";
         List<Article> articles = new ArrayList<>();
@@ -228,7 +296,12 @@ public class ArticleManager {
     
     
 
-    // Get articles by difficulty
+    /**
+     * Get the articles by difficulty  
+     *
+     * @param  difficulty the difficulty in which we require articles from 
+     * @throws SQLException if there is an error writing and executing the search on the SQL database using the difficulty 
+     */
     public List<Article> getArticlesByDifficulty(String difficulty) throws SQLException {
         String sql = "SELECT * FROM Articles WHERE difficulty = ?;";
         List<Article> articles = new ArrayList<>();
@@ -243,7 +316,12 @@ public class ArticleManager {
         return articles;
     }
 
-    // Remove articles by difficulty
+    /**
+     * Removes articles with the specified difficulty.
+     *
+     * @param difficulty the difficulty level of articles to remove
+     * @throws SQLException if an SQL error occurs during the removal process
+     */
     public void removeArticlesByDifficulty(String difficulty) throws SQLException {
         String sql = "DELETE FROM Articles WHERE difficulty = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -252,17 +330,32 @@ public class ArticleManager {
         }
     }
 
-    // Backup articles to file
+    /**
+     * Backs up articles to a specified file.
+     *
+     * @param fileName the name of the file to which articles should be backed up
+     */
     public void backupArticles(String fileName) {
         // Implement backup logic (e.g., serialize articles to JSON file)
     }
 
-    // Restore articles from backup
+    /**
+     * Restores articles from a backup file.
+     *
+     * @param fileName       the name of the backup file
+     * @param removeExisting whether to remove existing articles before restoring
+     */
     public void restoreArticles(String fileName, boolean removeExisting) {
         // Implement restore logic, ensuring no duplicates based on uniqueID
     }
 
-    // Fetch article by ID
+    /**
+     * Fetches an article by its unique ID.
+     *
+     * @param articleID the ID of the article to fetch
+     * @return the fetched Article object, or null if not found
+     * @throws Exception if an error occurs during fetching
+     */
     public Article getArticleByID(long articleID) throws Exception {
         String sql = "SELECT * FROM Articles WHERE articleID = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -280,7 +373,13 @@ public class ArticleManager {
         }
     }
 
-    // Fetch keywords for an article
+    /**
+     * Fetches keywords associated with an article by its ID.
+     *
+     * @param articleID the ID of the article
+     * @return a list of keywords associated with the article
+     * @throws SQLException if an SQL error occurs during fetching
+     */
     private List<String> getKeywordsForArticle(long articleID) throws SQLException {
         String sql = "SELECT keyword FROM Keywords WHERE articleID = ?;";
         List<String> keywords = new ArrayList<>();
@@ -295,7 +394,13 @@ public class ArticleManager {
         return keywords;
     }
 
-    // Fetch references for an article
+    /**
+     * Fetches references associated with an article by its ID.
+     *
+     * @param articleID the ID of the article
+     * @return a list of references associated with the article
+     * @throws SQLException if an SQL error occurs during fetching
+     */
     private List<String> getReferencesForArticle(long articleID) throws SQLException {
         String sql = "SELECT referenceLink FROM References WHERE articleID = ?;";
         List<String> references = new ArrayList<>();
@@ -310,7 +415,13 @@ public class ArticleManager {
         return references;
     }
 
-    // Fetch related articles for an article
+    /**
+     * Fetches related articles for an article by its ID.
+     *
+     * @param articleID the ID of the article
+     * @return a list of IDs of related articles
+     * @throws SQLException if an SQL error occurs during fetching
+     */
     private List<Long> getRelatedArticlesForArticle(long articleID) throws SQLException {
         String sql = "SELECT relatedArticleID FROM RelatedArticles WHERE articleID = ?;";
         List<Long> relatedArticles = new ArrayList<>();
@@ -326,7 +437,12 @@ public class ArticleManager {
     }
     
     
-    // Fetch all articles regardless
+    /**
+     * Fetches all articles from the database.
+     *
+     * @return a list of all articles
+     * @throws Exception if an error occurs during fetching
+     */
     public List<Article> getAllArticles() throws Exception {
         String sql = "SELECT * FROM Articles;";
         List<Article> articles = new ArrayList<>();
@@ -343,7 +459,12 @@ public class ArticleManager {
         return articles;
     }
     
-    
+    /**
+     * Updates the keywords for a specified article.
+     *
+     * @param article the article for which to update keywords
+     * @throws SQLException if an SQL error occurs during the update
+     */
     private void updateKeywords(Article article) throws SQLException {
         // Delete existing keywords
         String deleteSql = "DELETE FROM Keywords WHERE articleID = ?;";
@@ -355,7 +476,13 @@ public class ArticleManager {
         // Add new keywords
         addKeywords(article);
     }
-
+    
+    /**
+     * Updates the references for a specified article.
+     *
+     * @param article the article for which to update references
+     * @throws SQLException if an SQL error occurs during the update
+     */
     private void updateReferences(Article article) throws SQLException {
         // Delete existing references
         String deleteSql = "DELETE FROM References WHERE articleID = ?;";
@@ -368,6 +495,12 @@ public class ArticleManager {
         addReferences(article);
     }
 
+    /**
+     * Updates the related articles for a specified article.
+     *
+     * @param article the article for which to update related articles
+     * @throws SQLException if an SQL error occurs during the update
+     */
     private void updateRelatedArticles(Article article) throws SQLException {
         // Delete existing related articles
         String deleteSql = "DELETE FROM RelatedArticles WHERE articleID = ?;";

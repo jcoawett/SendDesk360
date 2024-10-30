@@ -2,14 +2,34 @@ package sendDesk360.model.database;
 
 import java.sql.*;
 
+/**
+ * Manages the connection to the database and handles the creation of necessary tables.
+ * This class initializes the database using H2 and provides methods to manage the database connection.
+ */
 public class DatabaseManager {
+
+    /** JDBC driver for H2 database. */
     private static final String JDBC_DRIVER = "org.h2.Driver";
+
+    /** Database connection URL for H2 database. */
     private static final String DB_URL = "jdbc:h2:~/helpArticlesDB;AUTO_SERVER=TRUE";    
+
+    /** Database user for authentication. */
     private static final String USER = "sa";
+
+    /** Database password for authentication. */
     private static final String PASS = "";
 
+    /** The active database connection. */
     private Connection connection;
 
+    /**
+     * Constructs a DatabaseManager and initializes the connection to the database.
+     * Creates necessary tables if they do not exist.
+     * 
+     * @throws SQLException if a database access error occurs
+     * @throws ClassNotFoundException if the JDBC driver class is not found
+     */
     public DatabaseManager() {
         try {
             connect();
@@ -20,7 +40,12 @@ public class DatabaseManager {
         }
     }
 
-    // Establish database connection
+    /**
+     * Establishes a connection to the database.
+     *
+     * @throws SQLException if a database access error occurs
+     * @throws ClassNotFoundException if the JDBC driver class is not found
+     */
     private void connect() throws SQLException, ClassNotFoundException {
         try {
             Class.forName(JDBC_DRIVER);
@@ -35,7 +60,9 @@ public class DatabaseManager {
         }
     }
 
-    // Close database connection
+    /**
+     * Closes the database connection if it is not already closed.
+     */
     public void close() {
         try {
             if (connection != null && !connection.isClosed()) {
@@ -46,7 +73,12 @@ public class DatabaseManager {
         }
     }
 
-    // Create necessary tables
+    /**
+     * Creates necessary tables in the database for users, roles, articles, keywords, references,
+     * and related articles if they do not already exist.
+     *
+     * @throws SQLException if a database access error occurs during table creation
+     */
     private void createTables() throws SQLException {
     	
     	// USERS TABLE
