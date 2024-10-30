@@ -8,21 +8,26 @@ import sendDesk360.view.DashboardView;
 import sendDesk360.view.LoginView;
 import sendDesk360.view.TestPage;
 import sendDesk360.view.SignUpView;
-
 import sendDesk360.view.OneTimeCodeView;
 import sendDesk360.viewModel.SignUpViewModel;
+import sendDesk360.viewModel.LoginViewModel;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
 import sendDesk360.model.User;
+import sendDesk360.model.database.DatabaseManager;
+import sendDesk360.model.database.UserManager;
 
 public class SendDesk360 extends Application {
 
     private Stage primaryStage;
     private Scene scene;
     private SignUpViewModel signUpViewModel;
+    private DatabaseManager dbManager;
+    private UserManager userManager;
 
     @Override
     public void start(Stage stage) {
         this.primaryStage = stage;
+        initializeDatabase();
         initializeViewModel();
         initializeScene();
 
@@ -32,12 +37,25 @@ public class SendDesk360 extends Application {
 
         // Show the initial login page
         showLoginView();
-//        showTestView();
+        printAllUsers();
+        
+        // showTestView();
     }
 
-    // Initialize the SignUpViewModel with a new User
+    // Initialize DatabaseManager and UserManager
+    private void initializeDatabase() {
+        try {
+            dbManager = new DatabaseManager();
+            userManager = new UserManager(dbManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle exception appropriately
+        }
+    }
+
+    // Initialize the SignUpViewModel with a new User and UserManager
     private void initializeViewModel() {
-        this.signUpViewModel = new SignUpViewModel(this, new User());
+        this.signUpViewModel = new SignUpViewModel(this, new User(), userManager);
     }
 
     // Initialize the scene with an empty VBox as root
@@ -54,12 +72,15 @@ public class SendDesk360 extends Application {
 
     // PAGE ROUTING METHODS
     public void showLoginView() {
-        LoginView loginView = new LoginView(this);
+        LoginViewModel loginViewModel = new LoginViewModel(this, userManager);
+        LoginView loginView = new LoginView(loginViewModel);
         scene.setRoot(loginView);
     }
 
     public void showSignUpView() {
-        SignUpView signUpView = new SignUpView(this, signUpViewModel);
+        // Re-initialize the SignUpViewModel for a new user
+        this.signUpViewModel = new SignUpViewModel(this, new User(), userManager);
+        SignUpView signUpView = new SignUpView(signUpViewModel);
         scene.setRoot(signUpView);
     }
 
@@ -69,18 +90,36 @@ public class SendDesk360 extends Application {
         scene.setRoot(oneTimeCodeView);
     }
 
-
     public void showDashboard() {
-    	DashboardView dashboardView = new DashboardView(this);
-    	scene.setRoot(dashboardView);
+        DashboardView dashboardView = new DashboardView(this);
+        scene.setRoot(dashboardView);
     }
-    
+
     public void showTestView() {
-    	TestPage testView = new TestPage();
-    	scene.setRoot(testView);
+        TestPage testView = new TestPage();
+        scene.setRoot(testView);
     }
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        // Close database connections when the application stops
+        if (dbManager != null) {
+            dbManager.close();
+            System.out.println("Database connection closed.");
+        }
+    }
+
+    // Method to print all users (for testing purposes)
+    public void printAllUsers() {
+        try {
+            userManager.printAllUsersTable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

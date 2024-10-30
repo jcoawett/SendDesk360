@@ -15,13 +15,6 @@ public class NavBar extends VBox {
 	private ImageView logo;
 	private Label heading;
 	private HBox logoWrapper;
-	private NavButton inviteUser;
-	private NavButton deleteUser;
-	private NavButton resetUser;
-	private NavButton addRole;
-	private NavButton removeRole;
-	private NavButton logOutButton;
-	private VBox navButtonWrapper;
 	
 	public NavBar() {
 		
@@ -40,27 +33,10 @@ public class NavBar extends VBox {
         logoWrapper.setSpacing(8);
         
         
-        inviteUser = new NavButton("user", "Invite user", event -> { System.out.println("CONNECT DASHBOARD VIEW MODEL: Invite User"); });
-        
-        deleteUser = new NavButton("user", "Delete user", event -> { System.out.println("CONNECT DASHBOARD VIEW MODEL: Delete User"); });
+        // ADD NAV BUTTON WRAPPER HERE
+        	// ADD NAV BUTTONS HERE TOO
 
-        resetUser = new NavButton("user", "Reset user", event -> { System.out.println("CONNECT DASHBOARD VIEW MODEL: Reset User"); });
-
-        addRole = new NavButton("user", "Add role", event -> { System.out.println("CONNECT DASHBOARD VIEW MODEL: Add Role"); });
-
-        removeRole = new NavButton("user", "Remove role", event -> { System.out.println("CONNECT DASHBOARD VIEW MODEL: Remove Role"); });
-
-        logOutButton = new NavButton("user", "Logout", event -> { System.out.println("CONNECT DASHBOARD VIEW MODEL: Logout User"); });
-
-        
-        // BUTTON WRAPPER
-        navButtonWrapper = new VBox(inviteUser, deleteUser, resetUser, addRole, removeRole, logOutButton);
-        HBox.setHgrow(navButtonWrapper, Priority.ALWAYS);
-
-        navButtonWrapper.setAlignment(Pos.TOP_LEFT);
-        navButtonWrapper.setSpacing(0);
-        
-        this.getChildren().addAll(logoWrapper, navButtonWrapper);
+        this.getChildren().addAll(logoWrapper); 
         this.getStyleClass().add("navbar");
         this.setSpacing(24);
         this.setAlignment(Pos.TOP_CENTER);

@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class DatabaseManager {
     private static final String JDBC_DRIVER = "org.h2.Driver";
-    private static final String DB_URL = "jdbc:h2:~/helpArticlesDB;AUTO_SERVER=TRUE";
+    private static final String DB_URL = "jdbc:h2:~/helpArticlesDB;AUTO_SERVER=TRUE";    
     private static final String USER = "sa";
     private static final String PASS = "";
 
@@ -19,6 +19,7 @@ public class DatabaseManager {
     private void connect() throws SQLException, ClassNotFoundException {
         Class.forName(JDBC_DRIVER);
         connection = DriverManager.getConnection(DB_URL, USER, PASS);
+        connection.setAutoCommit(true);
     }
 
     // Close database connection

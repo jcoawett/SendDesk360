@@ -1,15 +1,10 @@
 package sendDesk360.view;
 
 import javafx.geometry.Pos;
-
-// TODO: Role Selector
-// 
-
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
-import sendDesk360.SendDesk360;
 import sendDesk360.view.components.PrimaryButton;
 import sendDesk360.view.components.PrimaryField;
 import sendDesk360.view.components.RadialGradientBackground;
@@ -19,16 +14,16 @@ public class LoginView extends VBox {
 
     private final LoginViewModel loginViewModel;
 
-    public LoginView(SendDesk360 mainApp) {
-        this.loginViewModel = new LoginViewModel(mainApp);
+    public LoginView(LoginViewModel loginViewModel) {
+        this.loginViewModel = loginViewModel;
         initializeUI();
     }
 
     // Method to initialize the UI components
     private void initializeUI() {
         // LOGO AND TITLE
-    	ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/sendDesk360/view/assets/Send Desk Logo.png")));        
-    	logo.setFitWidth(100);
+        ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/sendDesk360/view/assets/Send Desk Logo.png")));
+        logo.setFitWidth(100);
         logo.setPreserveRatio(true);
 
         Label heading = new Label("Login to Send Desk");
@@ -39,12 +34,17 @@ public class LoginView extends VBox {
         topContent.setSpacing(40);
 
         // CONTENT WRAPPER (FIELDS AND BUTTONS)
-        PrimaryField emailField = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Email");
+        PrimaryField usernameField = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Username");
         PrimaryField passwordField = new PrimaryField(PrimaryField.FieldVariant.PASSWORD, "Password");
 
         // Bind fields to ViewModel properties
-        emailField.getUserInput().bindBidirectional(loginViewModel.emailProperty());
+        usernameField.getUserInput().bindBidirectional(loginViewModel.usernameProperty());
         passwordField.getUserInput().bindBidirectional(loginViewModel.passwordProperty());
+
+        // Error message label
+        Label errorMessageLabel = new Label();
+        errorMessageLabel.setStyle("-fx-text-fill: red;");
+        errorMessageLabel.textProperty().bind(loginViewModel.loginErrorProperty());
 
         // BUTTONS
         PrimaryButton loginButton = new PrimaryButton(
@@ -59,7 +59,7 @@ public class LoginView extends VBox {
         loginButton.setMaxWidth(464);
         createAccountButton.setMaxWidth(464);
 
-        VBox contentWrapper = new VBox(emailField, passwordField, loginButton, createAccountButton);
+        VBox contentWrapper = new VBox(usernameField, passwordField, errorMessageLabel, loginButton, createAccountButton);
         contentWrapper.setSpacing(8);
         contentWrapper.setAlignment(Pos.CENTER);
 

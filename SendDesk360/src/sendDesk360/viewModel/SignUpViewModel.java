@@ -1,18 +1,20 @@
 package sendDesk360.viewModel;
 
+import java.util.Vector;
+import java.util.Random;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import sendDesk360.model.Admin;
 import sendDesk360.model.User;
 import sendDesk360.model.User.Role;
 import sendDesk360.SendDesk360;
 import sendDesk360.model.PasswordValidator;
+import sendDesk360.model.database.UserManager;
 
 public class SignUpViewModel {
     private final User user;
-    private final Admin admin;
     private final SendDesk360 mainApp;
+    private final UserManager userManager;
     private ObjectProperty<SignUpStep> collectionStep = new SimpleObjectProperty<>(SignUpStep.USERNAME);
 
     // Properties for binding with the UI
@@ -38,33 +40,17 @@ public class SignUpViewModel {
     // Observable list for roles
     private ObservableList<Role> roles = FXCollections.observableArrayList();
 
-    public SignUpViewModel(SendDesk360 mainApp, User user) {
-    	
-    	this.admin = new Admin();
-		this.mainApp = mainApp;
+    public SignUpViewModel(SendDesk360 mainApp, User user, UserManager userManager) {
+        this.mainApp = mainApp;
         this.user = user;
+        this.userManager = userManager;
         roles.addAll(user.getRoles());
         
-        
-        
-        
+        collectionStepProperty().addListener((obs, oldStep, newStep) -> {
+            System.out.println("Step changed from " + oldStep + " to " + newStep); // DEBUG
+        });
     }
-    
 
-    public String getUserDetails() {
-        StringBuilder userDetails = new StringBuilder();
-        userDetails.append("Username: ").append(user.getUsername()).append("\n")
-            .append("Password: ").append(user.getPassword()).append("\n")
-            .append("First Name: ").append(user.getName().getFirst()).append("\n")
-            .append("Middle Name: ").append(user.getName().getMiddle()).append("\n")
-            .append("Last Name: ").append(user.getName().getLast()).append("\n")
-            .append("Preferred Name: ").append(user.getName().getPref()).append("\n")
-            .append("Email: ").append(user.getEmail()).append("\n")
-            .append("Roles: ");
-        // TODO: GET ROLES
-        return userDetails.toString();
-    }
-    
     // Enum for signup steps
     public enum SignUpStep {
         USERNAME,
@@ -74,7 +60,6 @@ public class SignUpViewModel {
         LASTNAME,
         PREFNAME,
         EMAIL,
-        ROLES,
         COMPLETED
     }
 
@@ -91,7 +76,6 @@ public class SignUpViewModel {
         this.collectionStep.set(step);
     }
 
-    
     // Validation and data processing methods
     public boolean processInput() {
         boolean validInput = false;
@@ -175,17 +159,12 @@ public class SignUpViewModel {
                 } else {
                     emailError.set("Please enter a valid email address.");
                 }
-                break;
-
-            case COMPLETED:
-                validInput = true;
-                break;
-
+                break;              
             default:
                 break;
         }
-
-        if (validInput) {
+        
+        if (validInput && getCollectionStep() != SignUpStep.COMPLETED) {
             advanceToNextStep();
         }
 
@@ -194,6 +173,7 @@ public class SignUpViewModel {
 
     // Advances to the next step
     private void advanceToNextStep() {
+
         switch (getCollectionStep()) {
             case USERNAME:
                 setCollectionStep(SignUpStep.PASSWORD);
@@ -219,20 +199,70 @@ public class SignUpViewModel {
             default:
                 break;
         }
+
+    }
+    
+    // SAVE USER
+    
+    public boolean completeSignUp() {
+        boolean validInput = false;
+
+        try {
+
+            // Add the user to the database
+            userManager.addUser(user);
+
+            // Set default values for the user
+            user.setFlag(false);
+            user.setExpireTime(System.currentTimeMillis() + (60000 * 60 * 24)); // 24 hours expiration
+
+            // Check if this is the first user to assign admin role
+            if (userManager.isFirstUser()) {
+                Vector<Role> roles = new Vector<>();
+                Role adminRole = new Role();
+                adminRole.setName("admin");
+                adminRole.setPrivilege(1); // Set admin privilege
+                roles.add(adminRole);
+                user.setRoles(roles);
+            } else {
+                Vector<Role> roles = new Vector<>();
+                Role userRole = new Role();
+                userRole.setName("user");
+                userRole.setPrivilege(0); // Set normal user privilege
+                roles.add(userRole);
+                user.setRoles(roles);
+            }
+
+            // If everything is successful, mark input as valid
+            validInput = true;
+        } catch (Exception e) {
+            // Handle exceptions and set the error message
+            e.printStackTrace();
+            emailError.set("Failed to create user: " + e.getMessage());
+        }
+
+        return validInput; // Return success or failure
     }
 
-    
     // NAVIGATION
     public void goToLogin() {
-    	mainApp.showLoginView();
+        mainApp.showLoginView();
     }
-    
-    public void goToOTC() {
-    	mainApp.showOneTimeCodeView("101010");
-    }
-    
+
     public void proceedToDashboard() {
         mainApp.showDashboard();
+    }
+
+    public void goToOTC() {
+        // Generate a random 6-digit code
+        String generatedCode = String.format("%06d", new Random().nextInt(999999));
+        
+        // Send the code via email (optional)
+        // For testing purposes, we can just print it or pass it along
+        System.out.println("Generated OTC: " + generatedCode);
+        
+        // Navigate to the One-Time Code View
+        mainApp.showOneTimeCodeView(generatedCode);
     }
 
     // Properties for binding with the UI

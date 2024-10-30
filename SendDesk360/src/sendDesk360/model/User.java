@@ -88,9 +88,11 @@ public class User {
 
     // Default Constructor
     public User() {
+        this.name = new FullName();
         this.username = "";
         this.email = "";
         this.password = "";
+        this.roles = new Vector<>();
         this.flag = true;
         this.expireTime = System.currentTimeMillis() + (60000 * 5);
     }

@@ -8,7 +8,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import sendDesk360.SendDesk360;
 import sendDesk360.view.components.PrimaryButton;
 import sendDesk360.view.components.PrimaryField;
 import sendDesk360.view.components.RadialGradientBackground;
@@ -31,8 +30,7 @@ public class SignUpView extends VBox {
     private PrimaryButton linkToLogin;
     private PrimaryButton linkToOTC;
 
-    public SignUpView(SendDesk360 mainApp, SignUpViewModel viewModel) {
-
+    public SignUpView(SignUpViewModel viewModel) {
         this.signUpViewModel = viewModel;
         initializeUI();
 
@@ -42,6 +40,7 @@ public class SignUpView extends VBox {
         // Update the view for the first time
         updateView(signUpViewModel.getCollectionStep());
     }
+
 
     // Method to initialize static UI components
     public void initializeUI() {
@@ -176,12 +175,17 @@ public class SignUpView extends VBox {
                 heading.setText("Sign Up Complete!");
                 continueButton.setText("Go to Dashboard");
                 continueButton.setVariant(PrimaryButton.ButtonVariant.ACCENT);
-                continueButton.setOnAction(event -> {
-                    signUpViewModel.proceedToDashboard();
-                });
-                break;
 
-            default:
+                continueButton.setOnAction(event -> {
+                    if (signUpViewModel.completeSignUp()) { // Call completeSignUp and check result
+                        System.out.println("User successfully created, navigating to dashboard."); // DEBUG
+                        signUpViewModel.proceedToDashboard(); // Proceed only if successful
+                    } else {
+                        System.out.println("User creation failed. Stay on the same page."); // DEBUG
+                    }
+                });
+
+                fieldWrapper.getChildren().add(continueButton);
                 break;
         }
 

@@ -3,29 +3,35 @@ package sendDesk360.viewModel;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import sendDesk360.SendDesk360;
+import sendDesk360.model.database.UserManager;
 
 public class LoginViewModel {
 
     // Properties for data binding
-	private final StringProperty email = new SimpleStringProperty("");
-	private final StringProperty password = new SimpleStringProperty("");
+    private final StringProperty username = new SimpleStringProperty("");
+    private final StringProperty password = new SimpleStringProperty("");
     private final SendDesk360 mainApp;
+    private final UserManager userManager;
 
-    public LoginViewModel(SendDesk360 mainApp) {
+    // Error message property
+    private final StringProperty loginError = new SimpleStringProperty("");
+
+    public LoginViewModel(SendDesk360 mainApp, UserManager userManager) {
         this.mainApp = mainApp;
+        this.userManager = userManager;
     }
 
     // Getters and Setters for the properties
-    public StringProperty emailProperty() {
-        return email;
+    public StringProperty usernameProperty() {
+        return username;
     }
 
-    public String getEmail() {
-        return email.get();
+    public String getUsername() {
+        return username.get();
     }
 
-    public void setEmail(String email) {
-        this.email.set(email);
+    public void setUsername(String username) {
+        this.username.set(username);
     }
 
     public StringProperty passwordProperty() {
@@ -40,18 +46,34 @@ public class LoginViewModel {
         this.password.set(password);
     }
 
+    // Error property getter
+    public StringProperty loginErrorProperty() {
+        return loginError;
+    }
+
     // Method to handle login logic
     public boolean login() {
-        if (getEmail().isEmpty() || getPassword().isEmpty()) {
-            // Ideally, notify the view to show error (could use a callback or observer)
+        loginError.set("");
+        if (getUsername().isEmpty() || getPassword().isEmpty()) {
+            loginError.set("Username and password cannot be empty.");
             return false;
         }
 
-        // Placeholder logic for successful login
-        System.out.println("Logging in with email: " + getEmail() + " and password: " + getPassword());
-        // You can add logic here to check credentials
-
-        return true;
+        try {
+            boolean isAuthenticated = userManager.authenticateUser(getUsername(), getPassword());
+            if (isAuthenticated) {
+                // Proceed to dashboard or next view
+                mainApp.showDashboard();
+                return true;
+            } else {
+                loginError.set("Authentication failed. Invalid username or password.");
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            loginError.set("An error occurred during authentication.");
+            return false;
+        }
     }
 
     // Method to navigate to the sign-up page

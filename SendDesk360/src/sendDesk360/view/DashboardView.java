@@ -7,15 +7,13 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import sendDesk360.view.components.UserCard;
 import sendDesk360.viewModel.DashboardViewModel;
-import sendDesk360.model.User;
-import java.util.Vector;
+
 
 public class DashboardView extends VBox {
 
     private final DashboardViewModel dashboardViewModel;
-    private VBox userCardList;
+    private VBox articleList;
 
     public DashboardView(SendDesk360 mainApp) {
         this.dashboardViewModel = new DashboardViewModel(mainApp);
@@ -34,13 +32,13 @@ public class DashboardView extends VBox {
         pageTitle.setText("Dashboard");
         pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
 
-        userCardList = new VBox();
-        userCardList.setAlignment(Pos.TOP_LEFT);
-        userCardList.setStyle("-fx-padding: 32px 0px 32px 0px;");
-        userCardList.setSpacing(16); // Add spacing between user cards
-        HBox.setHgrow(userCardList, Priority.ALWAYS);
+        articleList = new VBox();
+        articleList.setAlignment(Pos.TOP_LEFT);
+        articleList.setStyle("-fx-padding: 32px 0px 32px 0px;");
+        articleList.setSpacing(16); // Add spacing between user cards
+        HBox.setHgrow(articleList, Priority.ALWAYS);
 
-        VBox pageBody = new VBox(pageTitle, userCardList);
+        VBox pageBody = new VBox(pageTitle, articleList);
         pageBody.setAlignment(Pos.TOP_LEFT);
         pageBody.setStyle("-fx-padding: 32px;");
         pageBody.setSpacing(16); // Add spacing between title and list
@@ -56,18 +54,7 @@ public class DashboardView extends VBox {
     }
 
     public void initializeUserListCards() {
-        Vector<User> users = dashboardViewModel.getUsers();
-        for (User user : users) {
-            // Get the first letter of the user's first name
-            String iconLetter = user.getName().getFirst().substring(0, 1).toUpperCase();
-
-            // Get the username and email
-            String username = user.getUsername();
-            String email = user.getEmail();
-
-            // Create a UserCard
-            UserCard userCard = new UserCard(iconLetter, username, email);
-            userCardList.getChildren().add(userCard);
-        }
+    	
+    	
     }
 }

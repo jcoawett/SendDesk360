@@ -2,7 +2,6 @@ package sendDesk360.viewModel;
 
 import javafx.beans.property.*;
 import sendDesk360.SendDesk360;
-import sendDesk360.model.Admin;
 
 public class OneTimeCodeViewModel {
 
