@@ -12,8 +12,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Manages the articles stored in the database and handles related operations,
@@ -265,15 +267,33 @@ public class ArticleManager {
      * @throws SQLException if there is an error adding articles into the RelatedArticles table
      */
     private void addRelatedArticles(Article article) throws SQLException {
-        String sql = "INSERT INTO RelatedArticles (articleID, relatedArticleID) VALUES (?, ?);";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            for (Long relatedID : article.getRelatedArticleIDs()) {
-                pstmt.setLong(1, article.getArticleID());
-                pstmt.setLong(2, relatedID);
-                pstmt.addBatch();
-            }
-            pstmt.executeBatch();
-        }
+    	 String checkSQL = "SELECT COUNT(*) FROM Articles WHERE articleID = ?;";
+    	    String insertSQL = "INSERT INTO RelatedArticles (articleID, relatedArticleID) VALUES (?, ?);";
+    	    
+    	    // Use a try-with-resources to ensure both PreparedStatements are closed properly
+    	    try (PreparedStatement checkPstmt = connection.prepareStatement(checkSQL);
+    	         PreparedStatement insertPstmt = connection.prepareStatement(insertSQL)) {
+    	        
+    	        for (Long relatedID : article.getRelatedArticleIDs()) {
+    	            // Check if the related article ID exists in the Articles table
+    	            checkPstmt.setLong(1, relatedID);
+    	            ResultSet rs = checkPstmt.executeQuery();
+    	            if (rs.next() && rs.getInt(1) > 0) { // Related article exists
+    	                // Prepare to insert into RelatedArticles
+    	                insertPstmt.setLong(1, article.getArticleID());
+    	                insertPstmt.setLong(2, relatedID);
+    	                insertPstmt.addBatch();
+    	            } else {
+    	                System.out.println("Related article ID " + relatedID + " does not exist. Skipping insertion.");
+    	            }
+    	        }
+    	        
+    	        // Execute the batch if there are any valid related IDs
+    	        insertPstmt.executeBatch();
+    	    } catch (SQLException e) {
+    	        System.out.println("Error adding related articles: " + e.getMessage());
+    	        throw e; // Rethrow to handle higher up if necessary
+    	    }
     }
 
     /**
@@ -520,15 +540,67 @@ public class ArticleManager {
         addRelatedArticles(article);
     }
     
+    public void backupArticles(File backupFile) throws Exception {
+        List<Article> articles = getAllArticles(); // Fetch all articles
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(backupFile))) {
+            for (Article article : articles) {
+                StringBuilder articleData = new StringBuilder();
+
+                // Encrypt fields and generate random IVs
+                byte[] titleIV = EncryptionUtils.generateRandomIV();
+                String encryptedTitle = encryptField(article.getTitle(), titleIV);
+                String titleIVBase64 = Base64.getEncoder().encodeToString(titleIV);
+
+                byte[] shortDescIV = EncryptionUtils.generateRandomIV();
+                String encryptedShortDesc = encryptField(article.getShortDescription(), shortDescIV);
+                String shortDescIVBase64 = Base64.getEncoder().encodeToString(shortDescIV);
+
+                byte[] bodyIV = EncryptionUtils.generateRandomIV();
+                String encryptedBody = encryptField(article.getBody(), bodyIV);
+                String bodyIVBase64 = Base64.getEncoder().encodeToString(bodyIV);
+
+                // Handle keywords, references, and related articles
+                String keywordsString = String.join("|", article.getKeywords()); // Use '|' as separator
+                String referencesString = String.join("|", article.getReferenceLinks()); // Use '|' as separator
+                List<Long> relatedArticleIDs = article.getRelatedArticleIDs();
+                String relatedIDsString = relatedArticleIDs.isEmpty() ? "0" : relatedArticleIDs.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining("|")); // Use '|' as separator
+
+                // Append the encrypted data and IVs to the StringBuilder
+                articleData.append(article.getUniqueID()).append(",")
+                           .append(encryptedTitle).append(",")
+                           .append(titleIVBase64).append(",")
+                           .append(encryptedShortDesc).append(",")
+                           .append(shortDescIVBase64).append(",")
+                           .append(article.getDifficulty()).append(",")
+                           .append(encryptedBody).append(",")
+                           .append(bodyIVBase64).append(",")
+                           .append(keywordsString).append(",")
+                           .append(referencesString).append(",")
+                           .append(relatedIDsString).append(","); // Add references and related IDs
+
+                // Write to the backup file
+                writer.write(articleData.toString());
+                writer.newLine(); // Write a new line after each article
+            }
+            System.out.println("Articles backed up successfully to " + backupFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Error writing to the backup file: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error fetching articles for backup: " + e.getMessage());
+        }
+    }
+
     public void restoreArticles(File backupFile) {
-    	String insertSQL = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+        String insertSQL = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
         try (BufferedReader reader = new BufferedReader(new FileReader(backupFile))) {
             String line;
             try (PreparedStatement pstmt = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
                 while ((line = reader.readLine()) != null) {
-                	
-                    String[] articleData = line.split(","); 
-                    if (articleData.length < 6) { // Ensure there are enough fields for the article
+                    String[] articleData = line.split(",");
+                    if (articleData.length < 11) { // Expecting at least 11 fields (including keywords, references, and related IDs)
                         System.out.println("Skipping invalid article data: " + line);
                         continue;
                     }
@@ -536,23 +608,33 @@ public class ArticleManager {
                     // Create Article object and set values
                     Article article = new Article();
                     article.setUniqueID(Long.parseLong(articleData[0].trim()));
-                    article.setTitle(articleData[1].trim());
-                    article.setShortDescription(articleData[2].trim());
-                    article.setDifficulty(articleData[3].trim());
-                    article.setBody(articleData[4].trim());
+                    String encryptedTitle = articleData[1].trim();
+                    String titleIVBase64 = articleData[2].trim();
+                    String encryptedShortDesc = articleData[3].trim();
+                    String shortDescIVBase64 = articleData[4].trim();
+                    article.setDifficulty(articleData[5].trim());
+                    String encryptedBody = articleData[6].trim();
+                    String bodyIVBase64 = articleData[7].trim();
+                    String keywordsString = articleData[8].trim(); // Keywords string
+                    String referencesString = articleData[9].trim(); // References string
+                    String relatedIDsString = articleData[10].trim(); // Related IDs string
 
-                    // Encrypt fields and generate random IVs
-                    byte[] titleIV = EncryptionUtils.generateRandomIV();
-                    String encryptedTitle = encryptField(article.getTitle(), titleIV);
-                    String titleIVBase64 = Base64.getEncoder().encodeToString(titleIV);
+                    // Set encrypted values and IVs in the Article object
+                    article.setTitle(encryptedTitle);
+                    article.setShortDescription(encryptedShortDesc);
+                    article.setBody(encryptedBody);
 
-                    byte[] shortDescIV = EncryptionUtils.generateRandomIV();
-                    String encryptedShortDesc = encryptField(article.getShortDescription(), shortDescIV);
-                    String shortDescIVBase64 = Base64.getEncoder().encodeToString(shortDescIV);
-
-                    byte[] bodyIV = EncryptionUtils.generateRandomIV();
-                    String encryptedBody = encryptField(article.getBody(), bodyIV);
-                    String bodyIVBase64 = Base64.getEncoder().encodeToString(bodyIV);
+                    // Set keywords, references, and related articles in the Article object
+                    List<String> keywords = Arrays.asList(keywordsString.split("\\|")); // Split by the pipe '|'
+                    article.setKeywords(keywords);
+                    
+                    List<String> references = Arrays.asList(referencesString.split("\\|")); // Split by the pipe '|'
+                    article.setReferenceLinks(references);
+                    
+                    List<Long> relatedIDs = Arrays.stream(relatedIDsString.split("\\|")) // Split by the pipe '|'
+                                                   .map(Long::parseLong)
+                                                   .collect(Collectors.toList());
+                    article.setRelatedArticleIDs(relatedIDs);
 
                     // Set parameters for the SQL statement
                     pstmt.setLong(1, article.getUniqueID());
@@ -572,41 +654,16 @@ public class ArticleManager {
                     if (keys.next()) {
                         long articleID = keys.getLong(1);
                         article.setArticleID(articleID);
-                        
-                        addKeywords(article);
-                        addReferences(article);
-                        addRelatedArticles(article);
+
+                        addKeywords(article); // Ensure this method handles the keywords
+                        addReferences(article); // Ensure this method handles the references
+                        addRelatedArticles(article); // Ensure this method handles the related articles
                     }
                 }
                 System.out.println("Articles restored successfully from " + backupFile.getAbsolutePath());
             }
-        } catch (Exception e ) {
-            System.out.println("Error reading the backup file: " + e.getMessage());
-        } 
-    }
-    
-    public void backupArticles(File restoreFile) {
-    	try {
-            List<Article> articles = getAllArticles(); // Fetch all articles
-
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(restoreFile))) {
-                for (Article article : articles) {
-                    StringBuilder articleData = new StringBuilder();
-                    articleData.append(article.getUniqueID()).append(",")
-                               .append(article.getTitle()).append(",")
-                               .append(article.getShortDescription()).append(",")
-                               .append(article.getDifficulty()).append(",")
-                               .append(article.getBody());
-                    
-                    writer.write(articleData.toString());
-                    writer.newLine(); // Write a new line after each article
-                }
-                System.out.println("Articles backed up successfully to " + restoreFile.getAbsolutePath());
-            }
-        } catch (IOException e) {
-            System.out.println("Error writing to the backup file: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error fetching articles for backup: " + e.getMessage());
+            System.out.println("Error reading the backup file: " + e.getMessage());
         }
     }
 }
