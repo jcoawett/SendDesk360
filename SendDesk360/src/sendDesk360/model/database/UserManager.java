@@ -19,6 +19,7 @@ import java.util.Vector;
 public class UserManager {
     private Connection connection;
     private EncryptionHelper encryptionHelper;
+    private User currentUser; // Store the current logged-in user
 
     /**
      * Constructs a UserManager with a given DatabaseManager.
@@ -29,6 +30,15 @@ public class UserManager {
     public UserManager(DatabaseManager dbManager) throws Exception {
         this.connection = dbManager.getConnection();
         this.encryptionHelper = new EncryptionHelper();
+    }
+   
+    // Set the current user after successful login
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
     }
     
     // USER FUNCTIONS

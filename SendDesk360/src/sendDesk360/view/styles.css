@@ -31,6 +31,7 @@
 /* NAV-BAR */
 /* ----------------------- */
 .navbar {
+	-fx-border-width: 0px 0px 0px 1px;
 	-fx-background-color: #080808;
 	-fx-padding: 24px 16px 24px 16px; /* top, right, bottom, left */
 }
@@ -260,6 +261,23 @@
 	
 }
 /* ----------------------- */
+
+
+/* ARTICLE CARD */
+.article-preview-card {
+	-fx-padding: 16px;
+    -fx-border-width: 0px 0px 1px 0px;
+    -fx-border-color: #28292E;
+    -fx-border-style: solid;
+}
+
+.article-preview-card:hover {
+	-fx-padding: 16px;
+	-fx-background-color: #1E2025;
+    -fx-border-width: 0px 0px 1px 0px;
+    -fx-border-color: #28292E;
+    -fx-border-style: solid;
+}
 
 /* -------------------------------------------------------------------- */
 
