@@ -65,8 +65,10 @@ public class ArticleManager {
                    + "difficulty = ?, "
                    + "body = ?, body_iv = ? "
                    + "WHERE articleID = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            // Generate new IVs for each field
+        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setLong(1, article.getUniqueID());
+
+            // Encrypt fields and generate random IVs
             byte[] titleIV = EncryptionUtils.generateRandomIV();
             String encryptedTitle = encryptField(article.getTitle(), titleIV);
             String titleIVBase64 = Base64.getEncoder().encodeToString(titleIV);
@@ -79,26 +81,27 @@ public class ArticleManager {
             String encryptedBody = encryptField(article.getBody(), bodyIV);
             String bodyIVBase64 = Base64.getEncoder().encodeToString(bodyIV);
 
-            // Set parameters in the PreparedStatement
-            pstmt.setString(1, encryptedTitle);
-            pstmt.setString(2, titleIVBase64);
-            pstmt.setString(3, encryptedShortDesc);
-            pstmt.setString(4, shortDescIVBase64);
-            pstmt.setString(5, article.getDifficulty()); // Assuming difficulty is not encrypted
-            pstmt.setString(6, encryptedBody);
-            pstmt.setString(7, bodyIVBase64);
-            pstmt.setLong(8, article.getArticleID());
+            pstmt.setString(2, encryptedTitle);
+            pstmt.setString(3, titleIVBase64);
+            pstmt.setString(4, encryptedShortDesc);
+            pstmt.setString(5, shortDescIVBase64);
+            pstmt.setString(6, article.getDifficulty());
+            pstmt.setString(7, encryptedBody);
+            pstmt.setString(8, bodyIVBase64);
+
             pstmt.executeUpdate();
 
-            // Update keywords, references, related articles as needed
-            // For example:
-            updateKeywords(article);
-            updateReferences(article);
-            updateRelatedArticles(article);
-
+            ResultSet keys = pstmt.getGeneratedKeys();
+            if (keys.next()) {
+                long articleID = keys.getLong(1);
+                article.setArticleID(articleID);
+                addKeywords(article);
+                addReferences(article);
+                addRelatedArticles(article);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw e;
+            throw new Exception("Error adding article to database", e);
         }
     }
 
@@ -208,17 +211,18 @@ public class ArticleManager {
     public List<Article> searchArticles(String searchTerm) throws Exception {
         String sql = "SELECT * FROM Articles;";
         List<Article> articles = new ArrayList<>();
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            try (ResultSet resultSet = pstmt.executeQuery()) {
-                while (resultSet.next()) {
-                    Article article = mapArticle(resultSet);
-                    if (article.getTitle().contains(searchTerm) ||
-                        article.getKeywords().contains(searchTerm)) {
-                        articles.add(article);
-                    }
-                }
-            }
-        }
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+                ResultSet resultSet = pstmt.executeQuery()) {
+               while (resultSet.next()) {
+                   Article article = mapArticle(resultSet);
+                   if (article.getTitle().contains(searchTerm) || article.getKeywords().contains(searchTerm)) {
+                       articles.add(article);
+                   }
+               }
+           } catch (SQLException e) {
+               e.printStackTrace();
+               throw new Exception("Error searching articles", e);
+           }
         return articles;
     }
     

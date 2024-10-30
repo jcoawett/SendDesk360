@@ -10,21 +10,40 @@ public class DatabaseManager {
 
     private Connection connection;
 
-    public DatabaseManager() throws SQLException, ClassNotFoundException {
-        connect();
-        createTables();
+    public DatabaseManager() {
+        try {
+            connect();
+            createTables();
+        } catch (SQLException | ClassNotFoundException e) {
+            System.err.println("Error initializing the DatabaseManager: " + e.getMessage());
+            e.printStackTrace(); // Print the full stack trace for debugging
+        }
     }
 
     // Establish database connection
     private void connect() throws SQLException, ClassNotFoundException {
-        Class.forName(JDBC_DRIVER);
-        connection = DriverManager.getConnection(DB_URL, USER, PASS);
-        connection.setAutoCommit(true);
+        try {
+            Class.forName(JDBC_DRIVER);
+            connection = DriverManager.getConnection(DB_URL, USER, PASS);
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            System.err.println("Error connecting to the database: " + e.getMessage());
+            throw e; // Rethrow the exception to propagate it upwards if necessary
+        } catch (ClassNotFoundException e) {
+            System.err.println("JDBC Driver not found: " + e.getMessage());
+            throw e; // Rethrow the exception for clarity
+        }
     }
 
     // Close database connection
-    public void close() throws SQLException {
-        if (connection != null) connection.close();
+    public void close() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error closing the database connection: " + e.getMessage());
+        }
     }
 
     // Create necessary tables
@@ -95,15 +114,18 @@ public class DatabaseManager {
                 + "FOREIGN KEY (relatedArticleID) REFERENCES Articles(articleID)"
                 + ");";
 
-        Statement stmt = connection.createStatement();
-        stmt.execute(createUsersTable);
-        stmt.execute(createRolesTable);
-        stmt.execute(createUserRolesTable);
-        stmt.execute(createArticlesTable);
-        stmt.execute(createKeywordsTable);
-        stmt.execute(createReferencesTable);
-        stmt.execute(createRelatedArticlesTable);
-        stmt.close();
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createUsersTable);
+            stmt.execute(createRolesTable);
+            stmt.execute(createUserRolesTable);
+            stmt.execute(createArticlesTable);
+            stmt.execute(createKeywordsTable);
+            stmt.execute(createReferencesTable);
+            stmt.execute(createRelatedArticlesTable);
+        } catch (SQLException e) {
+            System.err.println("Error creating tables: " + e.getMessage());
+            throw e; // Rethrow to let the caller know about the failure
+        }
     }
 
     // Get the database connection

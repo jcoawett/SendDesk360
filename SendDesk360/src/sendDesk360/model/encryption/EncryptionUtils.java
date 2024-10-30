@@ -20,8 +20,13 @@ public class EncryptionUtils {
      * @return the resulting byte array
      */
     public static byte[] toByteArray(char[] chars) {
-        ByteBuffer byteBuffer = Charset.defaultCharset().encode(CharBuffer.wrap(chars));
-        return Arrays.copyOf(byteBuffer.array(), byteBuffer.limit());
+    	try {
+            ByteBuffer byteBuffer = Charset.defaultCharset().encode(CharBuffer.wrap(chars));
+            return Arrays.copyOf(byteBuffer.array(), byteBuffer.limit());
+        } catch (Exception e) {
+            System.err.println("Error converting char array to byte array: " + e.getMessage());
+            return new byte[0];  // Return empty array in case of an error
+        }
     }
 
     /**
@@ -31,8 +36,13 @@ public class EncryptionUtils {
      * @return the resulting character array
      */
     public static char[] toCharArray(byte[] bytes) {
-        CharBuffer charBuffer = Charset.defaultCharset().decode(ByteBuffer.wrap(bytes));
-        return Arrays.copyOf(charBuffer.array(), charBuffer.limit());
+    	try {
+            CharBuffer charBuffer = Charset.defaultCharset().decode(ByteBuffer.wrap(bytes));
+            return Arrays.copyOf(charBuffer.array(), charBuffer.limit());
+        } catch (Exception e) {
+            System.err.println("Error converting byte array to char array: " + e.getMessage());
+            return new char[0];  // Return empty array in case of an error
+        }
     }
 
     /**
@@ -43,15 +53,25 @@ public class EncryptionUtils {
      * @return a byte array representing the initialization vector (IV)
      */
     public static byte[] getInitializationVector(char[] text) {
-        char[] iv = new char[IV_SIZE];
-        int textPointer = 0;
-        int ivPointer = 0;
-
-        // Cycle through the text to fill the IV array
-        while (ivPointer < IV_SIZE) {
-            iv[ivPointer++] = text[textPointer++ % text.length];
+    	if (text == null || text.length == 0) {
+            System.err.println("Invalid input text for IV generation.");
+            return new byte[0];  // Return empty array for invalid input
         }
-        return toByteArray(iv);
+        
+        try {
+            char[] iv = new char[IV_SIZE];
+            int textPointer = 0;
+            int ivPointer = 0;
+
+            // Cycle through the text to fill the IV array
+            while (ivPointer < IV_SIZE) {
+                iv[ivPointer++] = text[textPointer++ % text.length];
+            }
+            return toByteArray(iv);
+        } catch (Exception e) {
+            System.err.println("Error generating initialization vector: " + e.getMessage());
+            return new byte[0];  // Return empty array in case of an error
+        }
     }
     
     /**
@@ -60,9 +80,14 @@ public class EncryptionUtils {
      * @return a byte array representing the initialization vector (IV)
      */
     public static byte[] generateRandomIV() {
-        byte[] iv = new byte[IV_SIZE];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(iv);
-        return iv;
+    	try {
+            byte[] iv = new byte[IV_SIZE];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(iv);
+            return iv;
+        } catch (Exception e) {
+            System.err.println("Error generating random IV: " + e.getMessage());
+            return new byte[0];  // Return empty array in case of an error
+        }
     }
 }

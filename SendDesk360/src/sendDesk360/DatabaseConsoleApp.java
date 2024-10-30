@@ -35,7 +35,7 @@ public class DatabaseConsoleApp {
                 try {
                     dbManager.close();
                     System.out.println("Database connection closed.");
-                } catch (SQLException e) {
+                } catch (Exception e) { // Use generic Exception instead of SQLException
                     System.err.println("Error closing database connection: " + e.getMessage());
                     e.printStackTrace();
                 }

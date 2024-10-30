@@ -5,6 +5,7 @@ import sendDesk360.model.User.Role;
 import sendDesk360.model.encryption.EncryptionHelper;
 import sendDesk360.model.encryption.EncryptionUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -74,6 +75,10 @@ public class UserManager {
                 if (rs.next()) {
                     return rs.getLong("userID");
                 }
+            } catch (SQLException e) {
+                System.err.println("Error retreiving userID from database " + e.getMessage());
+                e.printStackTrace();
+                throw e; // Rethrow for higher-level handling.
             }
         }
         return -1;
@@ -108,6 +113,10 @@ public class UserManager {
 
                     return user;
                 }
+            } catch (SQLException e) {
+                System.err.println("Error retreiving user from database " + e.getMessage());
+                e.printStackTrace();
+                throw e; // Rethrow for higher-level handling.
             }
         }
         return null;
@@ -138,6 +147,10 @@ public class UserManager {
 
             // Update user roles
             changeUserRoles(user.getUsername(), user.getRoles());
+        } catch (SQLException e) {
+            System.err.println("Error updating user information " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Rethrow for higher-level handling.
         }
     }
     
@@ -183,10 +196,19 @@ public class UserManager {
     }
     
     private String decryptPassword(String encryptedPassword, String ivBase64) throws Exception {
-        byte[] encryptedPasswordBytes = Base64.getDecoder().decode(encryptedPassword);
-        byte[] passwordIV = Base64.getDecoder().decode(ivBase64);
-        byte[] decryptedPasswordBytes = encryptionHelper.decrypt(encryptedPasswordBytes, passwordIV);
-        return new String(decryptedPasswordBytes, "UTF-8");
+    	try {
+            byte[] encryptedPasswordBytes = Base64.getDecoder().decode(encryptedPassword);
+            byte[] passwordIV = Base64.getDecoder().decode(ivBase64);
+            byte[] decryptedPasswordBytes = encryptionHelper.decrypt(encryptedPasswordBytes, passwordIV);
+            return new String(decryptedPasswordBytes, "UTF-8");
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error decoding Base64: " + e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Unsupported encoding: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Decryption error: " + e.getMessage());
+        }
+        return null;
     }
     
     // Delete a user
@@ -195,6 +217,8 @@ public class UserManager {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
         }
     }
    
@@ -214,6 +238,8 @@ public class UserManager {
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
+        } catch (SQLException e) {
+            System.err.println("Error adding user roles: " + e.getMessage());
         }
     }
 
@@ -227,7 +253,11 @@ public class UserManager {
             if (rs.next()) {
                 return rs.getLong("roleID");
             }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving role: " + e.getMessage());
         }
+        
+        
         // Role does not exist, create it
         String insertSql = "INSERT INTO Roles (name, privilege) VALUES (?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -238,28 +268,36 @@ public class UserManager {
             if (keys.next()) {
                 return keys.getLong(1);
             }
+        } catch (SQLException e) {
+            System.err.println("Error creating role: " + e.getMessage());
         }
+        
         throw new SQLException("Failed to insert role");
     }
 
     // Change user roles
     public void changeUserRoles(String username, Vector<Role> newRoles) throws SQLException {
-        // Get userID
-        long userID = getUserIDByUsername(username);
-        if (userID == -1) {
-            throw new SQLException("User not found");
-        }
-        // Delete existing roles
-        String deleteSql = "DELETE FROM UserRoles WHERE userID = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(deleteSql)) {
-            pstmt.setLong(1, userID);
-            pstmt.executeUpdate();
-        }
-        // Add new roles
-        User user = new User();
-        user.setUserID(userID);
-        user.setRoles(newRoles);
-        addUserRoles(user);
+    	 try {
+    	        long userID = getUserIDByUsername(username);
+    	        if (userID == -1) {
+    	            throw new SQLException("User not found");
+    	        }
+
+    	        // Delete existing roles
+    	        String deleteSql = "DELETE FROM UserRoles WHERE userID = ?;";
+    	        try (PreparedStatement pstmt = connection.prepareStatement(deleteSql)) {
+    	            pstmt.setLong(1, userID);
+    	            pstmt.executeUpdate();
+    	        }
+
+    	        // Add new roles
+    	        User user = new User();
+    	        user.setUserID(userID);
+    	        user.setRoles(newRoles);
+    	        addUserRoles(user);
+    	    } catch (SQLException e) {
+    	        System.err.println("Error changing user roles: " + e.getMessage());
+    	    }
     }
 
     // Get User roles
@@ -348,30 +386,32 @@ public class UserManager {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM Users;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                User user = new User();
-                user.setUserID(rs.getLong("userID"));
-                user.setUsername(rs.getString("username"));
-                user.setEmail(rs.getString("email"));
-                user.setFlag(rs.getBoolean("flag"));
-                user.setExpireTime(rs.getLong("expireTime"));
+                ResultSet rs = pstmt.executeQuery()) {
+               while (rs.next()) {
+                   User user = new User();
+                   user.setUserID(rs.getLong("userID"));
+                   user.setUsername(rs.getString("username"));
+                   user.setEmail(rs.getString("email"));
+                   user.setFlag(rs.getBoolean("flag"));
+                   user.setExpireTime(rs.getLong("expireTime"));
 
-                // Retrieve name fields directly
-                User.FullName fullName = new User.FullName();
-                fullName.setFirst(rs.getString("firstName"));
-                fullName.setMiddle(rs.getString("middleName"));
-                fullName.setLast(rs.getString("lastName"));
-                fullName.setPref(rs.getString("preferredName"));
-                user.setName(fullName);
+                   // Retrieve name fields directly
+                   User.FullName fullName = new User.FullName();
+                   fullName.setFirst(rs.getString("firstName"));
+                   fullName.setMiddle(rs.getString("middleName"));
+                   fullName.setLast(rs.getString("lastName"));
+                   fullName.setPref(rs.getString("preferredName"));
+                   user.setName(fullName);
 
-                // Retrieve roles
-                Vector<Role> roles = getRolesForUser(user.getUserID());
-                user.setRoles(roles);
+                   // Retrieve roles
+                   Vector<Role> roles = getRolesForUser(user.getUserID());
+                   user.setRoles(roles);
 
-                users.add(user);
-            }
-        }
+                   users.add(user);
+               }
+           } catch (SQLException e) {
+               System.err.println("Error retrieving all users: " + e.getMessage());
+           }
         return users;
     }
 }
