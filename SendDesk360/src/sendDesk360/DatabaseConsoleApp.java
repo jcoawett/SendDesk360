@@ -8,6 +8,7 @@ import sendDesk360.model.database.UserManager;
 import sendDesk360.model.database.ArticleManager;
 
 import java.util.*;
+import java.io.File;
 import java.sql.*;
 
 /**
@@ -705,14 +706,34 @@ public class DatabaseConsoleApp {
     
     // BACKUP ARTICLES
     private static void backupArticles() {
-        System.out.println("Backup articles functionality is not implemented yet.");
-        // You can implement this method to backup articles to a file.
+    	try {
+            System.out.print("Enter the path for the backup file: ");
+            String backupFilePath = scanner.nextLine();
+            File backupFile = new File(backupFilePath);
+            articleManager.backupArticles(backupFile);
+            
+            
+            System.out.println("Articles backed up successfully to " + backupFilePath + ".");
+        } catch (Exception e) {
+            System.out.println("An error occurred while backing up the articles.");
+            e.printStackTrace();
+        }
     }
 
     // RESTORE ARTICLES
     private static void restoreArticles() {
-        System.out.println("Restore articles functionality is not implemented yet.");
-        // You can implement this method to restore articles from a backup file.
+    	try {
+            System.out.print("Enter the path for the backup file to restore: ");
+            
+            String backupFilePath = scanner.nextLine();
+            File backupFile = new File(backupFilePath);
+            articleManager.restoreArticles(backupFile);
+
+            System.out.println("Articles restored successfully from " + backupFilePath + ".");
+        } catch (Exception e) {
+            System.out.println("An error occurred while restoring the articles.");
+            e.printStackTrace();
+        }
     }
 
     

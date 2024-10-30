@@ -3,6 +3,13 @@ package sendDesk360.model.database;
 import sendDesk360.model.Article;
 import sendDesk360.model.encryption.EncryptionHelper;
 import sendDesk360.model.encryption.EncryptionUtils;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -511,5 +518,95 @@ public class ArticleManager {
 
         // Add new related articles
         addRelatedArticles(article);
+    }
+    
+    public void restoreArticles(File backupFile) {
+    	String insertSQL = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+        try (BufferedReader reader = new BufferedReader(new FileReader(backupFile))) {
+            String line;
+            try (PreparedStatement pstmt = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
+                while ((line = reader.readLine()) != null) {
+                	
+                    String[] articleData = line.split(","); 
+                    if (articleData.length < 6) { // Ensure there are enough fields for the article
+                        System.out.println("Skipping invalid article data: " + line);
+                        continue;
+                    }
+
+                    // Create Article object and set values
+                    Article article = new Article();
+                    article.setUniqueID(Long.parseLong(articleData[0].trim()));
+                    article.setTitle(articleData[1].trim());
+                    article.setShortDescription(articleData[2].trim());
+                    article.setDifficulty(articleData[3].trim());
+                    article.setBody(articleData[4].trim());
+
+                    // Encrypt fields and generate random IVs
+                    byte[] titleIV = EncryptionUtils.generateRandomIV();
+                    String encryptedTitle = encryptField(article.getTitle(), titleIV);
+                    String titleIVBase64 = Base64.getEncoder().encodeToString(titleIV);
+
+                    byte[] shortDescIV = EncryptionUtils.generateRandomIV();
+                    String encryptedShortDesc = encryptField(article.getShortDescription(), shortDescIV);
+                    String shortDescIVBase64 = Base64.getEncoder().encodeToString(shortDescIV);
+
+                    byte[] bodyIV = EncryptionUtils.generateRandomIV();
+                    String encryptedBody = encryptField(article.getBody(), bodyIV);
+                    String bodyIVBase64 = Base64.getEncoder().encodeToString(bodyIV);
+
+                    // Set parameters for the SQL statement
+                    pstmt.setLong(1, article.getUniqueID());
+                    pstmt.setString(2, encryptedTitle);
+                    pstmt.setString(3, titleIVBase64);
+                    pstmt.setString(4, encryptedShortDesc);
+                    pstmt.setString(5, shortDescIVBase64);
+                    pstmt.setString(6, article.getDifficulty());
+                    pstmt.setString(7, encryptedBody);
+                    pstmt.setString(8, bodyIVBase64);
+
+                    // Execute the insert
+                    pstmt.executeUpdate();
+
+                    // Get the generated keys if necessary
+                    ResultSet keys = pstmt.getGeneratedKeys();
+                    if (keys.next()) {
+                        long articleID = keys.getLong(1);
+                        article.setArticleID(articleID);
+                        
+                        addKeywords(article);
+                        addReferences(article);
+                        addRelatedArticles(article);
+                    }
+                }
+                System.out.println("Articles restored successfully from " + backupFile.getAbsolutePath());
+            }
+        } catch (Exception e ) {
+            System.out.println("Error reading the backup file: " + e.getMessage());
+        } 
+    }
+    
+    public void backupArticles(File restoreFile) {
+    	try {
+            List<Article> articles = getAllArticles(); // Fetch all articles
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(restoreFile))) {
+                for (Article article : articles) {
+                    StringBuilder articleData = new StringBuilder();
+                    articleData.append(article.getUniqueID()).append(",")
+                               .append(article.getTitle()).append(",")
+                               .append(article.getShortDescription()).append(",")
+                               .append(article.getDifficulty()).append(",")
+                               .append(article.getBody());
+                    
+                    writer.write(articleData.toString());
+                    writer.newLine(); // Write a new line after each article
+                }
+                System.out.println("Articles backed up successfully to " + restoreFile.getAbsolutePath());
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to the backup file: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error fetching articles for backup: " + e.getMessage());
+        }
     }
 }
