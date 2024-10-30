@@ -1,18 +1,29 @@
 package sendDesk360;
 
 import javafx.application.Application;
-import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+// VIEWS
 import sendDesk360.view.DashboardView;
 import sendDesk360.view.LoginView;
 import sendDesk360.view.TestPage;
 import sendDesk360.view.SignUpView;
 import sendDesk360.view.OneTimeCodeView;
+import sendDesk360.view.ArticleDetailView;
+
+// VIEW MODELS
 import sendDesk360.viewModel.SignUpViewModel;
 import sendDesk360.viewModel.LoginViewModel;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
+import sendDesk360.viewModel.ArticleViewModel;
+
+
+// MODELS
+import sendDesk360.model.Article;
 import sendDesk360.model.User;
+import sendDesk360.model.database.ArticleManager;
 import sendDesk360.model.database.DatabaseManager;
 import sendDesk360.model.database.UserManager;
 
@@ -21,12 +32,16 @@ public class SendDesk360 extends Application {
     private Stage primaryStage;
     private Scene scene;
     private SignUpViewModel signUpViewModel;
-    private DatabaseManager dbManager;
+    private DatabaseManager dbManager;  // DatabaseManager instance
     private UserManager userManager;
+    private ArticleManager articleManager;
+    private User currentUser;
 
     @Override
     public void start(Stage stage) {
         this.primaryStage = stage;
+        
+        // Ensure the database is initialized before anything else
         initializeDatabase();
         initializeViewModel();
         initializeScene();
@@ -35,23 +50,51 @@ public class SendDesk360 extends Application {
         primaryStage.setTitle("Send Desk 360");
         primaryStage.show();
 
-        // Show the initial login page
-        showLoginView();
-        printAllUsers();
-        
-        // showTestView();
+        showLoginView();  // Start with login view
     }
 
     // Initialize DatabaseManager and UserManager
-    private void initializeDatabase() {
-        try {
-            dbManager = new DatabaseManager();
-            userManager = new UserManager(dbManager);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Handle exception appropriately
-        }
+
+	private void initializeDatabase() {
+	    try {
+	        dbManager = new DatabaseManager();  // Initialize DatabaseManager
+	        userManager = new UserManager(dbManager);  // Initialize UserManager
+	        articleManager = new ArticleManager(dbManager);  // Initialize ArticleManager
+	
+	        // Debugging: Ensure ArticleManager is initialized
+	        System.out.println("ArticleManager initialized: " + (articleManager != null));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	
+	
+	// DATA
+	public User getCurrentUser() {
+		
+		return currentUser;
+	}
+	
+	// DATA MANAGERS
+	
+	// Getter for ArticleManager
+	public ArticleManager getArticleManager() {
+	    return articleManager;
+	}
+
+	// Getter for UserManager
+	public UserManager getUserManager() {
+	    return userManager;
+	}
+
+    // Add a getter for the DatabaseManager
+    public DatabaseManager getDatabaseManager() {
+        return dbManager;
     }
+    
+    
+    
 
     // Initialize the SignUpViewModel with a new User and UserManager
     private void initializeViewModel() {
@@ -78,7 +121,6 @@ public class SendDesk360 extends Application {
     }
 
     public void showSignUpView() {
-        // Re-initialize the SignUpViewModel for a new user
         this.signUpViewModel = new SignUpViewModel(this, new User(), userManager);
         SignUpView signUpView = new SignUpView(signUpViewModel);
         scene.setRoot(signUpView);
@@ -99,6 +141,23 @@ public class SendDesk360 extends Application {
         TestPage testView = new TestPage();
         scene.setRoot(testView);
     }
+    
+    public void showArticleDetailView(Article article) {
+        // Ensure the current user is available and userManager is properly initialized
+        User currentUser = userManager.getCurrentUser();
+        if (currentUser == null) {
+            System.out.println("Error: No current user found. Redirecting to login.");
+            showLoginView();
+            return;
+        }
+
+        // Create the ArticleViewModel and ArticleDetailView
+        ArticleViewModel viewModel = new ArticleViewModel(article, currentUser, articleManager);
+        ArticleDetailView articleDetailView = new ArticleDetailView(viewModel, this);
+
+        // Set the article detail view as the root of the existing scene
+        scene.setRoot(articleDetailView);
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -107,7 +166,6 @@ public class SendDesk360 extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        // Close database connections when the application stops
         if (dbManager != null) {
             dbManager.close();
             System.out.println("Database connection closed.");

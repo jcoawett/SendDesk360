@@ -60,7 +60,7 @@ public class SignUpView extends VBox {
         // Field Wrapper
         fieldWrapper = new VBox();
         fieldWrapper.setAlignment(Pos.CENTER);
-        fieldWrapper.setSpacing(16);
+        fieldWrapper.setSpacing(8);
 
         // Buttons
         continueButton = new PrimaryButton(PrimaryButton.ButtonVariant.FILLED, "Continue", event -> {

@@ -2,6 +2,7 @@ package sendDesk360.viewModel;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import sendDesk360.model.User;
 import sendDesk360.SendDesk360;
 import sendDesk360.model.database.UserManager;
 
@@ -54,6 +55,7 @@ public class LoginViewModel {
     // Method to handle login logic
     public boolean login() {
         loginError.set("");
+
         if (getUsername().isEmpty() || getPassword().isEmpty()) {
             loginError.set("Username and password cannot be empty.");
             return false;
@@ -62,8 +64,10 @@ public class LoginViewModel {
         try {
             boolean isAuthenticated = userManager.authenticateUser(getUsername(), getPassword());
             if (isAuthenticated) {
-                // Proceed to dashboard or next view
+                User authenticatedUser = userManager.getUserByUsername(getUsername());
+                userManager.setCurrentUser(authenticatedUser);
                 mainApp.showDashboard();
+                
                 return true;
             } else {
                 loginError.set("Authentication failed. Invalid username or password.");
