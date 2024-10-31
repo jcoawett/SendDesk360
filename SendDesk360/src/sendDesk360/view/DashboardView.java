@@ -1,16 +1,22 @@
 package sendDesk360.view;
 
 import sendDesk360.SendDesk360;
+import sendDesk360.model.Article;
 import sendDesk360.view.components.NavBar;
+import sendDesk360.view.components.PrimaryButton;
 import sendDesk360.view.components.ArticleGroupDropdown;
 import sendDesk360.view.components.ArticleGroupDropdown.ArticleDropdownVariant;
+import sendDesk360.view.components.PrimaryButton.ButtonVariant;
 import sendDesk360.view.components.ArticlePreviewCard;
+import sendDesk360.view.components.EditArticlePannel;
+import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.DashboardViewModel;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
@@ -19,21 +25,21 @@ public class DashboardView extends VBox {
 
     private final DashboardViewModel dashboardViewModel;
     private VBox articleList;
+    private PrimaryButton createNewArticle;
+    private EditArticlePannel editPannel;
 
-    // Constructor receiving the main app instance
     public DashboardView(SendDesk360 mainApp) {
         this.dashboardViewModel = new DashboardViewModel(
             mainApp, 
             mainApp.getArticleManager(), 
             mainApp.getUserManager()
         );
-        initializeUI(); // Setup UI
-        initializeArticleDropdowns(mainApp); // Populate dropdowns
+        initializeUI(mainApp);
+        initializeArticleDropdowns(mainApp);
     }
 
-    // Initialize the UI components
-    private void initializeUI() {
-        NavBar navBar = new NavBar(); // Left navigation bar
+    private void initializeUI(SendDesk360 mainApp) {
+        NavBar navBar = new NavBar();
         navBar.setAlignment(Pos.TOP_LEFT);
         VBox.setVgrow(navBar, Priority.ALWAYS);
         navBar.setMaxWidth(300);
@@ -42,35 +48,65 @@ public class DashboardView extends VBox {
         Label pageTitle = new Label("Dashboard");
         pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
 
-        // Article list container
         articleList = new VBox();
         articleList.setAlignment(Pos.TOP_LEFT);
-        articleList.setSpacing(0); // Spacing between dropdowns
-        HBox.setHgrow(articleList, Priority.ALWAYS); // Ensure it grows horizontally
+        articleList.setSpacing(0);
+        HBox.setHgrow(articleList, Priority.ALWAYS);
 
-        VBox pageTitleContainer = new VBox();
-        pageTitleContainer.getChildren().add(pageTitle);
+        HBox pageTitleContainer = new HBox(pageTitle);
         pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
-        pageTitleContainer.setSpacing(0);
         HBox.setHgrow(pageTitleContainer, Priority.ALWAYS);
+
+        if (dashboardViewModel.isAdmin()) {
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            
+            createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
+            pageTitleContainer.getChildren().addAll(spacer, createNewArticle);
+        }
         
-        // Page body container
+        pageTitleContainer.setAlignment(Pos.CENTER);
+
         VBox pageBody = new VBox(pageTitleContainer, articleList);
         pageBody.setAlignment(Pos.TOP_LEFT);
         HBox.setHgrow(pageBody, Priority.ALWAYS);
 
-        // Main page body (nav bar + page content)
         HBox mainPageBody = new HBox(navBar, pageBody);
         mainPageBody.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(mainPageBody, Priority.ALWAYS);
         VBox.setVgrow(mainPageBody, Priority.ALWAYS);
 
-        // Add everything to the root layout
         this.getChildren().add(mainPageBody);
         this.setStyle("-fx-background-color: #101011;");
     }
 
-    // Initialize article dropdowns and populate them dynamically
+    private void onArticleSaved(SendDesk360 mainApp, ArticleViewModel viewModel) {
+        // Close the edit panel
+        if (editPannel != null) {
+            HBox mainPageBody = (HBox) this.getChildren().get(0);
+            mainPageBody.getChildren().remove(editPannel);
+            editPannel = null;
+        }
+
+        try {
+            Article newArticle = viewModel.buildArticleFromProperties();
+            articleList.getChildren().clear();
+            initializeArticleDropdowns(mainApp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void openEditPanelForNewArticle(SendDesk360 mainApp) {
+        if (dashboardViewModel.isAdmin()) {
+            ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser());
+            viewModel.resetProperties();
+
+            editPannel = new EditArticlePannel(viewModel, () -> onArticleSaved(mainApp, viewModel));
+            HBox mainPageBody = (HBox) this.getChildren().get(0); 
+            mainPageBody.getChildren().add(editPannel);
+        }
+    }
 
     private void initializeArticleDropdowns(SendDesk360 mainApp) {
         try {
@@ -82,13 +118,10 @@ public class DashboardView extends VBox {
             e.printStackTrace();
         }
     }
-    
-    
 
-    // Create a dropdown for the specified difficulty level
     private ArticleGroupDropdown createDropdown(ArticleDropdownVariant variant, SendDesk360 mainApp) throws Exception {
         String difficulty = variant.name().toLowerCase();
-        List<sendDesk360.model.Article> articles = dashboardViewModel.getArticlesByDifficulty(difficulty);
+        List<Article> articles = dashboardViewModel.getArticlesByDifficulty(difficulty);
 
         List<ArticlePreviewCard> articleCards = articles.stream()
             .map(article -> new ArticlePreviewCard(article, mainApp))

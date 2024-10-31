@@ -77,7 +77,7 @@ public class UserManager {
                     if (keys.next()) {
                         long userID = keys.getLong(1);
                         user.setUserID(userID);
-                        addUserRoles(user);
+                        addUserRoles(user);  // Save roles to UserRoles table
                         System.out.println("User added successfully with ID: " + userID);
                     }
                 }

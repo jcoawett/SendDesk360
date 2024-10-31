@@ -35,7 +35,6 @@ public class SendDesk360 extends Application {
     private DatabaseManager dbManager;  // DatabaseManager instance
     private UserManager userManager;
     private ArticleManager articleManager;
-    private User currentUser;
 
     @Override
     public void start(Stage stage) {
@@ -69,12 +68,7 @@ public class SendDesk360 extends Application {
 	}
 	
 	
-	
-	// DATA
-	public User getCurrentUser() {
-		
-		return currentUser;
-	}
+
 	
 	// DATA MANAGERS
 	
@@ -143,7 +137,6 @@ public class SendDesk360 extends Application {
     }
     
     public void showArticleDetailView(Article article) {
-        // Ensure the current user is available and userManager is properly initialized
         User currentUser = userManager.getCurrentUser();
         if (currentUser == null) {
             System.out.println("Error: No current user found. Redirecting to login.");
@@ -151,14 +144,15 @@ public class SendDesk360 extends Application {
             return;
         }
 
-        // Create the ArticleViewModel and ArticleDetailView
-        ArticleViewModel viewModel = new ArticleViewModel(article, currentUser, articleManager);
+        // Create the ArticleViewModel, load the article, and set up the view
+        ArticleViewModel viewModel = new ArticleViewModel(articleManager, currentUser);
+        viewModel.loadArticle(article);  // Load article details here
         ArticleDetailView articleDetailView = new ArticleDetailView(viewModel, this);
 
         // Set the article detail view as the root of the existing scene
         scene.setRoot(articleDetailView);
     }
-
+    
     public static void main(String[] args) {
         launch(args);
     }

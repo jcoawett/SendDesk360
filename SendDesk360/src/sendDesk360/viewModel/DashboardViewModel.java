@@ -21,6 +21,7 @@ public class DashboardViewModel {
     private StringProperty newArticleDescription = new SimpleStringProperty("");
     private StringProperty newArticleBody = new SimpleStringProperty("");
     private StringProperty newArticleDifficulty = new SimpleStringProperty("beginner");
+    
 
     private StringProperty newUserEmail = new SimpleStringProperty("");
     private StringProperty newUserName = new SimpleStringProperty("");
@@ -131,6 +132,12 @@ public class DashboardViewModel {
     // Refresh the dashboard view
     public void refreshDashboard() {
         mainApp.showDashboard();
+    }
+    
+    public boolean isAdmin() {
+        User currentUser = userManager.getCurrentUser();
+        return currentUser.getRoles().stream()
+            .anyMatch(role -> role.getName().equalsIgnoreCase("admin"));
     }
 
     // Properties for article input binding
