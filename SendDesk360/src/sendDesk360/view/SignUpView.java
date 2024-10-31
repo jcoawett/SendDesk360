@@ -180,6 +180,7 @@ public class SignUpView extends VBox {
                     if (signUpViewModel.completeSignUp()) { // Call completeSignUp and check result
                         System.out.println("User successfully created, navigating to dashboard."); // DEBUG
                         signUpViewModel.proceedToDashboard(); // Proceed only if successful
+                        
                     } else {
                         System.out.println("User creation failed. Stay on the same page."); // DEBUG
                     }

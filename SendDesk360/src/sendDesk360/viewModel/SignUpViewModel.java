@@ -208,10 +208,6 @@ public class SignUpViewModel {
         boolean validInput = false;
 
         try {
-
-            // Add the user to the database
-            userManager.addUser(user);
-
             // Set default values for the user
             user.setFlag(false);
             user.setExpireTime(System.currentTimeMillis() + (60000 * 60 * 24)); // 24 hours expiration
@@ -220,18 +216,24 @@ public class SignUpViewModel {
             if (userManager.isFirstUser()) {
                 Vector<Role> roles = new Vector<>();
                 Role adminRole = new Role();
-                adminRole.setName("admin");
-                adminRole.setPrivilege(1); // Set admin privilege
+                adminRole.setName("admin");  // Set admin role name
+                adminRole.setPrivilege(1);   // Set admin privilege
                 roles.add(adminRole);
-                user.setRoles(roles);
+                user.setRoles(roles);  // Set roles to user BEFORE saving
             } else {
                 Vector<Role> roles = new Vector<>();
                 Role userRole = new Role();
                 userRole.setName("user");
-                userRole.setPrivilege(0); // Set normal user privilege
+                userRole.setPrivilege(0);  // Set normal user privilege
                 roles.add(userRole);
                 user.setRoles(roles);
             }
+
+            // Now add the user to the database with the correct roles
+            userManager.addUser(user);
+
+            // Set the current user as this newly created user
+            userManager.setCurrentUser(user);
 
             // If everything is successful, mark input as valid
             validInput = true;

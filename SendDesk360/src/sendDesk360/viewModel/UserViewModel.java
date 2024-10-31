@@ -16,6 +16,7 @@ public class UserViewModel {
     private BooleanProperty flag = new SimpleBooleanProperty();
     private LongProperty expireTime = new SimpleLongProperty();
     private ObservableList<Role> roles = FXCollections.observableArrayList();
+    private User currentUser;
 
 
     // FullName properties
@@ -186,6 +187,11 @@ public class UserViewModel {
     public BooleanProperty flagProperty() {
         return flag;
     }
+    
+	public User getCurrentUser() {
+		
+		return currentUser;
+	}
 
     public boolean isFlag() {
         return flag.get();

@@ -140,11 +140,11 @@ public class DatabaseManager {
 
         // RELATED ARTICLES
         String createRelatedArticlesTable = "CREATE TABLE IF NOT EXISTS RelatedArticles ("
-                + "articleID BIGINT NOT NULL, "
-                + "relatedArticleID BIGINT NOT NULL, "
-                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE, "
-                + "FOREIGN KEY (relatedArticleID) REFERENCES Articles(articleID)"
-                + ");";
+        		+ "articleID BIGINT NOT NULL,"
+        		+ "relatedArticleID BIGINT NOT NULL,"
+        		+ "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE,"
+        		+ "FOREIGN KEY (relatedArticleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
+        		+ ");";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createUsersTable);

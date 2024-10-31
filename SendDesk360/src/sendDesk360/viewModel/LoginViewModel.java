@@ -65,9 +65,8 @@ public class LoginViewModel {
             boolean isAuthenticated = userManager.authenticateUser(getUsername(), getPassword());
             if (isAuthenticated) {
                 User authenticatedUser = userManager.getUserByUsername(getUsername());
-                userManager.setCurrentUser(authenticatedUser);
-                mainApp.showDashboard();
-                
+                userManager.setCurrentUser(authenticatedUser);  // Set the current user
+                mainApp.showDashboard();  // Navigate to dashboard
                 return true;
             } else {
                 loginError.set("Authentication failed. Invalid username or password.");

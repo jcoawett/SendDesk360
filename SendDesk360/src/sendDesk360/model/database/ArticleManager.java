@@ -214,9 +214,34 @@ public class ArticleManager {
      * @param  articleID  Article ID for the article to delete 
      * @throws SQLException if there is an error deleting the article from the SQLdatabase 
      */
+    
+    
     public void deleteArticle(long articleID) throws SQLException {
-        String sql = "DELETE FROM Articles WHERE articleID = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        // Delete keywords associated with the article
+        String deleteKeywordsSql = "DELETE FROM Keywords WHERE articleID = ?;";
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteKeywordsSql)) {
+            pstmt.setLong(1, articleID);
+            pstmt.executeUpdate();
+        }
+
+        // Delete references associated with the article
+        String deleteReferencesSql = "DELETE FROM References WHERE articleID = ?;";
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteReferencesSql)) {
+            pstmt.setLong(1, articleID);
+            pstmt.executeUpdate();
+        }
+
+        // Delete any related articles referencing this article
+        String deleteRelatedSql = "DELETE FROM RelatedArticles WHERE articleID = ? OR relatedArticleID = ?;";
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteRelatedSql)) {
+            pstmt.setLong(1, articleID);
+            pstmt.setLong(2, articleID);
+            pstmt.executeUpdate();
+        }
+
+        // Finally, delete the article itself
+        String deleteArticleSql = "DELETE FROM Articles WHERE articleID = ?;";
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteArticleSql)) {
             pstmt.setLong(1, articleID);
             pstmt.executeUpdate();
         }
