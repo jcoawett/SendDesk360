@@ -96,9 +96,8 @@ public class ArticleManager {
                    + "difficulty = ?, "
                    + "body = ?, body_iv = ? "
                    + "WHERE articleID = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setLong(1, article.getUniqueID());
-
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            
             // Encrypt fields and generate random IVs
             byte[] titleIV = EncryptionUtils.generateRandomIV();
             String encryptedTitle = encryptField(article.getTitle(), titleIV);
@@ -112,27 +111,21 @@ public class ArticleManager {
             String encryptedBody = encryptField(article.getBody(), bodyIV);
             String bodyIVBase64 = Base64.getEncoder().encodeToString(bodyIV);
 
-            pstmt.setString(2, encryptedTitle);
-            pstmt.setString(3, titleIVBase64);
-            pstmt.setString(4, encryptedShortDesc);
-            pstmt.setString(5, shortDescIVBase64);
-            pstmt.setString(6, article.getDifficulty());
-            pstmt.setString(7, encryptedBody);
-            pstmt.setString(8, bodyIVBase64);
+            // Set parameters in SQL statement as strings
+            pstmt.setString(1, encryptedTitle);
+            pstmt.setString(2, titleIVBase64);
+            pstmt.setString(3, encryptedShortDesc);
+            pstmt.setString(4, shortDescIVBase64);
+            pstmt.setString(5, article.getDifficulty());
+            pstmt.setString(6, encryptedBody);
+            pstmt.setString(7, bodyIVBase64);
+            pstmt.setLong(8, article.getArticleID());
 
             pstmt.executeUpdate();
 
-            ResultSet keys = pstmt.getGeneratedKeys();
-            if (keys.next()) {
-                long articleID = keys.getLong(1);
-                article.setArticleID(articleID);
-                addKeywords(article);
-                addReferences(article);
-                addRelatedArticles(article);
-            }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new Exception("Error adding article to database", e);
+            throw new Exception("Error updating article in database", e);
         }
     }
 

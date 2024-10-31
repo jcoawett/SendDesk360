@@ -31,11 +31,19 @@
 /* NAV-BAR */
 /* ----------------------- */
 .navbar {
-	-fx-border-width: 0px 1px 0px 1px;
+	-fx-border-width: 0 0 0 1px;
 	-fx-background-color: #080808;
 	-fx-padding: 24px 16px 24px 16px; /* top, right, bottom, left */
 }
 /* ----------------------- */
+
+
+/* EDIT-ARTICLE-BAR */
+.edit-pannel {
+	-fx-border-width: 0 1px 0 0;
+	-fx-background-color: #17181A;
+	-fx-padding: 24px 16px 24px 16px;
+}
 
 /* BUTTONS */
 /* ----------------------- */

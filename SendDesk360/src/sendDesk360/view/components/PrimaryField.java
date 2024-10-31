@@ -59,7 +59,7 @@ public class PrimaryField extends VBox {
         getChildren().add(errorLabel);
 
         fieldComponent.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.isEmpty()) {
+            if (newValue != null && !newValue.isEmpty()) {  // Check for null before using isEmpty
                 hasText = true;
                 fieldComponent.getStyleClass().add("edited");  
             } else {

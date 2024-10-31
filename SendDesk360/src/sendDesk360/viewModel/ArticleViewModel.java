@@ -39,9 +39,11 @@ public class ArticleViewModel {
         shortDescription.set(article.getShortDescription());
         difficulty.set(article.getDifficulty());
         body.set(article.getBody());
-        keywords.setAll(article.getKeywords());
-        referenceLinks.setAll(article.getReferenceLinks());
-        relatedArticleIDs.setAll(article.getRelatedArticleIDs());
+
+        // Ensure collections are initialized with non-null lists
+        keywords.setAll(article.getKeywords() != null ? article.getKeywords() : new ArrayList<>());
+        referenceLinks.setAll(article.getReferenceLinks() != null ? article.getReferenceLinks() : new ArrayList<>());
+        relatedArticleIDs.setAll(article.getRelatedArticleIDs() != null ? article.getRelatedArticleIDs() : new ArrayList<>());
 
         // Debugging output to confirm article data
         System.out.println("Loaded Article Title: " + title.get());
@@ -82,9 +84,26 @@ public class ArticleViewModel {
             throw new IllegalAccessException("Only admins can perform this action.");
         }
     }
+    
+    
+    
+    // RESET PROPERTIES
+    public void resetProperties() {
+        articleID.set(0L);
+        uniqueID.set(0L);
+        title.set("");
+        shortDescription.set("");
+        difficulty.set("");
+        body.set("");
+        
+        // Clear each list property safely
+        keywords.clear();
+        referenceLinks.clear();
+        relatedArticleIDs.clear();
+    }
 
     // Helper method to build an Article object from the view model properties
-    private Article buildArticleFromProperties() {
+    public Article buildArticleFromProperties() {
         Article article = new Article();
         article.setUniqueID(uniqueID.get());
         article.setTitle(title.get());
@@ -97,14 +116,52 @@ public class ArticleViewModel {
         return article;
     }
 
-    // Property getters for UI binding
-    public LongProperty articleIDProperty() { return articleID; }
-    public LongProperty uniqueIDProperty() { return uniqueID; }
-    public StringProperty titleProperty() { return title; }
-    public StringProperty shortDescriptionProperty() { return shortDescription; }
-    public StringProperty difficultyProperty() { return difficulty; }
-    public StringProperty bodyProperty() { return body; }
-    public ListProperty<String> keywordsProperty() { return keywords; }
-    public ListProperty<String> referenceLinksProperty() { return referenceLinks; }
-    public ListProperty<Long> relatedArticleIDsProperty() { return relatedArticleIDs; }
+    
+    // SETTERS
+    public LongProperty articleIDProperty() { 
+        articleID.addListener((obs, oldVal, newVal) -> System.out.println("Article ID updated: " + newVal));
+        return articleID; 
+    }
+
+    public LongProperty uniqueIDProperty() { 
+        uniqueID.addListener((obs, oldVal, newVal) -> System.out.println("Unique ID updated: " + newVal));
+        return uniqueID; 
+    }
+
+    public StringProperty titleProperty() { 
+        title.addListener((obs, oldVal, newVal) -> System.out.println("Title updated: " + newVal));
+        return title; 
+    }
+
+    public StringProperty shortDescriptionProperty() { 
+        shortDescription.addListener((obs, oldVal, newVal) -> System.out.println("Short Description updated: " + newVal));
+        return shortDescription; 
+    }
+
+    public StringProperty difficultyProperty() { 
+        difficulty.addListener((obs, oldVal, newVal) -> System.out.println("Difficulty updated: " + newVal));
+        return difficulty; 
+    }
+
+    public StringProperty bodyProperty() { 
+        body.addListener((obs, oldVal, newVal) -> System.out.println("Body updated: " + newVal));
+        return body; 
+    }
+
+    public ListProperty<String> keywordsProperty() { 
+        keywords.addListener((obs, oldVal, newVal) -> System.out.println("Keywords updated: " + newVal));
+        return keywords; 
+    }
+
+    public ListProperty<String> referenceLinksProperty() { 
+        referenceLinks.addListener((obs, oldVal, newVal) -> System.out.println("Reference Links updated: " + newVal));
+        return referenceLinks; 
+    }
+
+    public ListProperty<Long> relatedArticleIDsProperty() { 
+        relatedArticleIDs.addListener((obs, oldVal, newVal) -> System.out.println("Related Article IDs updated: " + newVal));
+        return relatedArticleIDs; 
+    }
+    
+    
 }
