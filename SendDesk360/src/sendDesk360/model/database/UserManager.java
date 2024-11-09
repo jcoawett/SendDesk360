@@ -236,7 +236,14 @@ public class UserManager {
                     String decryptedStoredPassword = decryptPassword(encryptedStoredPassword, passwordIVBase64);
 
                     // Compare passwords
-                    return password.equals(decryptedStoredPassword);
+                    boolean success =  password.equals(decryptedStoredPassword);
+                    if (!success) {
+                    	System.out.println("Password: " + password + " did not match stored password: " + decryptedStoredPassword);
+                    }
+                    else {return success;} 
+                }
+                else {
+                	System.out.println("No users with the given username found, are we sure it's in the database?"); 
                 }
             }
         } catch (SQLException e) {

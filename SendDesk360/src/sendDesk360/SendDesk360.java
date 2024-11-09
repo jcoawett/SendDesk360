@@ -12,12 +12,14 @@ import sendDesk360.view.TestPage;
 import sendDesk360.view.SignUpView;
 import sendDesk360.view.OneTimeCodeView;
 import sendDesk360.view.ArticleDetailView;
+import sendDesk360.view.RoleDropdownView; 
 
 // VIEW MODELS
 import sendDesk360.viewModel.SignUpViewModel;
 import sendDesk360.viewModel.LoginViewModel;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
 import sendDesk360.viewModel.ArticleViewModel;
+import sendDesk360.viewModel.RoleDropdownViewModel; 
 
 
 // MODELS
@@ -129,6 +131,12 @@ public class SendDesk360 extends Application {
     public void showDashboard() {
         DashboardView dashboardView = new DashboardView(this);
         scene.setRoot(dashboardView);
+    }
+    
+    public void showRoleDropdownView() {
+    	RoleDropdownViewModel roleDropdownViewModel = new RoleDropdownViewModel(this, new User(), userManager); 
+    	RoleDropdownView roleDropdownView = new RoleDropdownView(roleDropdownViewModel);
+    	scene.setRoot(roleDropdownView);
     }
 
     public void showTestView() {

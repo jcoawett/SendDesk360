@@ -3,6 +3,7 @@ package sendDesk360.viewModel;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import sendDesk360.model.User;
+import sendDesk360.model.User.Role;
 import sendDesk360.SendDesk360;
 import sendDesk360.model.database.UserManager;
 
@@ -64,9 +65,15 @@ public class LoginViewModel {
         try {
             boolean isAuthenticated = userManager.authenticateUser(getUsername(), getPassword());
             if (isAuthenticated) {
+            	System.out.println("Authenticated Username: " + getUsername() + "password: " + getPassword()); 
+            }
+            else {
+            	System.out.println("Failed to authenticated Username: " + getUsername() + "password: " + getPassword()); 
+            }
+            if (isAuthenticated) {
                 User authenticatedUser = userManager.getUserByUsername(getUsername());
                 userManager.setCurrentUser(authenticatedUser);  // Set the current user
-                mainApp.showDashboard();  // Navigate to dashboard
+                mainApp.showRoleDropdownView();  // Navigate to RoleSelection
                 return true;
             } else {
                 loginError.set("Authentication failed. Invalid username or password.");

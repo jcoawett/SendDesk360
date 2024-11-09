@@ -61,13 +61,18 @@ public class ArticleGroupDropdown extends VBox {
 
     // Set the text based on the difficulty variant
     private String setDiffLabelText(ArticleDropdownVariant variant) {
-        return switch (variant) {
-            case BEGINNER -> "Beginner";
-            case INTERMEDIATE -> "Intermediate";
-            case ADVANCED -> "Advanced";
-            case EXPERT -> "Expert";
-            default -> "Unknown";
-        };
+    	 switch (variant) {
+         case BEGINNER:
+             return "Beginner";
+         case INTERMEDIATE:
+             return "Intermediate";
+         case ADVANCED:
+             return "Advanced";
+         case EXPERT:
+             return "Expert";
+         default:
+             return "Unknown";
+    	 }
     }
 
     // Return the SVGPath based on the difficulty variant

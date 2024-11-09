@@ -231,6 +231,7 @@ public class SignUpViewModel {
 
             // Now add the user to the database with the correct roles
             userManager.addUser(user);
+            System.out.println("User was added into the database"); 
 
             // Set the current user as this newly created user
             userManager.setCurrentUser(user);
