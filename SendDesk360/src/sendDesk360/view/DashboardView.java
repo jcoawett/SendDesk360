@@ -9,6 +9,7 @@ import sendDesk360.view.components.ArticleGroupDropdown.ArticleDropdownVariant;
 import sendDesk360.view.components.PrimaryButton.ButtonVariant;
 import sendDesk360.view.components.ArticlePreviewCard;
 import sendDesk360.view.components.EditArticlePannel;
+import sendDesk360.view.components.EditGroupPannel;
 import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.DashboardViewModel;
 
@@ -26,7 +27,9 @@ public class DashboardView extends VBox {
     private final DashboardViewModel dashboardViewModel;
     private VBox articleList;
     private PrimaryButton createNewArticle;
+    private PrimaryButton addNewArticleGroup; 
     private EditArticlePannel editPannel;
+    private EditGroupPannel editGroupPannel; 
 
     public DashboardView(SendDesk360 mainApp) {
         this.dashboardViewModel = new DashboardViewModel(
@@ -58,11 +61,17 @@ public class DashboardView extends VBox {
         HBox.setHgrow(pageTitleContainer, Priority.ALWAYS);
 
         if (dashboardViewModel.isAdmin()) {
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            
-            createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
-            pageTitleContainer.getChildren().addAll(spacer, createNewArticle);
+        	 Region spacer = new Region();
+        	 HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        	 createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
+        	  addNewArticleGroup = new PrimaryButton(ButtonVariant.ACCENT, "New Grouping", event -> openEditPanelForNewGrouping(mainApp));
+
+        	  // Set spacing and alignment for better layout
+        	  pageTitleContainer.setSpacing(10); 
+        	  pageTitleContainer.setAlignment(Pos.CENTER_RIGHT);  // Align items to the left
+
+        	  pageTitleContainer.getChildren().addAll(spacer, createNewArticle, addNewArticleGroup);
         }
         
         pageTitleContainer.setAlignment(Pos.CENTER);
@@ -97,8 +106,24 @@ public class DashboardView extends VBox {
         }
     }
     
+    private void onGroupSaved(SendDesk360 mainApp, ArticleViewModel viewModel) {
+    	System.out.println("On Group Saved Called");
+    	if (editGroupPannel != null) {
+    		 HBox mainPageBody = (HBox) this.getChildren().get(0);
+             mainPageBody.getChildren().remove(editGroupPannel);
+             editGroupPannel = null;
+    	}
+    	
+    	try {
+    		articleList.getChildren().clear(); 
+    		initializeArticleDropdowns(mainApp);
+    	} catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     private void openEditPanelForNewArticle(SendDesk360 mainApp) {
-        if (dashboardViewModel.isAdmin()) {
+        if (dashboardViewModel.isAdmin()) { //TODO: create dashboardViewModel.isInstructor() 
             ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser());
             viewModel.resetProperties();
 
@@ -108,6 +133,16 @@ public class DashboardView extends VBox {
         }
     }
 
+    private void openEditPanelForNewGrouping(SendDesk360 mainApp) {
+    	if (dashboardViewModel.isAdmin()) {
+    		ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser()); 
+    		viewModel.resetProperties(); 
+    		
+    		editGroupPannel = new EditGroupPannel(viewModel, () -> onGroupSaved(mainApp, viewModel)); 
+    		HBox mainPageBody = (HBox) this.getChildren().get(0); 
+            mainPageBody.getChildren().add(editGroupPannel);
+    	}
+    }
     private void initializeArticleDropdowns(SendDesk360 mainApp) {
         try {
             articleList.getChildren().add(createDropdown(ArticleDropdownVariant.BEGINNER, mainApp));

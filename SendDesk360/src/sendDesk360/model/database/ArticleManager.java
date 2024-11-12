@@ -590,17 +590,24 @@ public class ArticleManager {
     }
     
     public void addArticleToGroup(long articleID, long groupID) throws SQLException {
-    	 String sql = "INSERT INTO ArticleGroups (articleID, groupID) VALUES (?, ?) "
-                 + "ON DUPLICATE KEY UPDATE articleID = articleID";  // Ensures no duplicate entries
-
-      try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-          stmt.setLong(1, articleID);
-          stmt.setLong(2, groupID);
-          stmt.executeUpdate();
-      } catch (SQLException e) {
-          e.printStackTrace();
-          throw new SQLException("Failed to add article to group", e);
-      }
+    	// Check if the entry already exists
+        String checkSql = "SELECT COUNT(*) FROM ArticleGroups WHERE articleID = ? AND groupID = ?";
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+            checkStmt.setLong(1, articleID);
+            checkStmt.setLong(2, groupID);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) == 0) {  // If no existing record is found, proceed with insert
+                String insertSql = "INSERT INTO ArticleGroups (articleID, groupID) VALUES (?, ?)";
+                try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+                    insertStmt.setLong(1, articleID);
+                    insertStmt.setLong(2, groupID);
+                    insertStmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to add article to group", e);
+        }
     }
     
     public void removeArticleFromGroup(long articleID, long groupID) throws SQLException {

@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import sendDesk360.model.Group;
 import sendDesk360.viewModel.ArticleViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EditArticlePannel extends VBox {
@@ -25,6 +26,9 @@ public class EditArticlePannel extends VBox {
 
     private final Runnable onSaveCallback;
     private VBox groupCheckboxContainer;
+    
+    private List<Group> groupsToAddArticleTo = new ArrayList<Group>();
+    private List<Group> groupsToRemoveArticleFrom = new ArrayList<Group>(); 
 
     public EditArticlePannel(ArticleViewModel viewModel, Runnable onSaveCallback) {
         this.onSaveCallback = onSaveCallback;
@@ -75,9 +79,11 @@ public class EditArticlePannel extends VBox {
             // Add listener to handle adding/removing article from group
             groupCheckBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
                 if (isSelected) {
-                    viewModel.addArticleToGroup(group.getGroupID());
+                	System.out.println("Adding group: " + group.getName() + " to the list of groups to add this article to"); 
+                	groupsToAddArticleTo.add(group); 
                 } else {
-                    viewModel.removeArticleFromGroup(group.getGroupID());
+                	System.out.println("Adding group: " + group.getName() + " to the list of groups to remove this article from"); 
+                	groupsToRemoveArticleFrom.add(group); 
                 }
             });
 
@@ -93,6 +99,17 @@ public class EditArticlePannel extends VBox {
                 } else {
                     viewModel.updateArticle();  // Update existing article
                 }
+                
+                for (Group group : groupsToAddArticleTo) {
+                	viewModel.addArticleToGroup(group.getGroupID()); 
+                }
+                
+                for (Group group: groupsToRemoveArticleFrom) {
+                	viewModel.removeArticleFromGroup(group.getGroupID()); 
+                }
+                
+                groupsToAddArticleTo.clear(); 
+                groupsToRemoveArticleFrom.clear(); 
                 
                 // Invoke the callback to notify DashboardView that the article was saved
                 onSaveCallback.run();

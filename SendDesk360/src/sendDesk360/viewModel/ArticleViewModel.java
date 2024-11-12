@@ -162,6 +162,15 @@ public class ArticleViewModel {
 		}
     }
     
+    public void addNewGroup(String Groupname) {
+    	try {
+			articleManager.addGroup(Groupname);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     // SETTERS
     public LongProperty articleIDProperty() { 
         articleID.addListener((obs, oldVal, newVal) -> System.out.println("Article ID updated: " + newVal));
