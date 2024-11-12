@@ -3,11 +3,14 @@ package sendDesk360.viewModel;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import sendDesk360.model.Article;
+import sendDesk360.model.Group;
 import sendDesk360.model.User;
 import sendDesk360.model.database.ArticleManager;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ArticleViewModel {
 
@@ -52,6 +55,7 @@ public class ArticleViewModel {
 
     // Create a new article
     public void saveNewArticle() throws Exception {
+    	System.out.println("saveNewArticle Called");
         validateAdminAccess();
         Article newArticle = buildArticleFromProperties();
         articleManager.addArticle(newArticle);
@@ -105,7 +109,11 @@ public class ArticleViewModel {
     // Helper method to build an Article object from the view model properties
     public Article buildArticleFromProperties() {
         Article article = new Article();
-        article.setUniqueID(uniqueID.get());
+        
+        //generate a unique incremented ID
+        long generatedUniqueID = Math.abs(UUID.randomUUID().getMostSignificantBits());
+        
+        article.setUniqueID(generatedUniqueID);
         article.setTitle(title.get());
         article.setShortDescription(shortDescription.get());
         article.setDifficulty(difficulty.get());
@@ -116,6 +124,43 @@ public class ArticleViewModel {
         return article;
     }
 
+    public List<Group> getAvailableGroups(){
+    	try {
+			return articleManager.getAllGroups();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return null; 
+    }
+    
+    public boolean isArticleInGroup(long groupID){
+    	try {
+			return articleManager.isArticleInGroup(articleIDProperty().get(), groupID);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return false;
+    }
+    
+    public void addArticleToGroup(long groupID) {
+    	try {
+			articleManager.addArticleToGroup(articleIDProperty().get(), groupID);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void removeArticleFromGroup(long groupID) {
+    	try {
+			articleManager.removeArticleFromGroup(articleIDProperty().get(), groupID);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
     
     // SETTERS
     public LongProperty articleIDProperty() { 

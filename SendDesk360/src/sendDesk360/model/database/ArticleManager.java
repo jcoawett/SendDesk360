@@ -1,6 +1,7 @@
 package sendDesk360.model.database;
 
 import sendDesk360.model.Article;
+import sendDesk360.model.Group;
 import sendDesk360.model.encryption.EncryptionHelper;
 import sendDesk360.model.encryption.EncryptionUtils;
 
@@ -47,6 +48,7 @@ public class ArticleManager {
      * @throws Exception if adding the article fails 
      */
     public void addArticle(Article article) throws Exception {
+    	System.out.println("Attempting to add article " + article.getTitle() + " " + article.getDifficulty() + " " + article.getBody() + " " + article.getShortDescription()); 
         String sql = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setLong(1, article.getUniqueID());
@@ -82,6 +84,12 @@ public class ArticleManager {
                 addReferences(article);
                 addRelatedArticles(article);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error adding article to database", e);
+        } catch (Exception e) {
+            //e.printStackTrace();
+            throw new Exception("Unexpected error occurred while adding article", e);
         }
     }
 
@@ -417,6 +425,29 @@ public class ArticleManager {
             throw new Exception("Error fetching article by ID", e);
         }
     }
+    
+    public Article getArticleByTitle(String title) throws Exception {
+    	String sql = "SELECT * FROM Articles;";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                String encryptedTitle = rs.getString("title");
+                String titleIVBase64 = rs.getString("title_iv");
+
+                // Decrypt the title
+                String decryptedTitle = decryptField(encryptedTitle, titleIVBase64);
+
+                // Compare decrypted title with the provided title
+                if (title.equals(decryptedTitle)) {
+                    return mapArticle(rs); // mapArticle should handle the full article mapping
+                }
+            }
+            return null; // Article not found
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error fetching article by title", e);
+        }
+    }
 
     /**
      * Fetches keywords associated with an article by its ID.
@@ -556,6 +587,129 @@ public class ArticleManager {
 
         // Add new related articles
         addRelatedArticles(article);
+    }
+    
+    public void addArticleToGroup(long articleID, long groupID) throws SQLException {
+    	 String sql = "INSERT INTO ArticleGroups (articleID, groupID) VALUES (?, ?) "
+                 + "ON DUPLICATE KEY UPDATE articleID = articleID";  // Ensures no duplicate entries
+
+      try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+          stmt.setLong(1, articleID);
+          stmt.setLong(2, groupID);
+          stmt.executeUpdate();
+      } catch (SQLException e) {
+          e.printStackTrace();
+          throw new SQLException("Failed to add article to group", e);
+      }
+    }
+    
+    public void removeArticleFromGroup(long articleID, long groupID) throws SQLException {
+        String sql = "DELETE FROM ArticleGroups WHERE articleID = ? AND groupID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, articleID);
+            stmt.setLong(2, groupID);
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected == 0) {
+                throw new SQLException("No record found to remove for articleID: " + articleID + " and groupID: " + groupID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to remove article from group", e);
+        }
+    }
+    
+    public List<Group> getGroupsForArticle(long articleID) throws SQLException {
+    	List<Group> groups = new ArrayList<>();
+        String sql = "SELECT g.groupID, g.name FROM Groups g "
+                   + "JOIN ArticleGroups ag ON g.groupID = ag.groupID "
+                   + "WHERE ag.articleID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, articleID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    long groupID = rs.getLong("groupID");
+                    String name = rs.getString("name");
+                    groups.add(new Group(groupID, name));
+                }
+            }              
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to retrieve groups for article", e);
+        }
+        
+        return groups;
+    }
+    
+    /**
+     * Retrieves all groups from the Groups table.
+     *
+     * @return List of all Group objects.
+     * @throws SQLException If a database access error occurs.
+     */
+    public List<Group> getAllGroups() throws SQLException {
+        List<Group> groups = new ArrayList<>();
+        String sql = "SELECT groupID, name FROM Groups";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                long groupID = rs.getLong("groupID");
+                String name = rs.getString("name");
+                groups.add(new Group(groupID, name));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to retrieve all groups", e);
+        }
+
+        return groups;
+    }
+    
+    public void removeGroup(long groupID) throws SQLException {
+        String sql = "DELETE FROM Groups WHERE groupID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, groupID);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No group found with groupID: " + groupID);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to remove group", e);
+        }
+    }
+    
+    public void addGroup(String groupName) throws SQLException {
+        String sql = "INSERT INTO Groups (name) VALUES (?)";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, groupName);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to add group", e);
+        }
+    }
+    
+    public boolean isArticleInGroup(long articleID, long groupID) throws SQLException {
+        String sql = "SELECT 1 FROM ArticleGroups WHERE articleID = ? AND groupID = ? LIMIT 1";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, articleID);
+            stmt.setLong(2, groupID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();  // If a result is found, the article is in the group
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to check if article is in group", e);
+        }
     }
     
     public void backupArticles(File backupFile) throws Exception {

@@ -81,6 +81,7 @@ public class DashboardView extends VBox {
     }
 
     private void onArticleSaved(SendDesk360 mainApp, ArticleViewModel viewModel) {
+    	System.out.println("Called onArticleSaved");
         // Close the edit panel
         if (editPannel != null) {
             HBox mainPageBody = (HBox) this.getChildren().get(0);
@@ -89,7 +90,6 @@ public class DashboardView extends VBox {
         }
 
         try {
-            Article newArticle = viewModel.buildArticleFromProperties();
             articleList.getChildren().clear();
             initializeArticleDropdowns(mainApp);
         } catch (Exception e) {

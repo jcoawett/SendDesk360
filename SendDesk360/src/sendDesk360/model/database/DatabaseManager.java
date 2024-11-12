@@ -145,6 +145,20 @@ public class DatabaseManager {
         		+ "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE,"
         		+ "FOREIGN KEY (relatedArticleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
         		+ ");";
+        
+        String createGroupsTable = "CREATE TABLE IF NOT EXISTS Groups ("
+                + "groupID BIGINT AUTO_INCREMENT PRIMARY KEY, "
+                + "name VARCHAR(255) UNIQUE NOT NULL"
+                + ");";
+
+        String createArticleGroupsTable = "CREATE TABLE IF NOT EXISTS ArticleGroups ("
+                + "articleID BIGINT NOT NULL, "
+                + "groupID BIGINT NOT NULL, "
+                + "PRIMARY KEY (articleID, groupID), "
+                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE, "
+                + "FOREIGN KEY (groupID) REFERENCES Groups(groupID) ON DELETE CASCADE"
+                + ");";
+
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createUsersTable);
@@ -154,6 +168,8 @@ public class DatabaseManager {
             stmt.execute(createKeywordsTable);
             stmt.execute(createReferencesTable);
             stmt.execute(createRelatedArticlesTable);
+            stmt.execute(createGroupsTable); 
+            stmt.execute(createArticleGroupsTable); 
         } catch (SQLException e) {
             System.err.println("Error creating tables: " + e.getMessage());
             throw e; // Rethrow to let the caller know about the failure

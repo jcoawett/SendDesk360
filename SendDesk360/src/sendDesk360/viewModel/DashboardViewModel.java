@@ -59,7 +59,14 @@ public class DashboardViewModel {
             newArticle.setBody(newArticleBody.get());
             newArticle.setDifficulty(newArticleDifficulty.get());
 
-            articleManager.addArticle(newArticle);  // Add article to the database
+            //Check that this article is not a duplicate article
+            if (checkDuplicateArticle(newArticle)) {
+            	articleManager.addArticle(newArticle); //Add article to the database 
+            }
+            else {
+            	articleError.set("The Article you are trying to add already exists");
+            	return false;
+            }
             resetArticleInput();  // Clear input fields after success
             return true;
         } catch (Exception e) {
@@ -116,6 +123,21 @@ public class DashboardViewModel {
         }
         userError.set(""); // Clear error message if validation passes
         return true;
+    }
+    
+    private boolean checkDuplicateArticle(Article newArticle) {
+    	boolean result = true;
+    	try {
+			if (articleManager.getArticleByID(newArticle.getUniqueID()) != null){
+				result = false;
+			}
+			if (articleManager.getArticleByTitle(newArticle.getTitle()) != null) {
+				result = false; 
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return result;
     }
 
     // Reset user input fields
