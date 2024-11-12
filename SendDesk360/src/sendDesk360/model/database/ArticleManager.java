@@ -718,6 +718,7 @@ public class ArticleManager {
             throw new SQLException("Failed to check if article is in group", e);
         }
     }
+     
     
     public void backupArticles(File backupFile) throws Exception {
         List<Article> articles = getAllArticles(); // Fetch all articles
