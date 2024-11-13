@@ -10,8 +10,12 @@ import sendDesk360.view.components.PrimaryButton.ButtonVariant;
 import sendDesk360.view.components.ArticlePreviewCard;
 import sendDesk360.view.components.EditArticlePannel;
 import sendDesk360.view.components.EditGroupPannel;
+import sendDesk360.view.components.SearchBar;
+
+
 import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.DashboardViewModel;
+
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -20,7 +24,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+
 import java.util.List;
+
 
 public class DashboardView extends VBox {
 
@@ -29,7 +35,8 @@ public class DashboardView extends VBox {
     private PrimaryButton createNewArticle;
     private PrimaryButton addNewArticleGroup; 
     private EditArticlePannel editPannel;
-    private EditGroupPannel editGroupPannel; 
+    private EditGroupPannel editGroupPannel;
+    private SearchBar searchBar;
 
     public DashboardView(SendDesk360 mainApp) {
         this.dashboardViewModel = new DashboardViewModel(
@@ -55,6 +62,12 @@ public class DashboardView extends VBox {
         articleList.setAlignment(Pos.TOP_LEFT);
         articleList.setSpacing(0);
         HBox.setHgrow(articleList, Priority.ALWAYS);
+        
+        
+        searchBar = new SearchBar();
+        searchBar.setPrefWidth(400);
+        searchBar.setPrefHeight(getPrefWidth());
+        
 
         HBox pageTitleContainer = new HBox(pageTitle);
         pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
@@ -65,7 +78,7 @@ public class DashboardView extends VBox {
         	 HBox.setHgrow(spacer, Priority.ALWAYS);
 
         	 createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
-        	  addNewArticleGroup = new PrimaryButton(ButtonVariant.ACCENT, "New Grouping", event -> openEditPanelForNewGrouping(mainApp));
+        	 addNewArticleGroup = new PrimaryButton(ButtonVariant.ACCENT, "New Grouping", event -> openEditPanelForNewGrouping(mainApp));
 
         	  // Set spacing and alignment for better layout
         	  pageTitleContainer.setSpacing(10); 

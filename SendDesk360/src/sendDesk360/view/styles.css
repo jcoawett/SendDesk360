@@ -120,6 +120,21 @@
 /* ----------------------- */
 
 
+/* Search Bar */
+/* Icon Positioning in SearchBar */
+.search-bar .text-field {
+    -fx-padding: 0 28 0 8; /* Adjust padding to make room for the icon */
+}
+
+.search-bar .text-field .text {
+    -fx-fill: -fx-text-inner-color;
+}
+
+.search-bar .stack-pane .image-view {
+    -fx-translate-x: -8px; /* Move icon left by 8px if necessary */
+}
+
+/* ----------------------- */
 
 
 
