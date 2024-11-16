@@ -11,8 +11,7 @@ import sendDesk360.view.components.ArticlePreviewCard;
 import sendDesk360.view.components.EditArticlePannel;
 import sendDesk360.view.components.EditGroupPannel;
 import sendDesk360.view.components.SearchBar;
-
-
+import sendDesk360.view.components.SpecialGroupTag;
 import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.DashboardViewModel;
 
@@ -23,7 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
+import javafx.scene.paint.Color;
 
 import java.util.List;
 
@@ -66,10 +65,10 @@ public class DashboardView extends VBox {
         
         searchBar = new SearchBar();
         searchBar.setPrefWidth(400);
-        searchBar.setPrefHeight(getPrefWidth());
+        searchBar.setPrefHeight(getPrefWidth());        
         
 
-        HBox pageTitleContainer = new HBox(pageTitle);
+        HBox pageTitleContainer = new HBox(pageTitle, searchBar);
         pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
         HBox.setHgrow(pageTitleContainer, Priority.ALWAYS);
 
@@ -78,7 +77,7 @@ public class DashboardView extends VBox {
         	 HBox.setHgrow(spacer, Priority.ALWAYS);
 
         	 createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
-        	 addNewArticleGroup = new PrimaryButton(ButtonVariant.ACCENT, "New Grouping", event -> openEditPanelForNewGrouping(mainApp));
+        	 addNewArticleGroup = new PrimaryButton(ButtonVariant.ACCENT, "Manage Groups", event -> openEditPanelForNewGrouping(mainApp));
 
         	  // Set spacing and alignment for better layout
         	  pageTitleContainer.setSpacing(10); 
@@ -135,27 +134,48 @@ public class DashboardView extends VBox {
         }
     }
     
+    
     private void openEditPanelForNewArticle(SendDesk360 mainApp) {
-        if (dashboardViewModel.isAdmin()) { //TODO: create dashboardViewModel.isInstructor() 
-            ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser());
-            viewModel.resetProperties();
+        if (dashboardViewModel.isAdmin()) {
+            HBox mainPageBody = (HBox) this.getChildren().get(0);
 
-            editPannel = new EditArticlePannel(viewModel, () -> onArticleSaved(mainApp, viewModel));
-            HBox mainPageBody = (HBox) this.getChildren().get(0); 
-            mainPageBody.getChildren().add(editPannel);
+            // Check if the edit panel is already open
+            if (editPannel != null) {
+                // Panel is already open, so close it
+                mainPageBody.getChildren().remove(editPannel);
+                editPannel = null; // Set to null to indicate it's closed
+            } else {
+                // Panel is not open, so create and open it
+                ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser());
+                viewModel.resetProperties();
+
+                editPannel = new EditArticlePannel(viewModel, () -> onArticleSaved(mainApp, viewModel));
+                mainPageBody.getChildren().add(editPannel);
+            }
         }
     }
 
     private void openEditPanelForNewGrouping(SendDesk360 mainApp) {
-    	if (dashboardViewModel.isAdmin()) {
-    		ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser()); 
-    		viewModel.resetProperties(); 
-    		
-    		editGroupPannel = new EditGroupPannel(viewModel, () -> onGroupSaved(mainApp, viewModel)); 
-    		HBox mainPageBody = (HBox) this.getChildren().get(0); 
-            mainPageBody.getChildren().add(editGroupPannel);
-    	}
+        if (dashboardViewModel.isAdmin()) {
+            HBox mainPageBody = (HBox) this.getChildren().get(0);
+
+            // Check if the group edit panel is already open
+            if (editGroupPannel != null) {
+                // Panel is already open, so close it
+                mainPageBody.getChildren().remove(editGroupPannel);
+                editGroupPannel = null; // Set to null to indicate it's closed
+            } else {
+                // Panel is not open, so create and open it
+                ArticleViewModel viewModel = new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser());
+                viewModel.resetProperties();
+
+                editGroupPannel = new EditGroupPannel(viewModel, () -> onGroupSaved(mainApp, viewModel));
+                mainPageBody.getChildren().add(editGroupPannel);
+            }
+        }
     }
+    
+    
     private void initializeArticleDropdowns(SendDesk360 mainApp) {
         try {
             articleList.getChildren().add(createDropdown(ArticleDropdownVariant.BEGINNER, mainApp));

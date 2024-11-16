@@ -39,7 +39,7 @@
 
 
 /* EDIT-ARTICLE-BAR */
-.edit-pannel {
+.pannel {
 	-fx-border-width: 0 1px 0 0;
 	-fx-background-color: #17181A;
 	-fx-padding: 24px 16px 24px 16px;
@@ -147,7 +147,7 @@
 .primary-field-variant-default {
     -fx-font-size: 16px;
     -fx-font-weight: 400;
-    -fx-text-fill: #404146;
+    -fx-text-fill: #F8F8F8;
     -fx-padding: 14.5px 14px;
     -fx-background-color: #0F1011;
     -fx-border-color: #28292E;
@@ -157,11 +157,18 @@
 }
 
 .primary-field-variant-default:hover,
-.primary-field-variant-default.edited {
+.primary-field-variant-default:focused {
     -fx-text-fill: #F8F8F8;
     -fx-background-color: #131516;
     -fx-border-color: #404146;
 }
+
+.placeholder-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #404146;
+    -fx-padding: 0 0 8 8;
+}
+
 
 /* Error State */
 .primary-field-variant-error {
@@ -174,6 +181,37 @@
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.64), 6, 0.0, 0, 6);
+}
+
+/* Placeholder text color for the ComboBox */
+.combo-box {
+    -fx-background-color: #0F1011; /* Match background */
+    -fx-text-fill: #F8F8F8; /* Match text color */
+    -fx-border-color: #28292E; /* Match border */
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 14.5px 14px; /* Match padding of PrimaryField */
+    -fx-min-height: 50px; /* Ensure consistent height */
+}
+
+.combo-box:hover, .combo-box:focused {
+    -fx-background-color: #131516; /* Match hover background */
+    -fx-border-color: #404146; /* Match hover border color */
+}
+
+/* Ensure dropdown list matches styling */
+.combo-box-popup .list-view {
+    -fx-background-color: #101011;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: #101011;
+    -fx-text-fill: #D3D3D3;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #333333;
+    -fx-text-fill: #F8F8F8;
 }
 
 .error-label {
@@ -203,31 +241,26 @@
 /* ROLE PILL */
 /* ----------------------- */
 
-/* Default */
 .role-pill {
-    /* Text */
-	-fx-font-size: 16px;
-	-fx-font-weight: 400;
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
     -fx-text-alignment: center;
-    
-    /* Layout */
-    -fx-padding: 6px 12px;
+
+    -fx-padding: 2px 8px; /* Reduced padding */
     -fx-alignment: center;
-        
-    /* Styles */
+
     -fx-background-color: transparent;
-    -fx-background-radius: 64px;
+    -fx-background-radius: 64px; /* Adjusted to smaller radius */
     -fx-border-radius: 64px;
     -fx-border-color: #28292E;
     -fx-border-width: 1px;
 }
 
-/* Hover & Selected */
 .role-pill:pressed,
 .role-pill:hover {
-	-fx-background-color: rgba(30, 32, 37, 0.64); 
-	-fx-border-color: #404146;
-	-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6);
+    -fx-background-color: rgba(30, 32, 37, 0.64); 
+    -fx-border-color: #404146;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6);
 }
 /* ----------------------- */
 
@@ -319,6 +352,35 @@
 .combo-box-popup .list-cell:filled:selected {
     -fx-background-color: #333333;
     -fx-text-fill: #F8F8F8;
+}
+
+
+/* CHECK BOX */
+.accent-checkbox .box {
+    -fx-background-color: transparent; /* Default background when not checked */
+    -fx-border-color: #28292E; /* Border color */
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 4, 0, 0, 2); /* Optional shadow */
+}
+
+/* Checked state for the checkbox */
+.accent-checkbox:selected .box {
+    -fx-background-color: #4A6EF2; /* Blue accent background when checked */
+    -fx-border-color: #4A6EF2; /* Match border to background */
+}
+
+/* The checkmark itself */
+.accent-checkbox:selected .mark {
+    -fx-background-color: white; /* Blue accent for the checkmark */
+    -fx-stroke: white; /* Blue stroke for the checkmark */
+}
+
+/* Hover effect */
+.accent-checkbox .box:hover {
+    -fx-border-color: #4A6EF2; /* Optional hover effect */
+    -fx-background-color: rgba(74, 110, 242, 0.2); /* Slight hover overlay */
 }
 
 /* -------------------------------------------------------------------- */

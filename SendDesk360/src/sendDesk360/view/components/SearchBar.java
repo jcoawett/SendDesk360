@@ -30,7 +30,7 @@ public class SearchBar extends HBox {
         searchField.setMaxWidth(Double.MAX_VALUE);
 
         // Add the magnifying glass icon inside the search field
-        ImageView searchIconView = new ImageView(new Image(getClass().getResourceAsStream("/icons/search-icon.png")));
+        ImageView searchIconView = new ImageView(new Image(getClass().getResourceAsStream("/sendDesk360/view/assets/search.png")));        
         searchIconView.setFitHeight(16); // Adjust size as needed
         searchIconView.setPreserveRatio(true);
 

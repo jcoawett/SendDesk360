@@ -58,10 +58,10 @@ public class EditGroupPannel extends VBox {
 
         // Add all components to the panel
         this.getChildren().addAll(heading, inputContainer, groupListContainer, saveButton);
-        this.setSpacing(20);  // Increased spacing between sections
+        this.setSpacing(16);  
         this.setAlignment(Pos.TOP_LEFT);
-        this.setPrefWidth(400);  // Set a fixed width for consistency
-        this.getStyleClass().add("edit-group-pannel");
+        this.setPrefWidth(400);  
+        this.getStyleClass().add("pannel");
     }
 
     // Adds a new group to the ViewModel and refreshes the display
