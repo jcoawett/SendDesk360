@@ -2,92 +2,119 @@ package sendDesk360.view.components;
 
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.Region;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
-import javafx.geometry.Insets;
+import javafx.stage.Popup;
+import javafx.stage.Window;
 import javafx.geometry.Pos;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import sendDesk360.SendDesk360;
+import sendDesk360.model.Article;
 
-public class SearchBar extends HBox {
-	
-	
-	//TODO: FIX THIS
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class SearchBar extends StackPane {
 
     private TextField searchField;
-    private PrimaryButton createNewArticle;
-    private SmallButton filterButton;
+    private VBox searchResultsContainer; // Container for displaying search results
+    private final List<Article> articles; // List of articles to search from
+    private Popup resultsPopup; // For dropdown behavior
+    private final SendDesk360 mainApp;
 
-    public SearchBar() {
+    public SearchBar(List<Article> articles, SendDesk360 mainApp) {
+        this.articles = articles;
+        this.mainApp = mainApp;
         initializeUI();
-    }	
+    }
 
     private void initializeUI() {
-        // Create the search field
+        // Search field with placeholder
         searchField = new TextField();
         searchField.setPromptText("Search...");
-        searchField.getStyleClass().add(null);
-        
+        searchField.setStyle("-fx-font-size: 16px; -fx-text-fill: #F8F8F8; -fx-background-color: #0F1011; -fx-border-color: #28292E; -fx-border-radius: 5px; -fx-padding: 10px;");
+        searchField.setPrefWidth(400);
 
-        // Add the magnifying glass icon inside the search field
-        ImageView searchIconView = new ImageView(new Image(getClass().getResourceAsStream("/sendDesk360/view/assets/search.png")));        
-        searchIconView.setFitHeight(16); // Adjust size as needed
-        searchIconView.setPreserveRatio(true);
+        // Search icon
+        ImageView searchIcon = new ImageView(new Image(getClass().getResourceAsStream("/sendDesk360/view/assets/search.png")));
+        searchIcon.setFitHeight(24);
+        searchIcon.setPreserveRatio(true);
 
+        // Create a container for the search field and icon
+        HBox searchFieldContainer = new HBox(8, searchIcon, searchField);
+        searchFieldContainer.setAlignment(Pos.CENTER_LEFT);
 
-        HBox searchWrapper = new HBox();
-        
-        
-        // Create the 'Filter' button
-        filterButton = new SmallButton("Filters", event -> {
-            // Function here should be written elsewhere in the file
-            onFilter(event);
-        });
-        
-        
-        searchWrapper.getChildren().addAll(searchIconView, searchField);
-        searchWrapper.getStyleClass().add("-fx-font-size: 16px;"
-        		+ "    -fx-font-weight: 400;"
-        		+ "    -fx-text-fill: #F8F8F8;"
-        		+ "    -fx-padding: 14.5px 14px;"
-        		+ "    -fx-background-color: #0F1011;"
-        		+ "    -fx-border-color: #28292E;"
-        		+ "    -fx-border-radius: 5pxn"
-        		+ "    -fx-background-radius: 5px;"
-        		+ "    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.64), 6, 0.0, 0, 6);");
-        HBox.setHgrow(searchWrapper, Priority.ALWAYS);
+        // Buttons container
+        SmallButton clearButton = new SmallButton("Clear", event -> clearSearch());
+        SmallButton filterButton = new SmallButton("Filters", event -> System.out.println("TODO: make filter function"));
+        HBox actionButtons = new HBox(8, filterButton, clearButton);
+        actionButtons.setAlignment(Pos.CENTER);
 
-        // Spacer between search field and buttons
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
+        // Initialize popup for search results
+        resultsPopup = new Popup();
+        resultsPopup.setAutoHide(true);
 
-        // Add components to the HBox
-        
-        this.getChildren().addAll(searchField, filterButton, spacer);
+        searchResultsContainer = new VBox();
+        searchResultsContainer.setSpacing(8);
+        searchResultsContainer.setStyle("-fx-background-color: #17181A; -fx-border-radius: 8px; -fx-padding: 8px;");
+        resultsPopup.getContent().add(searchResultsContainer);
 
-        // Set alignment and spacing
-        this.setPrefHeight(USE_COMPUTED_SIZE);
-        this.setAlignment(Pos.CENTER);
-        this.setSpacing(8); // Adjust spacing as needed
-        this.setPadding(new Insets(16)); // Optional padding
-        HBox.setHgrow(this, Priority.ALWAYS);
+        // Listen for text input and update the results
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> updateSearchResults(newValue));
+
+        // Combine all elements
+        HBox searchBarWithButtons = new HBox(16, searchFieldContainer, actionButtons);
+        searchBarWithButtons.setAlignment(Pos.CENTER_LEFT);
+        this.getChildren().add(searchBarWithButtons);
     }
 
-  
-    private void onFilter(ActionEvent event) {
-        // Implementation here
+    private void clearSearch() {
+        searchField.clear();
+        searchResultsContainer.getChildren().clear();
+        resultsPopup.hide();
     }
 
-    // Getters for components if needed
-    public TextField getSearchField() {
-        return searchField;
+    private void updateSearchResults(String query) {
+        searchResultsContainer.getChildren().clear();
+
+        if (query.isEmpty()) {
+            resultsPopup.hide();
+            return;
+        }
+
+        List<Article> matchingArticles = articles.stream()
+                .filter(article -> article.getTitle().toLowerCase().contains(query.toLowerCase())
+                        || article.getShortDescription().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+
+        for (Article article : matchingArticles) {
+            HBox resultItem = new HBox();
+            resultItem.setStyle("-fx-background-color: #28292E; -fx-padding: 10px; -fx-border-radius: 5px;");
+            resultItem.setAlignment(Pos.CENTER_LEFT);
+            resultItem.setOnMouseClicked(event -> openArticle(article)); // Add click behavior
+
+            Label resultText = new Label(article.getTitle() + ": " + article.getShortDescription());
+            resultText.setStyle("-fx-text-fill: #F8F8F8; -fx-font-size: 14px;");
+            resultItem.getChildren().add(resultText);
+
+            searchResultsContainer.getChildren().add(resultItem);
+        }
+
+        if (!resultsPopup.isShowing()) {
+            Window window = this.getScene().getWindow();
+            resultsPopup.setWidth(searchField.getWidth()); // Match the dropdown width with the search field
+            resultsPopup.show(window,
+                    window.getX() + searchField.localToScene(0, 0).getX() + searchField.getScene().getX(),
+                    window.getY() + searchField.localToScene(0, 0).getY() + searchField.getScene().getY() + searchField.getHeight());
+        }
     }
 
-    public PrimaryButton getCreateNewArticleButton() {
-        return createNewArticle;
+    private void openArticle(Article article) {
+        System.out.println("Navigating to article: " + article.getTitle());
+        mainApp.showArticleDetailView(article); // Navigate to the article detail view
+        resultsPopup.hide(); // Close the dropdown
     }
 }

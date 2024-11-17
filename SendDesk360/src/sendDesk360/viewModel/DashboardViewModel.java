@@ -8,6 +8,7 @@ import sendDesk360.model.User;
 import sendDesk360.model.database.ArticleManager;
 import sendDesk360.model.database.UserManager;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class DashboardViewModel {
@@ -73,6 +74,17 @@ public class DashboardViewModel {
             e.printStackTrace();
             articleError.set("Error adding article: " + e.getMessage());
             return false;
+        }
+    }
+    
+    
+    
+    public List<Article> getAllArticles() throws Exception {
+        try {
+            return articleManager.getAllArticles();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return List.of(); // Return an empty list in case of error
         }
     }
 

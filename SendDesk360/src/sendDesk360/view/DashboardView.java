@@ -48,57 +48,85 @@ public class DashboardView extends VBox {
     }
 
     private void initializeUI(SendDesk360 mainApp) {
-        NavBar navBar = new NavBar();
-        navBar.setAlignment(Pos.TOP_LEFT);
-        VBox.setVgrow(navBar, Priority.ALWAYS);
-        navBar.setMaxWidth(300);
-        navBar.setMaxHeight(Double.MAX_VALUE);
+        try {
+            NavBar navBar = new NavBar();
+            navBar.setAlignment(Pos.TOP_LEFT);
+            VBox.setVgrow(navBar, Priority.ALWAYS);
+            navBar.setMaxWidth(300);
+            navBar.setMaxHeight(Double.MAX_VALUE);
 
-        Label pageTitle = new Label("Dashboard");
-        pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
+            Label pageTitle = new Label("Dashboard");
+            pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
 
-        articleList = new VBox();
-        articleList.setAlignment(Pos.TOP_LEFT);
-        articleList.setSpacing(0);
-        HBox.setHgrow(articleList, Priority.ALWAYS);
-        
-        
-        searchBar = new SearchBar();
-        searchBar.setPrefWidth(400);
-        searchBar.setPrefHeight(getPrefWidth());        
-        
+            articleList = new VBox();
+            articleList.setAlignment(Pos.TOP_LEFT);
+            articleList.setSpacing(0);
+            HBox.setHgrow(articleList, Priority.ALWAYS);
 
-        HBox pageTitleContainer = new HBox(pageTitle, searchBar);
-        pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
-        HBox.setHgrow(pageTitleContainer, Priority.ALWAYS);
 
-        if (dashboardViewModel.isAdmin()) {
-        	 Region spacer = new Region();
-        	 HBox.setHgrow(spacer, Priority.ALWAYS);
+            List<Article> allArticles = dashboardViewModel.getAllArticles();
+            searchBar = new SearchBar(allArticles, mainApp);
 
-        	 createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
-        	 addNewArticleGroup = new PrimaryButton(ButtonVariant.TEXT_ONLY, "Manage Groups", event -> openEditPanelForNewGrouping(mainApp));
 
-        	  // Set spacing and alignment for better layout
-        	  pageTitleContainer.setSpacing(10); 
-        	  pageTitleContainer.setAlignment(Pos.CENTER_RIGHT);  // Align items to the left
+            searchBar.setPrefWidth(USE_COMPUTED_SIZE);
 
-        	  pageTitleContainer.getChildren().addAll(spacer, createNewArticle, addNewArticleGroup);
+            HBox pageTitleContainer = new HBox(pageTitle, searchBar);
+            pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
+            pageTitleContainer.setSpacing(16);
+            
+            HBox.setHgrow(pageTitleContainer, Priority.ALWAYS);
+
+            if (dashboardViewModel.isAdmin()) {
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
+                addNewArticleGroup = new PrimaryButton(ButtonVariant.TEXT_ONLY, "Manage Groups", event -> openEditPanelForNewGrouping(mainApp));
+
+                pageTitleContainer.setSpacing(8);
+                pageTitleContainer.setAlignment(Pos.CENTER_RIGHT);
+
+                pageTitleContainer.getChildren().addAll(spacer, createNewArticle, addNewArticleGroup);
+            }
+
+            pageTitleContainer.setAlignment(Pos.CENTER);
+
+            VBox pageBody = new VBox(pageTitleContainer, articleList);
+            pageBody.setAlignment(Pos.TOP_LEFT);
+            HBox.setHgrow(pageBody, Priority.ALWAYS);
+
+            HBox mainPageBody = new HBox(navBar, pageBody);
+            mainPageBody.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(mainPageBody, Priority.ALWAYS);
+            VBox.setVgrow(mainPageBody, Priority.ALWAYS);
+
+            this.getChildren().add(mainPageBody);
+            this.setStyle("-fx-background-color: #101011;");
+        } catch (Exception e) {
+            e.printStackTrace();
+            display403Error();
         }
-        
-        pageTitleContainer.setAlignment(Pos.CENTER);
+    }
+    
+    
+    private void display403Error() {
+        // Clear the current UI
+        this.getChildren().clear();
 
-        VBox pageBody = new VBox(pageTitleContainer, articleList);
-        pageBody.setAlignment(Pos.TOP_LEFT);
-        HBox.setHgrow(pageBody, Priority.ALWAYS);
+        // Create a new VBox for the error message
+        VBox errorContainer = new VBox();
+        errorContainer.setStyle("-fx-background-color: #101011; -fx-padding: 50px;");
+        errorContainer.setAlignment(Pos.CENTER);
 
-        HBox mainPageBody = new HBox(navBar, pageBody);
-        mainPageBody.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(mainPageBody, Priority.ALWAYS);
-        VBox.setVgrow(mainPageBody, Priority.ALWAYS);
+        // Create the error label
+        Label errorLabel = new Label("403 - Access Denied");
+        errorLabel.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #F8F8F8;");
 
-        this.getChildren().add(mainPageBody);
-        this.setStyle("-fx-background-color: #101011;");
+        // Add the label to the container
+        errorContainer.getChildren().add(errorLabel);
+
+        // Add the error container to the dashboard
+        this.getChildren().add(errorContainer);
     }
 
     private void onArticleSaved(SendDesk360 mainApp, ArticleViewModel viewModel) {
