@@ -22,7 +22,6 @@ public class DropdownField extends VBox {
     private void initializeUI(String placeholderText, List<String> items) {
         // Set up the VBox container
         this.setAlignment(Pos.CENTER_LEFT);
-        this.setMaxWidth(Double.MAX_VALUE);
 
         // Create the dropdown container
         HBox dropdownContainer = new HBox();
@@ -37,7 +36,6 @@ public class DropdownField extends VBox {
 
         // Style the dropdown to match other fields
         dropdown.getStyleClass().add("primary-field-variant-default");
-        dropdown.setPrefHeight(50); // Match height of `PrimaryField`
 
         // Add dropdown to the container
         dropdownContainer.getChildren().add(dropdown);
@@ -45,6 +43,7 @@ public class DropdownField extends VBox {
 
         // Add the dropdown container to the VBox
         this.getChildren().add(dropdownContainer);
+        this.prefHeight(USE_COMPUTED_SIZE);
     }
 
     // Methods for interacting with the dropdown

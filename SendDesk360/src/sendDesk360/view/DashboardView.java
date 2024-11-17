@@ -77,7 +77,7 @@ public class DashboardView extends VBox {
         	 HBox.setHgrow(spacer, Priority.ALWAYS);
 
         	 createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
-        	 addNewArticleGroup = new PrimaryButton(ButtonVariant.ACCENT, "Manage Groups", event -> openEditPanelForNewGrouping(mainApp));
+        	 addNewArticleGroup = new PrimaryButton(ButtonVariant.TEXT_ONLY, "Manage Groups", event -> openEditPanelForNewGrouping(mainApp));
 
         	  // Set spacing and alignment for better layout
         	  pageTitleContainer.setSpacing(10); 
@@ -188,14 +188,22 @@ public class DashboardView extends VBox {
     }
 
     private ArticleGroupDropdown createDropdown(ArticleDropdownVariant variant, SendDesk360 mainApp) throws Exception {
+        // Get difficulty as lowercase string
         String difficulty = variant.name().toLowerCase();
+
+        // Get articles for the specified difficulty
         List<Article> articles = dashboardViewModel.getArticlesByDifficulty(difficulty);
 
+        // Map articles to preview cards
         List<ArticlePreviewCard> articleCards = articles.stream()
             .map(article -> new ArticlePreviewCard(article, mainApp))
             .toList();
 
-        ArticleGroupDropdown dropdown = new ArticleGroupDropdown(variant, articleCards);
+        // Pass the article count to the dropdown
+        int articleCount = articles.size();
+
+        // Create and return the ArticleGroupDropdown with the count
+        ArticleGroupDropdown dropdown = new ArticleGroupDropdown(variant, articleCards, articleCount);
         HBox.setHgrow(dropdown, Priority.ALWAYS);
 
         return dropdown;

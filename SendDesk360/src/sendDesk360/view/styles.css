@@ -120,6 +120,39 @@
 /* ----------------------- */
 
 
+/* BUTTON SECONDARY */
+/* ----------------------- */
+.small-button {
+	
+    /* Text */
+	-fx-font-size: 12px;
+	-fx-font-weight: 600;
+    -fx-text-alignment: center;
+    -fx-text-fill: white;
+    
+    /* Layout */
+    -fx-padding: 8px 8px;
+    -fx-alignment: center;
+    
+    /* Styles */
+    -fx-background-color: #1E2025;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(248, 248, 248, 0.24);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.64), 12, 0, 0, 6);
+    
+}
+
+.small-button:hover {
+
+    /* Styles */
+    -fx-background-color: #404146;
+}
+
+/* ----------------------- */
+
+
 /* Search Bar */
 /* Icon Positioning in SearchBar */
 .search-bar .text-field {
@@ -165,8 +198,7 @@
 
 .placeholder-label {
     -fx-font-size: 14px;
-    -fx-text-fill: #404146;
-    -fx-padding: 0 0 8 8;
+    -fx-text-fill: #969799;
 }
 
 
@@ -181,37 +213,6 @@
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.64), 6, 0.0, 0, 6);
-}
-
-/* Placeholder text color for the ComboBox */
-.combo-box {
-    -fx-background-color: #0F1011; /* Match background */
-    -fx-text-fill: #F8F8F8; /* Match text color */
-    -fx-border-color: #28292E; /* Match border */
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-padding: 14.5px 14px; /* Match padding of PrimaryField */
-    -fx-min-height: 50px; /* Ensure consistent height */
-}
-
-.combo-box:hover, .combo-box:focused {
-    -fx-background-color: #131516; /* Match hover background */
-    -fx-border-color: #404146; /* Match hover border color */
-}
-
-/* Ensure dropdown list matches styling */
-.combo-box-popup .list-view {
-    -fx-background-color: #101011;
-}
-
-.combo-box-popup .list-cell {
-    -fx-background-color: #101011;
-    -fx-text-fill: #D3D3D3;
-}
-
-.combo-box-popup .list-cell:hover {
-    -fx-background-color: #333333;
-    -fx-text-fill: #F8F8F8;
 }
 
 .error-label {
@@ -234,6 +235,57 @@
 
 /* ----------------------- */
 
+
+/* DROPDOWN */
+/* ----------------------- */
+
+/* Style for the ComboBox (Dropdown) */
+.combo-box {
+    -fx-font-size: 16px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #F8F8F8;
+    -fx-padding: 6px 4px;
+    -fx-background-color: #0F1011;
+    -fx-border-color: #28292E;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.64), 6, 0.0, 0, 6);
+}
+
+/* Placeholder text style */
+.combo-box .text {
+    -fx-fill: #969799; /* Placeholder text color */
+    -fx-font-size: 16px; /* Match font size to PrimaryField */
+}
+
+/* Style for text of selected value */
+.combo-box .list-cell:filled:selected, .combo-box .text {
+    -fx-text-fill: #F8F8F8; /* White for selected item */
+}
+
+/* Style for the dropdown popup list */
+.combo-box-popup .list-view {
+    -fx-background-color: #101011; /* Match dropdown background */
+}
+
+/* Style for individual dropdown items (unselected state) */
+.combo-box-popup .list-cell {
+    -fx-background-color: #101011; /* Background of unselected items */
+    -fx-text-fill: #969799; /* Secondary foreground color */
+}
+
+/* Style for hovered dropdown items */
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #333333; /* Highlight background on hover */
+    -fx-text-fill: #F8F8F8; /* Turn text white on hover */
+}
+
+/* Style for selected dropdown items */
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #4A6EF2; /* Accent background for selected item */
+    -fx-text-fill: #F8F8F8; /* White text for selected item */
+}
+/* ----------------------- */
 
 
 
@@ -335,29 +387,11 @@
     -fx-border-style: solid;
 }
 
-.combo-box-popup .list-view {
-    -fx-background-color: #101011;
-}
-
-.combo-box-popup .list-cell {
-    -fx-background-color: #101011;
-    -fx-text-fill: #D3D3D3;
-}
-
-.combo-box-popup .list-cell:hover {
-    -fx-background-color: #333333;
-    -fx-text-fill: #F8F8F8;
-}
-
-.combo-box-popup .list-cell:filled:selected {
-    -fx-background-color: #333333;
-    -fx-text-fill: #F8F8F8;
-}
 
 
 /* CHECK BOX */
 .accent-checkbox .box {
-    -fx-background-color: transparent; /* Default background when not checked */
+    -fx-background-color: #0F1011; /* Default background when not checked */
     -fx-border-color: #28292E; /* Border color */
     -fx-border-width: 1px;
     -fx-border-radius: 4px;

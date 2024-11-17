@@ -13,10 +13,13 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 public class SearchBar extends HBox {
+	
+	
+	//TODO: FIX THIS
 
     private TextField searchField;
     private PrimaryButton createNewArticle;
-    private PrimaryButton filterButton;
+    private SmallButton filterButton;
 
     public SearchBar() {
         initializeUI();
@@ -26,55 +29,55 @@ public class SearchBar extends HBox {
         // Create the search field
         searchField = new TextField();
         searchField.setPromptText("Search...");
-        searchField.getStyleClass().add("primary-field-variant-default");
-        searchField.setMaxWidth(Double.MAX_VALUE);
+        searchField.getStyleClass().add(null);
+        
 
         // Add the magnifying glass icon inside the search field
         ImageView searchIconView = new ImageView(new Image(getClass().getResourceAsStream("/sendDesk360/view/assets/search.png")));        
         searchIconView.setFitHeight(16); // Adjust size as needed
         searchIconView.setPreserveRatio(true);
 
-        // Create a StackPane to hold the TextField and the icon
-        StackPane searchFieldStack = new StackPane();
-        searchFieldStack.getChildren().addAll(searchField);
 
-        // Position the icon to the right inside the TextField
-        StackPane.setAlignment(searchIconView, Pos.CENTER_RIGHT);
-        StackPane.setMargin(searchIconView, new Insets(0, 8, 0, 0)); // 8px spacing to the right
-
-        // Add the icon to the StackPane
-        searchFieldStack.getChildren().add(searchIconView);
-
-        // Create the 'Create New' button
-        createNewArticle = new PrimaryButton(PrimaryButton.ButtonVariant.FILLED, "Create New", event -> {
-            // Function here should be written elsewhere in the file
-            onCreateNewArticle(event);
-        });
-
+        HBox searchWrapper = new HBox();
+        
+        
         // Create the 'Filter' button
-        filterButton = new PrimaryButton(PrimaryButton.ButtonVariant.FILLED, "Filter", event -> {
+        filterButton = new SmallButton("Filters", event -> {
             // Function here should be written elsewhere in the file
             onFilter(event);
         });
+        
+        
+        searchWrapper.getChildren().addAll(searchIconView, searchField);
+        searchWrapper.getStyleClass().add("-fx-font-size: 16px;"
+        		+ "    -fx-font-weight: 400;"
+        		+ "    -fx-text-fill: #F8F8F8;"
+        		+ "    -fx-padding: 14.5px 14px;"
+        		+ "    -fx-background-color: #0F1011;"
+        		+ "    -fx-border-color: #28292E;"
+        		+ "    -fx-border-radius: 5pxn"
+        		+ "    -fx-background-radius: 5px;"
+        		+ "    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.64), 6, 0.0, 0, 6);");
+        HBox.setHgrow(searchWrapper, Priority.ALWAYS);
 
         // Spacer between search field and buttons
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
+        
 
         // Add components to the HBox
-        this.getChildren().addAll(searchFieldStack, spacer, filterButton, createNewArticle);
+        
+        this.getChildren().addAll(searchField, filterButton, spacer);
 
         // Set alignment and spacing
-        this.setAlignment(Pos.CENTER_LEFT);
+        this.setPrefHeight(USE_COMPUTED_SIZE);
+        this.setAlignment(Pos.CENTER);
         this.setSpacing(8); // Adjust spacing as needed
-        this.setPadding(new Insets(8)); // Optional padding
+        this.setPadding(new Insets(16)); // Optional padding
+        HBox.setHgrow(this, Priority.ALWAYS);
     }
 
-    // Event handlers (to be implemented elsewhere)
-    private void onCreateNewArticle(ActionEvent event) {
-        // Implementation here
-    }
-
+  
     private void onFilter(ActionEvent event) {
         // Implementation here
     }
@@ -86,9 +89,5 @@ public class SearchBar extends HBox {
 
     public PrimaryButton getCreateNewArticleButton() {
         return createNewArticle;
-    }
-
-    public PrimaryButton getFilterButton() {
-        return filterButton;
     }
 }

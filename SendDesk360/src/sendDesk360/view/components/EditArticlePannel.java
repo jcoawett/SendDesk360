@@ -15,7 +15,7 @@ import java.util.List;
 public class EditArticlePannel extends VBox {
 
     private Label heading;
-    private PrimaryField inputDifficulty;
+    private DropdownField difficultyDropdown;
     private PrimaryField inputTitle;
     private PrimaryField inputSubtitle;
     private PrimaryField inputBody;
@@ -45,10 +45,34 @@ public class EditArticlePannel extends VBox {
        
         // Initialize fields with appropriate variants and placeholders
         inputTitle = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Title");
+        inputTitle.setPrefHeight(USE_COMPUTED_SIZE);
         
-        DropdownField difficultyDropdown = new DropdownField("Select Difficulty...", 
-                List.of("beginner", "intermediate", "advanced", "expert"));
+        difficultyDropdown = new DropdownField("Select Difficulty...", List.of("beginner", "intermediate", "advanced", "expert"));
+        difficultyDropdown.setPrefHeight(USE_COMPUTED_SIZE);
 
+
+        
+        inputSubtitle = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Short Description");
+        inputSubtitle.setPrefHeight(USE_COMPUTED_SIZE);
+        
+        inputBody = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Body");
+        inputBody.setPrefHeight(USE_COMPUTED_SIZE);
+        
+        inputKeywords = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Keywords");
+        inputKeywords.setPrefHeight(USE_COMPUTED_SIZE);
+        
+        inputRelatedArticles = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Related Articles");
+        inputRelatedArticles.setPrefHeight(USE_COMPUTED_SIZE);
+        
+        inputLinks = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Reference Links");
+        inputLinks.setPrefHeight(USE_COMPUTED_SIZE);
+        
+        
+
+        // Bind fields to the view model properties
+        inputTitle.getUserInput().bindBidirectional(viewModel.titleProperty());
+        
+        
         // Bind to ViewModel
         viewModel.difficultyProperty().addListener((obs, oldValue, newValue) -> {
             difficultyDropdown.setSelectedValue(newValue);
@@ -59,20 +83,8 @@ public class EditArticlePannel extends VBox {
                 viewModel.difficultyProperty().set(newValue);
             }
         });
-
-        
-        inputSubtitle = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Short Description");
-        inputBody = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Body");
-        inputKeywords = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Keywords");
-        inputRelatedArticles = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Related Articles");
-        inputLinks = new PrimaryField(PrimaryField.FieldVariant.DEFAULT, "Reference Links");
-        
         
 
-        // Bind fields to the view model properties
-        inputTitle.getUserInput().bindBidirectional(viewModel.titleProperty());
-
-        
         inputBody.getUserInput().bindBidirectional(viewModel.bodyProperty());
         inputKeywords.getUserInput().unbindBidirectional(viewModel.keywordsProperty());
         inputSubtitle.getUserInput().bindBidirectional(viewModel.shortDescriptionProperty()); 
@@ -82,6 +94,7 @@ public class EditArticlePannel extends VBox {
         
         
         fieldWrapper.getChildren().addAll(inputTitle, difficultyDropdown, inputSubtitle, inputBody, inputKeywords, inputRelatedArticles, inputLinks);
+        fieldWrapper.setSpacing(16);
         
         // Group Checkboxes
         bottomContent = new VBox();
