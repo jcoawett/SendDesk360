@@ -144,6 +144,17 @@ public class ArticleViewModel {
     	return false;
     }
     
+    //overloaded function
+    public boolean isArticleInGroup(long articleID, long groupID){
+    	try {
+			return articleManager.isArticleInGroup(articleID, groupID);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return false;
+    }
+    
     public void addArticleToGroup(long groupID) {
     	try {
 			articleManager.addArticleToGroup(articleIDProperty().get(), groupID);

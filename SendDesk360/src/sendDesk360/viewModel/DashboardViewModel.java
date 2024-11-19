@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import sendDesk360.SendDesk360;
 import sendDesk360.model.Article;
+import sendDesk360.model.Group;
 import sendDesk360.model.User;
 import sendDesk360.model.database.ArticleManager;
 import sendDesk360.model.database.UserManager;
@@ -76,8 +77,6 @@ public class DashboardViewModel {
             return false;
         }
     }
-    
-    
     
     public List<Article> getAllArticles() throws Exception {
         try {
@@ -166,6 +165,10 @@ public class DashboardViewModel {
     // Refresh the dashboard view
     public void refreshDashboard() {
         mainApp.showDashboard();
+    }
+    
+    public void filterArticlesBasedOnGroup(List<Group> filteredGroups) {
+    	
     }
     
     public boolean isAdmin() {

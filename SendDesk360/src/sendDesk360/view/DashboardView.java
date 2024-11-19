@@ -65,7 +65,7 @@ public class DashboardView extends VBox {
 
 
             List<Article> allArticles = dashboardViewModel.getAllArticles();
-            searchBar = new SearchBar(allArticles, mainApp);
+            searchBar = new SearchBar(allArticles, mainApp, new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser())); //I am not sure about this line
 
 
             searchBar.setPrefWidth(USE_COMPUTED_SIZE);
