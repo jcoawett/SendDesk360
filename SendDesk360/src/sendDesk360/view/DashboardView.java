@@ -54,6 +54,9 @@ public class DashboardView extends VBox {
             VBox.setVgrow(navBar, Priority.ALWAYS);
             navBar.setMaxWidth(300);
             navBar.setMaxHeight(Double.MAX_VALUE);
+            
+            // Set the action for the Access Group button in NavBar
+            navBar.setOnAccessGroupButtonClicked(() -> openAccessGroupView(mainApp));
 
             Label pageTitle = new Label("Dashboard");
             pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
@@ -235,5 +238,14 @@ public class DashboardView extends VBox {
         HBox.setHgrow(dropdown, Priority.ALWAYS);
 
         return dropdown;
+    }
+    
+    // Open AccessGroupView when button is clicked
+    private void openAccessGroupView(SendDesk360 mainApp) {
+        // Remove any existing content
+        this.getChildren().clear();
+        
+        // Create the AccessGroupView
+        mainApp.showAccessGroupView();
     }
 }

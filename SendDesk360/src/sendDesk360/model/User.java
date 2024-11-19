@@ -1,5 +1,6 @@
 package sendDesk360.model;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 public class User {
@@ -57,6 +58,7 @@ public class User {
     public static class Role {
         private String name;
         private int privilege;
+        private ArrayList<String> tags;
 
         // Getters and Setters for Role
         public String getName() {
@@ -74,6 +76,15 @@ public class User {
         public void setPrivilege(int privilege) {
             this.privilege = privilege;
         }
+        
+        public ArrayList<String> getTags(){
+        	return this.tags; 
+        }
+        
+        public void addNewTag(String newTag) {
+        	this.tags.add(newTag);
+        }
+        
     }
 	
 

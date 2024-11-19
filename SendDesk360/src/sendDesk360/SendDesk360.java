@@ -11,6 +11,7 @@ import sendDesk360.view.LoginView;
 import sendDesk360.view.TestPage;
 import sendDesk360.view.SignUpView;
 import sendDesk360.view.OneTimeCodeView;
+import sendDesk360.view.AccessGroupView;
 import sendDesk360.view.ArticleDetailView;
 import sendDesk360.view.RoleDropdownView; 
 
@@ -18,6 +19,7 @@ import sendDesk360.view.RoleDropdownView;
 import sendDesk360.viewModel.SignUpViewModel;
 import sendDesk360.viewModel.LoginViewModel;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
+import sendDesk360.viewModel.AccessGroupViewModel;
 import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.RoleDropdownViewModel; 
 
@@ -161,8 +163,18 @@ public class SendDesk360 extends Application {
         scene.setRoot(articleDetailView);
     }
     
-    public static void main(String[] args) {
-        launch(args);
+    public void showAccessGroupView() {
+    	User currentUser = userManager.getCurrentUser();
+    	
+    	if (currentUser == null) {
+            System.out.println("Error: No current user found. Redirecting to login.");
+            showLoginView();
+            return;
+        }
+    	
+    	AccessGroupViewModel viewModel = new AccessGroupViewModel(userManager, currentUser); 
+    	AccessGroupView accessGroupView = new AccessGroupView(this, viewModel); 
+    	scene.setRoot(accessGroupView);
     }
 
     @Override
@@ -174,12 +186,4 @@ public class SendDesk360 extends Application {
         }
     }
 
-    // Method to print all users (for testing purposes)
-    public void printAllUsers() {
-        try {
-            userManager.printAllUsersTable();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

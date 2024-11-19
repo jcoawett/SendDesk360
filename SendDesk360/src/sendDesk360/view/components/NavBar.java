@@ -12,9 +12,14 @@ import javafx.scene.layout.Priority;
 public class NavBar extends VBox {
 	
 	// UI Components
-	private ImageView logo;
-	private Label heading;
-	private HBox logoWrapper;
+    private ImageView logo;
+    private Label heading;
+    private HBox logoWrapper;
+    private NavButton accessGroupsButton;
+    private NavButton helpMessagesButton;
+    private VBox navButtonWrapper; // Wrapper for the buttons
+    
+    private Runnable onAccessGroupButtonClicked; 
 	
 	public NavBar() {
 		
@@ -33,12 +38,39 @@ public class NavBar extends VBox {
         logoWrapper.setSpacing(8);
         
         
-        // ADD NAV BUTTON WRAPPER HERE
-        	// ADD NAV BUTTONS HERE TOO
+       // Create NavButton instances
+        accessGroupsButton = new NavButton("user", "Access Groups", event -> {
+            // Add the action handler for "Access Groups"
+        	onAccessGroupButtonClicked(); 
+            System.out.println("Access Groups button clicked");
+        });
+        
+        helpMessagesButton = new NavButton("MessageIcon", "Help Messages", event -> {
+            // Add the action handler for "Help Messages"
+            System.out.println("Help Messages button clicked");
+        });
+        
+        // Wrap the buttons in an HBox for proper layout
+        navButtonWrapper = new VBox(accessGroupsButton, helpMessagesButton);
+        navButtonWrapper.setSpacing(16); // Set spacing between buttons
+        navButtonWrapper.setAlignment(Pos.CENTER_LEFT); // Align buttons to the left*/
 
-        this.getChildren().addAll(logoWrapper); 
+        this.getChildren().addAll(logoWrapper, navButtonWrapper); 
         this.getStyleClass().add("navbar");
         this.setSpacing(24);
         this.setAlignment(Pos.TOP_CENTER);
+       
 	}
+	
+	public void onAccessGroupButtonClicked() {
+		// This will notify the DashboardView to show the AccessGroupView
+        if (onAccessGroupButtonClicked != null) {
+            onAccessGroupButtonClicked.run();
+        }
+	}
+	
+	public void setOnAccessGroupButtonClicked(Runnable handler) {
+        this.onAccessGroupButtonClicked = handler;
+    }
+	
 }

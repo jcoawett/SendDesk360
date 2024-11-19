@@ -425,7 +425,7 @@ public class UserManager {
      *
      * @throws Exception if there is an error during the retrieval or printing of users.
      */
-    public void printAllUsersTable() throws Exception {
+    /*public void printAllUsersTable() throws Exception {
         List<User> users = getAllUsers();
 
         if (users.isEmpty()) {
@@ -462,7 +462,7 @@ public class UserManager {
         }
 
         System.out.format("+-------+-----------------+-----------------+------------+--------------------------------+-----------------+%n");
-    }
+    }*/
 
     /**
      * Helper method to determine the highest privilege level from a vector of roles.
@@ -534,4 +534,178 @@ public class UserManager {
            }
         return users;
     }
+    
+    
+    public List<String> getAccessTagsForUser(User user, Role role) throws Exception {
+        ArrayList<String> tags = new ArrayList<>();
+        String query = "SELECT tagName FROM UserAccessTags WHERE userID = ? AND roleID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setLong(1, user.getUserID());
+            stmt.setLong(2, role.getPrivilege());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                tags.add(rs.getString("tagName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving access tags for user: " + e.getMessage());
+            throw e;
+        }
+
+        return tags;
+    }
+    
+    public List<String> getAccessTagsForRole(Role role) throws SQLException {
+        String query = "SELECT tagName FROM AccessTags WHERE roleID = ?";
+        List<String> accessTags = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setLong(1, role.getPrivilege());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                accessTags.add(rs.getString("tagName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving access tags for role: " + e.getMessage());
+            throw e;
+        }
+
+        return accessTags;
+    }
+
+    
+    public void createAccessTag(String tagName, Role role) throws SQLException {
+        String query = "INSERT INTO AccessTags (tagName, roleID) VALUES (?, ?)";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, tagName);
+            stmt.setLong(2, role.getPrivilege());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error creating access tag: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    
+    public void removeAccessTag(String tagName) throws SQLException {
+        String deleteFromUserAccessTagsQuery = "DELETE FROM UserAccessTags WHERE tagName = ?";
+        String deleteFromAccessTagsQuery = "DELETE FROM AccessTags WHERE tagName = ?";
+
+        try (PreparedStatement deleteUserTagsStmt = connection.prepareStatement(deleteFromUserAccessTagsQuery);
+             PreparedStatement deleteAccessTagStmt = connection.prepareStatement(deleteFromAccessTagsQuery)) {
+
+            deleteUserTagsStmt.setString(1, tagName);
+            deleteUserTagsStmt.executeUpdate();
+
+            deleteAccessTagStmt.setString(1, tagName);
+            deleteAccessTagStmt.executeUpdate();
+
+            System.out.println("Access tag '" + tagName + "' removed successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error removing access tag: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    
+    public void addAccessTagForUser(String tag, User user, Role role) throws Exception {
+        String checkTagQuery = "SELECT COUNT(*) AS count FROM AccessTags WHERE tagName = ? AND roleID = ?";
+        String addTagQuery = "INSERT INTO UserAccessTags (userID, roleID, tagName) VALUES (?, ?, ?)";
+
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkTagQuery);
+             PreparedStatement addStmt = connection.prepareStatement(addTagQuery)) {
+
+            checkStmt.setString(1, tag);
+            checkStmt.setLong(2, role.getPrivilege());
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next() && rs.getInt("count") == 0) {
+                throw new IllegalArgumentException(
+                    "Access tag '" + tag + "' does not exist for role ID '" + role.getPrivilege() + "'."
+                );
+            }
+
+            addStmt.setLong(1, user.getUserID());
+            addStmt.setLong(2, role.getPrivilege());
+            addStmt.setString(3, tag);
+            addStmt.executeUpdate();
+
+            System.out.println("Access tag '" + tag + "' added for user ID " + user.getUserID() + " under role ID '" + role.getPrivilege() + "'.");
+        } catch (SQLException e) {
+            System.err.println("Error adding user access tag: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    
+    public void removeAccessTagForUser(String tag, User user, Role role) throws Exception {
+        String query = "DELETE FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setLong(1, user.getUserID());
+            stmt.setString(2, tag);
+            stmt.setLong(3, role.getPrivilege());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error removing user access tag: " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    public boolean userHasAccessTag(long userID, String tagName, Role role) throws SQLException {
+        String query = "SELECT COUNT(*) AS tagCount FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setLong(1, userID);
+            stmt.setString(2, tagName);
+            stmt.setLong(3, role.getPrivilege());
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("tagCount") > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking user access tag: " + e.getMessage());
+            throw e;
+        }
+
+        return false;
+    }
+ 
+    public List<User> getUsersWithAccessTag(String tagName) throws SQLException {
+        String query = 
+            "SELECT u.userID, u.firstName, u.lastName, u.username " +
+            "FROM Users u " +
+            "JOIN UserAccessTags ua ON u.userID = ua.userID " +
+            "WHERE ua.tagName = ?";
+
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, tagName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    long userID = rs.getLong("userID");
+                    String firstName = rs.getString("firstName");
+                    String lastName = rs.getString("lastName");
+                    String username = rs.getString("username");
+
+                    User user = getUserByUsername(username); 
+                    users.add(user); 
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching users with access tag: " + e.getMessage());
+            throw e;
+        }
+
+        return users;
+    }
+
+
 }
