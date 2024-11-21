@@ -11,6 +11,7 @@ import sendDesk360.model.database.UserManager;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DashboardViewModel {
 
@@ -150,6 +151,26 @@ public class DashboardViewModel {
 		}
     	return result;
     }
+    
+    public List<Article> filterUnencryptedArticles(List<Article> articles) {
+        // Get the current user
+        User currentUser = userManager.getCurrentUser();
+
+        // Check if the user has the "view-article-bodies" access tag
+        boolean canViewBodies = userManager.getAccessTagsForUser(currentUser).stream()
+                .anyMatch(tag -> tag.equalsIgnoreCase("\"view-article-bodies\""));
+
+        // If the user cannot view article bodies, filter out encrypted articles
+        if (!canViewBodies) {
+            return articles.stream()
+                    .filter(article -> !article.getEncrypted())  // Assuming 'isEncrypted' method exists in Article class
+                    .collect(Collectors.toList());
+        }
+
+        // If the user has the tag, return all articles (even encrypted)
+        return articles;
+    }
+
 
     // Reset user input fields
     private void resetUserInput() {

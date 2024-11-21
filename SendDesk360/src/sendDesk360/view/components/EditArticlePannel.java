@@ -16,6 +16,7 @@ public class EditArticlePannel extends VBox {
 
     private Label heading;
     private DropdownField difficultyDropdown;
+    private DropdownField encryptionDropdown;
     private PrimaryField inputTitle;
     private PrimaryField inputSubtitle;
     private PrimaryField inputBody;
@@ -90,10 +91,22 @@ public class EditArticlePannel extends VBox {
         inputSubtitle.getUserInput().bindBidirectional(viewModel.shortDescriptionProperty()); 
         
         
+        // New dropdown for encryption selection
+        encryptionDropdown = new DropdownField("Encrypt Article?", List.of("Yes", "No"));
+        encryptionDropdown.setPrefHeight(USE_COMPUTED_SIZE);
 
+        viewModel.encryptionProperty().addListener((obs, oldValue, newValue) -> {
+        	encryptionDropdown.setSelectedValue(newValue);
+        });
+        
+        encryptionDropdown.selectedValueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                viewModel.encryptionProperty().set(newValue);
+            }
+        });
         
         
-        fieldWrapper.getChildren().addAll(inputTitle, difficultyDropdown, inputSubtitle, inputBody, inputKeywords, inputRelatedArticles, inputLinks);
+        fieldWrapper.getChildren().addAll(inputTitle, difficultyDropdown, inputSubtitle, inputBody, inputKeywords, inputRelatedArticles, inputLinks, encryptionDropdown);
         fieldWrapper.setSpacing(16);
         
         // Group Checkboxes

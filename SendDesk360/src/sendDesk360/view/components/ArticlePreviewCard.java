@@ -3,6 +3,7 @@ package sendDesk360.view.components;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -24,11 +25,18 @@ public class ArticlePreviewCard extends HBox {
         VBox textContainer = new VBox(title, subtitle);
         textContainer.setSpacing(0);
 
+        
         // Configure this card's layout
         HBox.setHgrow(this, Priority.ALWAYS);
         this.getChildren().add(textContainer);
         this.setAlignment(Pos.CENTER_LEFT);
         this.getStyleClass().add("article-preview-card");
+        
+        if (article.getEncrypted()) {
+        	SpecialGroupTag tag = new SpecialGroupTag("encrypted", Color.BLUEVIOLET);
+        	this.getChildren().add(tag);
+        }
+        
 
         // Add click event to navigate to the article detail view
         this.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {

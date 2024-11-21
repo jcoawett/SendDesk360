@@ -49,7 +49,7 @@ public class ArticleManager {
      */
     public void addArticle(Article article) throws Exception {
     	System.out.println("Attempting to add article " + article.getTitle() + " " + article.getDifficulty() + " " + article.getBody() + " " + article.getShortDescription()); 
-        String sql = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+        String sql = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv, ISENCRYPTED) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setLong(1, article.getUniqueID());
 
@@ -72,8 +72,8 @@ public class ArticleManager {
             pstmt.setString(5, shortDescIVBase64);
             pstmt.setString(6, article.getDifficulty());
             pstmt.setString(7, encryptedBody);
-            pstmt.setString(8, bodyIVBase64);
-
+            pstmt.setString(8, bodyIVBase64); 
+            pstmt.setBoolean(9, article.getEncrypted()); 
             pstmt.executeUpdate();
 
             ResultSet keys = pstmt.getGeneratedKeys();
@@ -92,6 +92,7 @@ public class ArticleManager {
             throw new Exception("Unexpected error occurred while adding article", e);
         }
     }
+    
 
     /**
      * Update an existing article while keeping it encrypted  
@@ -100,12 +101,14 @@ public class ArticleManager {
      * @throws Exception if updating the article fails 
      */
     public void updateArticle(Article article) throws Exception {
+    	System.out.println("Updating article"); 
         String sql = "UPDATE Articles SET "
                    + "title = ?, title_iv = ?, "
                    + "shortDescription = ?, shortDescription_iv = ?, "
                    + "difficulty = ?, "
                    + "body = ?, body_iv = ? "
-                   + "WHERE articleID = ?;";
+                   + "WHERE articleID = ?"
+                   + "WHERE ISENCRYPTED = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             
             // Encrypt fields and generate random IVs
@@ -130,6 +133,7 @@ public class ArticleManager {
             pstmt.setString(6, encryptedBody);
             pstmt.setString(7, bodyIVBase64);
             pstmt.setLong(8, article.getArticleID());
+            pstmt.setBoolean(9, article.getEncrypted());
 
             pstmt.executeUpdate();
 
@@ -170,6 +174,7 @@ public class ArticleManager {
             article.setShortDescription(decryptedShortDesc);
             article.setDifficulty(rs.getString("difficulty")); // Not encrypted
             article.setBody(decryptedBody);
+            article.setEncrypted(rs.getBoolean("ISENCRYPTED"));
 
             // Retrieve keywords, references, related articles
             article.setKeywords(getKeywordsForArticle(article.getArticleID()));

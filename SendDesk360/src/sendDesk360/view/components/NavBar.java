@@ -37,6 +37,7 @@ public class NavBar extends VBox {
         logoWrapper.setAlignment(Pos.CENTER_LEFT);
         logoWrapper.setSpacing(8);
         
+      
         
        // Create NavButton instances
         accessGroupsButton = new NavButton("user", "Access Groups", event -> {

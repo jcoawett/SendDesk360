@@ -8,6 +8,7 @@ public class Article {
     private String title;
     private String shortDescription;
     private String difficulty;
+    private boolean encrypted; 
     private String body;
     private List<String> keywords;
     private List<String> referenceLinks;
@@ -16,12 +17,13 @@ public class Article {
     // Constructors
     public Article() {}
 
-    public Article(long uniqueID, String title, String shortDescription, String difficulty, String body) {
+    public Article(long uniqueID, String title, String shortDescription, String difficulty, String body, boolean encrypted) {
         this.uniqueID = uniqueID;
         this.title = title;
         this.shortDescription = shortDescription;
         this.difficulty = difficulty;
         this.body = body;
+        this.encrypted = encrypted;
     }
 
     // Getters and setters
@@ -63,6 +65,14 @@ public class Article {
 
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
+    }
+    
+    public boolean getEncrypted() {
+    	return this.encrypted;
+    }
+    
+    public void setEncrypted(boolean encrypted) {
+    	this.encrypted = encrypted;
     }
 
     public String getBody() {

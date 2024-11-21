@@ -23,6 +23,7 @@ public class ArticleViewModel {
     private final StringProperty title = new SimpleStringProperty("");
     private final StringProperty shortDescription = new SimpleStringProperty("");
     private final StringProperty difficulty = new SimpleStringProperty("");
+    private final StringProperty encryption = new SimpleStringProperty("");
     private final StringProperty body = new SimpleStringProperty("");
     private final ListProperty<String> keywords = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<String> referenceLinks = new SimpleListProperty<>(FXCollections.observableArrayList());
@@ -41,6 +42,11 @@ public class ArticleViewModel {
         title.set(article.getTitle());
         shortDescription.set(article.getShortDescription());
         difficulty.set(article.getDifficulty());
+        
+        //Sorry I keep ruining this nice looking code lol
+        String encrypted; 
+        encrypted = (article.getEncrypted()) ? "yes" : "no";
+        encryption.set(encrypted); 
         body.set(article.getBody());
 
         // Ensure collections are initialized with non-null lists
@@ -55,7 +61,6 @@ public class ArticleViewModel {
 
     // Create a new article
     public void saveNewArticle() throws Exception {
-    	System.out.println("saveNewArticle Called");
         validateAdminAccess();
         Article newArticle = buildArticleFromProperties();
         articleManager.addArticle(newArticle);
@@ -117,6 +122,7 @@ public class ArticleViewModel {
         article.setTitle(title.get());
         article.setShortDescription(shortDescription.get());
         article.setDifficulty(difficulty.get());
+        article.setEncrypted(encryption.get().equalsIgnoreCase("yes")); 
         article.setBody(body.get());
         article.setKeywords(new ArrayList<>(keywords));
         article.setReferenceLinks(new ArrayList<>(referenceLinks));
@@ -206,6 +212,11 @@ public class ArticleViewModel {
     public StringProperty difficultyProperty() { 
         difficulty.addListener((obs, oldVal, newVal) -> System.out.println("Difficulty updated: " + newVal));
         return difficulty; 
+    }
+    
+    public StringProperty encryptionProperty() {
+    	encryption.addListener((obs, oldVal, newVal) -> System.out.println("Encryption status updated: " + newVal));
+    	return encryption; 
     }
 
     public StringProperty bodyProperty() { 

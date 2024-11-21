@@ -1,5 +1,6 @@
 package sendDesk360.viewModel;
 
+import java.sql.SQLException;
 import java.util.Vector;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -27,7 +28,14 @@ public class RoleDropdownViewModel {
         this.user = userManager.getCurrentUser();
         
         
-        roles = userManager.getCurrentUser().getRoles(); 
+        try {
+			roles = userManager.getRolesForUser(userManager.getCurrentUser().getUserID());
+			System.out.println("Number of roles fetched: " + roles.size());
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     public StringProperty selectedRoleProperty() {
@@ -44,8 +52,9 @@ public class RoleDropdownViewModel {
 
     public void handleLogin(String selectedRole) {
     	
+    	System.out.print("looking for selected role: " + selectedRole);
     	//check if the user has this role
-    	boolean proceed = hasRole(selectedRole); 
+    	boolean proceed = hasRole(selectedRole.toLowerCase()); 
     	System.out.println(user.getUsername());
     	System.out.print(roles.toString());
     	if (selectedRole != null && proceed) {
@@ -81,6 +90,7 @@ public class RoleDropdownViewModel {
     public boolean hasRole(String selected) {
     	//check the roles that the user ha
     	for (Role r: roles) {
+    		//System.out.println("User has Role: " + r.getName()); 
     		if (r.getName().equalsIgnoreCase(selected)) {
     			return true; 
     		}

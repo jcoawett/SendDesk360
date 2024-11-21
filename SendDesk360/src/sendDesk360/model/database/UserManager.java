@@ -30,6 +30,18 @@ public class UserManager {
     public UserManager(DatabaseManager dbManager) throws Exception {
         this.connection = dbManager.getConnection();
         this.encryptionHelper = new EncryptionHelper();
+        
+        
+        /*
+        Role instructorRole = new Role();
+        instructorRole.setName("instructor");
+        instructorRole.setPrivilege(1);
+        Vector<Role> roles = new Vector<Role>(); 
+        roles.add(instructorRole);
+        User dummyInstructor = new User("instructor-middle-last-teach", "instructor1", "instructor@asu.edu", "Happy123!", false, roles);
+        addUser(dummyInstructor);
+       */
+        
     }
    
     // Set the current user after successful login
@@ -299,68 +311,49 @@ public class UserManager {
     
     
     
-    // ROLES
-
-    /**
-     * Adds roles for a specified user to the database.
-     *
-     * @param user The user object containing the roles to be added.
-     * @throws SQLException if there is an error during the addition of roles.
-     */
     public void addUserRoles(User user) throws SQLException {
-        String sql = "INSERT INTO UserRoles (userID, roleID) VALUES (?, ?);";
+        String sql = "INSERT INTO UserRoles (userID, roleName) VALUES (?, ?);";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             for (Role role : user.getRoles()) {
-                long roleID = getOrCreateRole(role);
+            	System.out.println("Adding user role " + role.getName() + " for user " + user.getUserID()); 
+                getOrCreateRole(role); // Ensure the role exists in the Roles table
                 pstmt.setLong(1, user.getUserID());
-                pstmt.setLong(2, roleID);
+                pstmt.setString(2, role.getName()); // Use roleName instead of roleID
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
         } catch (SQLException e) {
             System.err.println("Error adding user roles: " + e.getMessage());
+            throw e; // Rethrow exception for better visibility
         }
     }
 
-    /**
-     * Retrieves or creates a role based on the provided role information.
-     * If the role already exists, it returns the existing roleID. Otherwise, it creates a new role.
-     *
-     * @param role The role object containing the name and privilege level of the role.
-     * @return The roleID of the existing or newly created role.
-     * @throws SQLException if there is an error during the role retrieval or creation process.
-     */
-    public long getOrCreateRole(Role role) throws SQLException {
-        String selectSql = "SELECT roleID FROM Roles WHERE name = ? AND privilege = ?;";
+    public void getOrCreateRole(Role role) throws SQLException {
+        String selectSql = "SELECT name FROM Roles WHERE name = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(selectSql)) {
             pstmt.setString(1, role.getName());
-            pstmt.setInt(2, role.getPrivilege());
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getLong("roleID");
+                // Role exists, no need to insert again
+                return;
             }
         } catch (SQLException e) {
             System.err.println("Error retrieving role: " + e.getMessage());
         }
-        
-        
-        // Role does not exist, create it
+
+        // If role does not exist, create it
         String insertSql = "INSERT INTO Roles (name, privilege) VALUES (?, ?);";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSql)) {
             pstmt.setString(1, role.getName());
             pstmt.setInt(2, role.getPrivilege());
             pstmt.executeUpdate();
-            ResultSet keys = pstmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getLong(1);
-            }
         } catch (SQLException e) {
             System.err.println("Error creating role: " + e.getMessage());
+            throw e; // Rethrow exception if role creation fails
         }
-        
-        throw new SQLException("Failed to insert role");
     }
-
+        
+        
     /**
      * Changes the roles of a user identified by the given username.
      * This method deletes the user's existing roles and assigns new roles from the provided vector.
@@ -370,52 +363,54 @@ public class UserManager {
      * @throws SQLException if there is an error during the process of changing user roles.
      */
     public void changeUserRoles(String username, Vector<Role> newRoles) throws SQLException {
-    	 try {
-    	        long userID = getUserIDByUsername(username);
-    	        if (userID == -1) {
-    	            throw new SQLException("User not found");
-    	        }
-
-    	        // Delete existing roles
-    	        String deleteSql = "DELETE FROM UserRoles WHERE userID = ?;";
-    	        try (PreparedStatement pstmt = connection.prepareStatement(deleteSql)) {
-    	            pstmt.setLong(1, userID);
-    	            pstmt.executeUpdate();
-    	        }
-
-    	        // Add new roles
-    	        User user = new User();
-    	        user.setUserID(userID);
-    	        user.setRoles(newRoles);
-    	        addUserRoles(user);
-    	    } catch (SQLException e) {
-    	        System.err.println("Error changing user roles: " + e.getMessage());
-    	    }
-    }
-
-    /**
-     * Retrieves the roles associated with a user identified by the given userID.
-     *
-     * @param userID The ID of the user whose roles are to be retrieved.
-     * @return A vector of Role objects associated with the specified user.
-     * @throws SQLException if there is an error during the retrieval process.
-     */
-    private Vector<Role> getRolesForUser(long userID) throws SQLException {
-        String sql = "SELECT r.name, r.privilege FROM Roles r JOIN UserRoles ur ON r.roleID = ur.roleID WHERE ur.userID = ?;";
-        Vector<Role> roles = new Vector<>();
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setLong(1, userID);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    Role role = new Role();
-                    role.setName(rs.getString("name"));
-                    role.setPrivilege(rs.getInt("privilege"));
-                    roles.add(role);
-                }
+        try {
+            long userID = getUserIDByUsername(username);
+            if (userID == -1) {
+                throw new SQLException("User not found");
             }
+
+            // Delete existing roles
+            String deleteSql = "DELETE FROM UserRoles WHERE userID = ?;";
+            try (PreparedStatement pstmt = connection.prepareStatement(deleteSql)) {
+                pstmt.setLong(1, userID);
+                pstmt.executeUpdate();
+            }
+
+            // Add new roles
+            User user = new User();
+            user.setUserID(userID);
+            user.setRoles(newRoles);
+            addUserRoles(user);
+        } catch (SQLException e) {
+            System.err.println("Error changing user roles: " + e.getMessage());
+            throw e;
         }
-        return roles;
     }
+
+    public Vector<Role> getRolesForUser(long userID) throws SQLException {
+    String sql = "SELECT Roles.name AS roleName, Roles.privilege " +
+                 "FROM Roles " +
+                 "JOIN UserRoles ON Roles.name = UserRoles.roleName " +
+                 "WHERE UserRoles.userID = ?;";
+    Vector<Role> roles = new Vector<>();
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setLong(1, userID); // Set the userID parameter
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            String roleName = rs.getString("roleName"); // Correctly retrieve roleName
+            System.out.print("user has role: " + roleName); 
+            int privilege = rs.getInt("privilege");
+            Role tempRole = new Role(); 
+            tempRole.setPrivilege(privilege);
+            tempRole.setName(roleName);
+            roles.add(tempRole);// Add the Role object to the list
+        }
+    } catch (SQLException e) {
+        System.err.println("Error retrieving roles for user: " + e.getMessage());
+        throw e; // Rethrow exception for better visibility
+    }
+    return roles;
+}
     
     
     // DEBUGGING
@@ -538,11 +533,11 @@ public class UserManager {
     
     public List<String> getAccessTagsForUser(User user, Role role) throws Exception {
         ArrayList<String> tags = new ArrayList<>();
-        String query = "SELECT tagName FROM UserAccessTags WHERE userID = ? AND roleID = ?";
+        String query = "SELECT tagName FROM UserAccessTags WHERE userID = ? AND roleName = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setLong(1, user.getUserID());
-            stmt.setLong(2, role.getPrivilege());
+            stmt.setString(2, role.getName());
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -555,13 +550,13 @@ public class UserManager {
 
         return tags;
     }
-    
+
     public List<String> getAccessTagsForRole(Role role) throws SQLException {
-        String query = "SELECT tagName FROM AccessTags WHERE roleID = ?";
+        String query = "SELECT tagName FROM AccessTags WHERE roleName = ?";
         List<String> accessTags = new ArrayList<>();
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setLong(1, role.getPrivilege());
+            stmt.setString(1, role.getName());
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -574,14 +569,27 @@ public class UserManager {
 
         return accessTags;
     }
-
     
-    public void createAccessTag(String tagName, Role role) throws SQLException {
-        String query = "INSERT INTO AccessTags (tagName, roleID) VALUES (?, ?)";
+    public List<String> getAccessTagsForUser(User user){
+    	List<String> result = new ArrayList<String>(); 
+    	for (Role r: user.getRoles()) {
+    		try {
+				result.addAll(getAccessTagsForUser(user,r));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+    	}
+    	return result;
+    }
 
+    public void createAccessTag(String tagName, Role role) throws SQLException {
+        String query = "INSERT INTO AccessTags (tagName, roleName) VALUES (?, ?)";
+
+        System.out.println("Adding in " + tagName + " to role " + role.getName()); 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, tagName);
-            stmt.setLong(2, role.getPrivilege());
+            stmt.setString(2, role.getName());
             stmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error creating access tag: " + e.getMessage());
@@ -589,79 +597,43 @@ public class UserManager {
         }
     }
 
-    
-    public void removeAccessTag(String tagName) throws SQLException {
-        String deleteFromUserAccessTagsQuery = "DELETE FROM UserAccessTags WHERE tagName = ?";
-        String deleteFromAccessTagsQuery = "DELETE FROM AccessTags WHERE tagName = ?";
-
-        try (PreparedStatement deleteUserTagsStmt = connection.prepareStatement(deleteFromUserAccessTagsQuery);
-             PreparedStatement deleteAccessTagStmt = connection.prepareStatement(deleteFromAccessTagsQuery)) {
-
-            deleteUserTagsStmt.setString(1, tagName);
-            deleteUserTagsStmt.executeUpdate();
-
-            deleteAccessTagStmt.setString(1, tagName);
-            deleteAccessTagStmt.executeUpdate();
-
-            System.out.println("Access tag '" + tagName + "' removed successfully.");
-        } catch (SQLException e) {
-            System.err.println("Error removing access tag: " + e.getMessage());
-            throw e;
-        }
-    }
-
-    
     public void addAccessTagForUser(String tag, User user, Role role) throws Exception {
-        String checkTagQuery = "SELECT COUNT(*) AS count FROM AccessTags WHERE tagName = ? AND roleID = ?";
-        String addTagQuery = "INSERT INTO UserAccessTags (userID, roleID, tagName) VALUES (?, ?, ?)";
+    	System.out.println("Checking access tag : " + tag + " for role " + role.getName()); 
+        String checkTagQuery = "SELECT COUNT(*) AS count FROM AccessTags WHERE tagName = ? AND roleName = ?";
+        String addTagQuery = "INSERT INTO UserAccessTags (userID, roleName, tagName) VALUES (?, ?, ?)";
 
         try (PreparedStatement checkStmt = connection.prepareStatement(checkTagQuery);
              PreparedStatement addStmt = connection.prepareStatement(addTagQuery)) {
 
             checkStmt.setString(1, tag);
-            checkStmt.setLong(2, role.getPrivilege());
+            checkStmt.setString(2, role.getName());
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next() && rs.getInt("count") == 0) {
                 throw new IllegalArgumentException(
-                    "Access tag '" + tag + "' does not exist for role ID '" + role.getPrivilege() + "'."
+                    "Access tag '" + tag + "' does not exist for role '" + role.getName() + "'."
                 );
             }
 
             addStmt.setLong(1, user.getUserID());
-            addStmt.setLong(2, role.getPrivilege());
+            addStmt.setString(2, role.getName());
             addStmt.setString(3, tag);
             addStmt.executeUpdate();
 
-            System.out.println("Access tag '" + tag + "' added for user ID " + user.getUserID() + " under role ID '" + role.getPrivilege() + "'.");
+            System.out.println("Access tag '" + tag + "' added for user ID " + user.getUserID() + " under role '" + role.getName() + "'.");
         } catch (SQLException e) {
             System.err.println("Error adding user access tag: " + e.getMessage());
             throw e;
         }
     }
 
-    
-    public void removeAccessTagForUser(String tag, User user, Role role) throws Exception {
-        String query = "DELETE FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleID = ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setLong(1, user.getUserID());
-            stmt.setString(2, tag);
-            stmt.setLong(3, role.getPrivilege());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Error removing user access tag: " + e.getMessage());
-            throw e;
-        }
-    }
-    
     public boolean userHasAccessTag(long userID, String tagName, Role role) throws SQLException {
-        String query = "SELECT COUNT(*) AS tagCount FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleID = ?";
+        String query = "SELECT COUNT(*) AS tagCount FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleName = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setLong(1, userID);
             stmt.setString(2, tagName);
-            stmt.setLong(3, role.getPrivilege());
+            stmt.setString(3, role.getName());
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -674,7 +646,27 @@ public class UserManager {
 
         return false;
     }
- 
+
+    public void removeAccessTagForUser(String tag, User user, Role role) throws Exception {
+        String query = "DELETE FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleName = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setLong(1, user.getUserID());
+            stmt.setString(2, tag);
+            stmt.setString(3, role.getName());
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Access tag '" + tag + "' removed for user ID " + user.getUserID() + " under role '" + role.getName() + "'.");
+            } else {
+                System.out.println("No matching access tag found for user ID " + user.getUserID() + " with tag '" + tag + "' under role '" + role.getName() + "'.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error removing user access tag: " + e.getMessage());
+            throw e;
+        }
+    }
+
     public List<User> getUsersWithAccessTag(String tagName) throws SQLException {
         String query = 
             "SELECT u.userID, u.firstName, u.lastName, u.username " +
@@ -693,18 +685,41 @@ public class UserManager {
                     String lastName = rs.getString("lastName");
                     String username = rs.getString("username");
 
+                    
                     User user = getUserByUsername(username); 
-                    users.add(user); 
+                    users.add(user);
                 }
+             System.out.print("fetched " + rs.getFetchSize() + " users for access group " + tagName);
             } catch (Exception e) {
-                e.printStackTrace();
-            }
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         } catch (SQLException e) {
-            System.err.println("Error fetching users with access tag: " + e.getMessage());
+            System.err.println("Error fetching users with access tag '" + tagName + "': " + e.getMessage());
             throw e;
         }
 
         return users;
+    }
+
+    public List<String> getAllAccessTags() throws SQLException {
+        String query = "SELECT DISTINCT tagName FROM AccessTags";
+        List<String> tags = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String tagName = rs.getString("tagName");
+                tags.add(tagName); // Add the tag to the list
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching all access tags: " + e.getMessage());
+            throw e;
+        }
+
+        return tags;
     }
 
 

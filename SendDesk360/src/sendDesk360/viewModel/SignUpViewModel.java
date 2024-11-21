@@ -217,7 +217,7 @@ public class SignUpViewModel {
                 Vector<Role> roles = new Vector<>();
                 Role adminRole = new Role();
                 adminRole.setName("admin");  // Set admin role name
-                adminRole.setPrivilege(1);   // Set admin privilege
+                adminRole.setPrivilege(2);   // Set admin privilege
                 roles.add(adminRole);
                 user.setRoles(roles);  // Set roles to user BEFORE saving
             } else {

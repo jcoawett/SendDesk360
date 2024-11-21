@@ -2,27 +2,37 @@ package sendDesk360.view;
 
 import sendDesk360.SendDesk360;
 import sendDesk360.model.User;
+import sendDesk360.model.User.Role;
 import sendDesk360.model.database.UserManager;
+import sendDesk360.view.components.EditAccessGroupPanel;
+import sendDesk360.view.components.EditUserAccessPanel;
 import sendDesk360.view.components.PrimaryButton;
+import sendDesk360.view.components.SmallButton;
 import sendDesk360.viewModel.AccessGroupViewModel;
 
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AccessGroupView extends VBox {
 
     private final AccessGroupViewModel accessGroupViewModel;
     private VBox userListContainer;
-    private PrimaryButton addGroupButton;
-    private PrimaryButton removeGroupButton;
+    private PrimaryButton editGroupButton;
     private PrimaryButton createGroupButton;
+    private PrimaryButton dashboardButton; 
 
+    EditAccessGroupPanel editAccessGroupPanel;
+    EditUserAccessPanel editUserAccessPanel; 
+    
     private User currentUser; 
     private UserManager userManager; 
     
@@ -31,6 +41,7 @@ public class AccessGroupView extends VBox {
     	this.userManager = mainApp.getUserManager();
         this.accessGroupViewModel = accessGroupViewModel;
         initializeUI(mainApp);
+        
     }
 
     private void initializeUI(SendDesk360 mainApp) {
@@ -42,15 +53,19 @@ public class AccessGroupView extends VBox {
             pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
             pageTitleContainer.setSpacing(16);
 
+            Region spacer = new Region();
+            dashboardButton = new PrimaryButton(PrimaryButton.ButtonVariant.ACCENT, "Dashboard", event -> openDashboard(mainApp));
+            
+            
             if (accessGroupViewModel.isAdmin()) {
-                Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
-
                 createGroupButton = new PrimaryButton(PrimaryButton.ButtonVariant.ACCENT, "Create Group", event -> openCreateGroupPanel(mainApp));
-                addGroupButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Add to Group", event -> openAddUserToGroupPanel(mainApp));
-                removeGroupButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Remove from Group", event -> openRemoveUserFromGroupPanel(mainApp));
+                editGroupButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Add to Group", event -> openAddUserToGroupPanel(mainApp));
 
-                pageTitleContainer.getChildren().addAll(spacer, createGroupButton, addGroupButton, removeGroupButton);
+                pageTitleContainer.getChildren().addAll(spacer, dashboardButton, createGroupButton, editGroupButton);
+            }
+            else {
+            	pageTitleContainer.getChildren().addAll(spacer,dashboardButton); 
             }
 
             userListContainer = new VBox();
@@ -71,28 +86,112 @@ public class AccessGroupView extends VBox {
     }
 
     private void openCreateGroupPanel(SendDesk360 mainApp) {
-        // Logic to open a panel for creating a new access group
-        System.out.println("Open Create Group Panel");
-        // Add your implementation here (similar to EditGroupPannel logic)
+    	System.out.print("openCreateGroupPanel");
+        if (accessGroupViewModel.isAdmin()) {
+            VBox mainPageBody = (VBox) this.getChildren().get(0);
+
+            // Check if the edit panel is already open
+            if (editAccessGroupPanel != null) {
+                // Panel is already open, so close it
+                mainPageBody.getChildren().remove(editAccessGroupPanel);
+                editAccessGroupPanel = null; // Set to null to indicate it's closed
+            } else {
+            	// Create and open the panel
+                editAccessGroupPanel = new EditAccessGroupPanel(() -> {
+                    // Define the save callback
+                    String groupName = editAccessGroupPanel.getAccessGroupName();
+                    boolean isUser = editAccessGroupPanel.isUserRoleSelected();
+                    boolean isAdmin = editAccessGroupPanel.isAdminRoleSelected();
+                    boolean isInstructor = editAccessGroupPanel.isInstructorRoleSelected();
+
+                    List<Role> selectedRoles = new ArrayList<>();
+                    if (isUser) {
+                        Role role = new Role();
+                        role.setName("user");
+                        role.setPrivilege(0);
+                        selectedRoles.add(role);
+                    }
+                    if (isAdmin) {
+                        Role role = new Role();
+                        role.setName("admin");
+                        role.setPrivilege(2);
+                        selectedRoles.add(role);
+                    }
+                    if (isInstructor) {
+                        Role role = new Role();
+                        role.setName("instructor");
+                        role.setPrivilege(1);
+                        selectedRoles.add(role);
+                    }
+
+                    // Add the access group to the ViewModel
+                    for (Role role : selectedRoles) {
+                        accessGroupViewModel.addAccessGroup(groupName, role);
+                    }
+
+                    // Close the panel after saving
+                    mainPageBody.getChildren().remove(editAccessGroupPanel);
+                    refreshUserList(); 
+                    editAccessGroupPanel = null;
+                });
+                
+                mainPageBody.getChildren().add(editAccessGroupPanel);
+            }
+        }
+         
     }
+
 
     private void openAddUserToGroupPanel(SendDesk360 mainApp) {
-        // Logic to open a panel for adding users to a group
-        System.out.println("Open Add User to Group Panel");
-        // Add your implementation here (similar to EditGroupPannel logic)
+        if (accessGroupViewModel.isAdmin()) {
+            VBox mainPageBody = (VBox) this.getChildren().get(0);
+
+            if (editUserAccessPanel != null) {
+                // Close the panel if already open
+                Node scrollPane = editUserAccessPanel.getParent(); // Get the ScrollPane wrapping the panel
+                if (scrollPane != null) {
+                    mainPageBody.getChildren().remove(scrollPane);
+                }
+                editUserAccessPanel = null;
+            } else {
+                // Get users and access groups
+                List<User> allUsers = accessGroupViewModel.getAllUsers();
+                List<String> allAccessGroups = accessGroupViewModel.getAllAccessGroups();
+
+                // Create the panel
+                editUserAccessPanel = new EditUserAccessPanel(allUsers, allAccessGroups, accessGroupViewModel);
+                
+                // Wrap the panel in a ScrollPane
+                ScrollPane scrollPane = new ScrollPane(editUserAccessPanel);
+                scrollPane.setFitToWidth(true); // Ensures the panel stretches to fit the width of the VBox
+                scrollPane.setPrefHeight(400); // Set a reasonable height for the scroll area
+                scrollPane.getStyleClass().add("scroll-pane"); // Optional: Style it with CSS
+
+
+                // Define save behavior
+                editUserAccessPanel.setOnSaveCallback(() -> {
+                    // Remove the panel and refresh user list
+                    mainPageBody.getChildren().remove(scrollPane);
+                    refreshUserList();
+                    editUserAccessPanel = null;
+                });
+
+                mainPageBody.getChildren().add(scrollPane);
+            }
+        }
     }
 
-    private void openRemoveUserFromGroupPanel(SendDesk360 mainApp) {
-        // Logic to open a panel for removing users from a group
-        System.out.println("Open Remove User from Group Panel");
-        // Add your implementation here (similar to EditGroupPannel logic)
-    }
 
+
+    private void openDashboard(SendDesk360 mainApp) {
+    	mainApp.showDashboard(); 
+    }
+    
     private void refreshUserList() {
-        try {
+    	try {
             userListContainer.getChildren().clear();
             List<String> accessGroups = accessGroupViewModel.getAllAccessGroups();
-
+            
             for (String group : accessGroups) {
                 // Group title
                 Label groupLabel = new Label(group);
@@ -105,6 +204,7 @@ public class AccessGroupView extends VBox {
 
                 // Add users to the container
                 List<User> usersInGroup = accessGroupViewModel.getAllUsersInAccessGroup(group);
+                System.out.println("Got " + usersInGroup.size() + " users in group " + group);
                 for (User user : usersInGroup) {
                     // Format user info
                     String userInfo = String.format("%s %s (%s)", 
@@ -116,20 +216,49 @@ public class AccessGroupView extends VBox {
                     Label userLabel = new Label(userInfo);
                     userLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #D0D0D0;");
 
-                    userInfoContainer.getChildren().add(userLabel);
+                 // Create the "Remove" button
+                    SmallButton removeButton = new SmallButton("Remove", event ->{
+                        // Handle removal logic
+                        accessGroupViewModel.removeUserFromAccessGroup(user, group);
+                        refreshUserList(); // Refresh the list after removal
+                    });
+                    
+                    //only admins and instructors of this access group can add and remove users from group 
+                    if (accessGroupViewModel.isAdmin() || 
+                    		(accessGroupViewModel.isUserInAccessGroup(currentUser, "\"admin-rights\"", currentUser.getRoles())) 
+                    			&& accessGroupViewModel.isUserInAccessGroup(currentUser, group, currentUser.getRoles())) {
+                    	
+                    	System.out.println("User was deemed to be an admin or an instructor with special access rights");
+                    	 removeButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-padding: 5px;");
+
+                         // Create an HBox to hold both the user label and remove button
+                         HBox userContainer = new HBox(userLabel, removeButton);
+                         userContainer.setSpacing(10);
+                         userContainer.setStyle("-fx-alignment: center-left;");
+
+                         userInfoContainer.getChildren().add(userContainer);
+                    }
+                    else {
+                    	HBox userContainer = new HBox(userLabel);
+                    	userContainer.setSpacing(10);
+                        userContainer.setStyle("-fx-alignment: center-left;");
+                    	System.out.println("User was not deemed to be an admin or an instructor with special access rights");
+                    }
                 }
 
                 // Combine group title and user info
                 VBox groupContainer = new VBox(groupLabel, userInfoContainer);
                 groupContainer.setSpacing(5);
                 groupContainer.setStyle("-fx-padding: 8px;");
-
+                
                 userListContainer.getChildren().add(groupContainer);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            displayError("Failed to load user list.");
+            displayError("Oops! You're not supposed to be here, you don't have admin-rights");
         }
+
+                
     }
 
 

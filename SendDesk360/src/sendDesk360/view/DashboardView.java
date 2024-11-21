@@ -68,6 +68,9 @@ public class DashboardView extends VBox {
 
 
             List<Article> allArticles = dashboardViewModel.getAllArticles();
+            allArticles = dashboardViewModel.filterUnencryptedArticles(allArticles); 
+            
+            
             searchBar = new SearchBar(allArticles, mainApp, new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser())); //I am not sure about this line
 
 
