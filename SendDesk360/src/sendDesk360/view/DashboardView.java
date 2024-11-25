@@ -68,7 +68,7 @@ public class DashboardView extends VBox {
 
 
             List<Article> allArticles = dashboardViewModel.getAllArticles();
-            allArticles = dashboardViewModel.filterUnencryptedArticles(allArticles); 
+           
             
             
             searchBar = new SearchBar(allArticles, mainApp, new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser())); //I am not sure about this line
@@ -227,6 +227,7 @@ public class DashboardView extends VBox {
 
         // Get articles for the specified difficulty
         List<Article> articles = dashboardViewModel.getArticlesByDifficulty(difficulty);
+        articles = dashboardViewModel.filterUnencryptedArticles(articles); 
 
         // Map articles to preview cards
         List<ArticlePreviewCard> articleCards = articles.stream()
