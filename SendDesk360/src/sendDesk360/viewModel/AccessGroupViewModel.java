@@ -19,13 +19,12 @@ public class AccessGroupViewModel{
 		this.currentUser = currentUser; 
 	}
 	
-	public void addAccessGroup(String Groupname, Role r) {
-		try {
-			userManager.createAccessTag(Groupname, r);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void addAccessGroup(String groupName, Role role) {
+	    try {
+	        userManager.createAccessTag(groupName, role.getName());
+	    } catch (SQLException e) {
+	        System.err.println("Error creating access tag: " + e.getMessage());
+	    }
 	}
 	
 	public void removeAccessGroup() {

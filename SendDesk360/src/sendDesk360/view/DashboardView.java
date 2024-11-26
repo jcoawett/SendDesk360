@@ -14,8 +14,6 @@ import sendDesk360.view.components.SearchBar;
 import sendDesk360.view.components.SpecialGroupTag;
 import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.DashboardViewModel;
-
-
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -29,7 +27,6 @@ import java.util.List;
 
 public class DashboardView extends VBox {
 
-    private final DashboardViewModel dashboardViewModel;
     private VBox articleList;
     private PrimaryButton createNewArticle;
     private PrimaryButton addNewArticleGroup; 
@@ -37,51 +34,63 @@ public class DashboardView extends VBox {
     private EditGroupPannel editGroupPannel;
     private SearchBar searchBar;
 
-    public DashboardView(SendDesk360 mainApp) {
+    private final DashboardViewModel dashboardViewModel;
+    private final ArticleViewModel articleViewModel;
+
+    public DashboardView(SendDesk360 mainApp, ArticleViewModel articleViewModel) {
         this.dashboardViewModel = new DashboardViewModel(
-            mainApp, 
-            mainApp.getArticleManager(), 
+            mainApp,
+            mainApp.getArticleManager(),
             mainApp.getUserManager()
         );
+        this.articleViewModel = articleViewModel;
         initializeUI(mainApp);
+        articleList.getChildren().clear();
         initializeArticleDropdowns(mainApp);
     }
-
+    
     private void initializeUI(SendDesk360 mainApp) {
         try {
-            NavBar navBar = new NavBar();
+            // Initialize the NavBar
+        	NavBar navBar = new NavBar(mainApp, 
+        		    () -> mainApp.showDashboard(), // Home button
+        		    () -> mainApp.showProfileView(), // Profile button
+        		    articleViewModel);       
             navBar.setAlignment(Pos.TOP_LEFT);
             VBox.setVgrow(navBar, Priority.ALWAYS);
             navBar.setMaxWidth(300);
             navBar.setMaxHeight(Double.MAX_VALUE);
-            
+
             // Set the action for the Access Group button in NavBar
             navBar.setOnAccessGroupButtonClicked(() -> openAccessGroupView(mainApp));
 
-            Label pageTitle = new Label("Dashboard");
+            // Page title
+            Label pageTitle = new Label(dashboardViewModel.welcomeMessage());
             pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
 
+            // Initialize articleList before it is used
             articleList = new VBox();
             articleList.setAlignment(Pos.TOP_LEFT);
             articleList.setSpacing(0);
             HBox.setHgrow(articleList, Priority.ALWAYS);
 
-
+            // Fetch all articles and initialize the SearchBar
             List<Article> allArticles = dashboardViewModel.getAllArticles();
-           
-            
-            
-            searchBar = new SearchBar(allArticles, mainApp, new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser())); //I am not sure about this line
-
-
+            searchBar = new SearchBar(
+                allArticles,
+                mainApp,
+                new ArticleViewModel(mainApp.getArticleManager(), mainApp.getUserManager().getCurrentUser())
+            );
             searchBar.setPrefWidth(USE_COMPUTED_SIZE);
 
+            // Page title container with search bar
             HBox pageTitleContainer = new HBox(pageTitle, searchBar);
             pageTitleContainer.setStyle("-fx-padding: 48px 16px 16px 16px;");
             pageTitleContainer.setSpacing(16);
-            
+            pageTitleContainer.setAlignment(Pos.CENTER_LEFT);
             HBox.setHgrow(pageTitleContainer, Priority.ALWAYS);
 
+            // Add admin-specific buttons if the user is an admin
             if (dashboardViewModel.isAdmin()) {
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -89,24 +98,24 @@ public class DashboardView extends VBox {
                 createNewArticle = new PrimaryButton(ButtonVariant.ACCENT, "Create New", event -> openEditPanelForNewArticle(mainApp));
                 addNewArticleGroup = new PrimaryButton(ButtonVariant.TEXT_ONLY, "Manage Groups", event -> openEditPanelForNewGrouping(mainApp));
 
-                pageTitleContainer.setSpacing(8);
-                pageTitleContainer.setAlignment(Pos.CENTER_RIGHT);
-
                 pageTitleContainer.getChildren().addAll(spacer, createNewArticle, addNewArticleGroup);
             }
 
-            pageTitleContainer.setAlignment(Pos.CENTER);
-
+            // Main page body
             VBox pageBody = new VBox(pageTitleContainer, articleList);
             pageBody.setAlignment(Pos.TOP_LEFT);
+            VBox.setVgrow(pageBody, Priority.ALWAYS);
             HBox.setHgrow(pageBody, Priority.ALWAYS);
 
+            // Main layout with NavBar and page content
             HBox mainPageBody = new HBox(navBar, pageBody);
             mainPageBody.setAlignment(Pos.CENTER_LEFT);
             HBox.setHgrow(mainPageBody, Priority.ALWAYS);
             VBox.setVgrow(mainPageBody, Priority.ALWAYS);
 
+            // Add the main layout to the root container
             this.getChildren().add(mainPageBody);
+            HBox.setHgrow(this, Priority.ALWAYS);
             this.setStyle("-fx-background-color: #101011;");
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,6 +221,7 @@ public class DashboardView extends VBox {
     
     private void initializeArticleDropdowns(SendDesk360 mainApp) {
         try {
+        	
             articleList.getChildren().add(createDropdown(ArticleDropdownVariant.BEGINNER, mainApp));
             articleList.getChildren().add(createDropdown(ArticleDropdownVariant.INTERMEDIATE, mainApp));
             articleList.getChildren().add(createDropdown(ArticleDropdownVariant.ADVANCED, mainApp));

@@ -190,6 +190,10 @@ public class UserViewModel {
     
 	public User getCurrentUser() {
 		
+		if (currentUser == null) {
+			System.err.println("Warning: Attempting to access a null currentUser. ");
+		}
+		
 		return currentUser;
 	}
 

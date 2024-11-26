@@ -29,6 +29,7 @@ public class ArticleViewModel {
     private final ListProperty<String> referenceLinks = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final ListProperty<Long> relatedArticleIDs = new SimpleListProperty<>(FXCollections.observableArrayList());
 
+
     // Constructor with dependencies
     public ArticleViewModel(ArticleManager articleManager, User currentUser) {
         this.articleManager = articleManager;
@@ -86,6 +87,11 @@ public class ArticleViewModel {
         return currentUser.getRoles().stream()
             .anyMatch(role -> role.getName().equalsIgnoreCase("admin"));
     }
+    
+    public boolean isInstructor() {
+    	return currentUser.getRoles().stream()
+    			.anyMatch(role -> role.getName().equalsIgnoreCase("instructor"));
+    }
 
     // Helper method to validate admin access before performing an action
     private void validateAdminAccess() throws IllegalAccessException {
@@ -95,6 +101,32 @@ public class ArticleViewModel {
     }
     
     
+    private final ListProperty<String> comments = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+	 // Getter for comments property
+	 public ListProperty<String> commentsProperty() {
+	     return comments;
+	 }
+	
+	 // Load comments for the article
+	 public void loadComments() {
+	     try {
+	         List<String> loadedComments = articleManager.getCommentsForArticle(articleID.get());
+	         comments.setAll(loadedComments);
+	     } catch (SQLException e) {
+	         System.err.println("Error loading comments: " + e.getMessage());
+	     }
+	 }
+	
+	 // Post a comment
+	 public void postComment(String commentText) {
+	     try {
+	         articleManager.addCommentToArticle(articleID.get(), currentUser.getUserID(), commentText);
+	         loadComments(); // Refresh comments
+	     } catch (SQLException e) {
+	         System.err.println("Error posting comment: " + e.getMessage());
+	     }
+	 }
     
     // RESET PROPERTIES
     public void resetProperties() {

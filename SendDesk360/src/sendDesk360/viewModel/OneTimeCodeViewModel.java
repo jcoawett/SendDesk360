@@ -47,6 +47,8 @@ public class OneTimeCodeViewModel {
         String inputCode = getCombinedInput();
         if (inputCode.equals(generatedCode)) {
             // Code is correct, proceed to dashboard
+        	
+        	
             proceedToDashboard();
             return true;
         } else {

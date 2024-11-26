@@ -65,23 +65,22 @@ public class LoginViewModel {
         try {
             boolean isAuthenticated = userManager.authenticateUser(getUsername(), getPassword());
             if (isAuthenticated) {
-            	System.out.println("Authenticated Username: " + getUsername() + "password: " + getPassword()); 
-            }
-            else {
-            	System.out.println("Failed to authenticated Username: " + getUsername() + "password: " + getPassword()); 
-            }
-            if (isAuthenticated) {
-                User authenticatedUser = userManager.getUserByUsername(getUsername());
-                userManager.setCurrentUser(authenticatedUser);  // Set the current user
-                mainApp.showRoleDropdownView();  // Navigate to RoleSelection
-                return true;
+            	System.out.println("Authenticated Username: " + getUsername() + "password: " + getPassword());
+            	User authendicatedUser = userManager.getUserByUsername(getUsername());
+            	userManager.setCurrentUser(authendicatedUser);
+            	mainApp.showRoleDropdownView();
+            	return true;
             } else {
-                loginError.set("Authentication failed. Invalid username or password.");
-                return false;
+            	System.out.println("Failed to authenticated Username: " + getUsername() + "password: " + getPassword()); 
+            	userManager.setCurrentUser(null);
+            	loginError.set("Authentication failer. Invalid username or password");
+            	return false;
             }
+           
         } catch (Exception e) {
             e.printStackTrace();
             loginError.set("An error occurred during authentication.");
+            userManager.setCurrentUser(null);
             return false;
         }
     }

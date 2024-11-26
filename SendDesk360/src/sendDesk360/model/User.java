@@ -59,6 +59,11 @@ public class User {
         private String name;
         private int privilege;
         private ArrayList<String> tags;
+        
+        @Override
+        public String toString() {
+            return name;
+        }
 
         // Getters and Setters for Role
         public String getName() {

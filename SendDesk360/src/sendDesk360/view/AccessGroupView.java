@@ -6,10 +6,11 @@ import sendDesk360.model.User.Role;
 import sendDesk360.model.database.UserManager;
 import sendDesk360.view.components.EditAccessGroupPanel;
 import sendDesk360.view.components.EditUserAccessPanel;
+import sendDesk360.view.components.NavBar;
 import sendDesk360.view.components.PrimaryButton;
 import sendDesk360.view.components.SmallButton;
 import sendDesk360.viewModel.AccessGroupViewModel;
-
+import sendDesk360.viewModel.ArticleViewModel;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -36,16 +37,25 @@ public class AccessGroupView extends VBox {
     private User currentUser; 
     private UserManager userManager; 
     
-    public AccessGroupView(SendDesk360 mainApp, AccessGroupViewModel accessGroupViewModel) {
-    	this.currentUser = mainApp.getUserManager().getCurrentUser();
-    	this.userManager = mainApp.getUserManager();
+    public AccessGroupView(SendDesk360 mainApp, AccessGroupViewModel accessGroupViewModel, ArticleViewModel articleViewModel) {
+        this.currentUser = mainApp.getUserManager().getCurrentUser();
+        this.userManager = mainApp.getUserManager();
         this.accessGroupViewModel = accessGroupViewModel;
-        initializeUI(mainApp);
-        
+        initializeUI(mainApp, articleViewModel);
     }
+    
 
-    private void initializeUI(SendDesk360 mainApp) {
+
+    private void initializeUI(SendDesk360 mainApp, ArticleViewModel articleViewModel) {
         try {
+            // Initialize the NavBar
+        	NavBar navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), () -> mainApp.showProfileView(), articleViewModel);
+            navBar.setAlignment(Pos.TOP_LEFT);
+            VBox.setVgrow(navBar, Priority.ALWAYS);
+            navBar.setMaxWidth(300);
+            navBar.setMaxHeight(Double.MAX_VALUE);
+
+            // Page title
             Label pageTitle = new Label("Access Groups");
             pageTitle.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
 
@@ -54,20 +64,19 @@ public class AccessGroupView extends VBox {
             pageTitleContainer.setSpacing(16);
 
             Region spacer = new Region();
-            dashboardButton = new PrimaryButton(PrimaryButton.ButtonVariant.ACCENT, "Dashboard", event -> openDashboard(mainApp));
-            
-            
+
+            // Admin-specific buttons
             if (accessGroupViewModel.isAdmin()) {
                 HBox.setHgrow(spacer, Priority.ALWAYS);
                 createGroupButton = new PrimaryButton(PrimaryButton.ButtonVariant.ACCENT, "Create Group", event -> openCreateGroupPanel(mainApp));
                 editGroupButton = new PrimaryButton(PrimaryButton.ButtonVariant.TEXT_ONLY, "Add to Group", event -> openAddUserToGroupPanel(mainApp));
 
-                pageTitleContainer.getChildren().addAll(spacer, dashboardButton, createGroupButton, editGroupButton);
-            }
-            else {
-            	pageTitleContainer.getChildren().addAll(spacer,dashboardButton); 
+                pageTitleContainer.getChildren().addAll(spacer, createGroupButton, editGroupButton);
+            } else {
+                pageTitleContainer.getChildren().add(spacer);
             }
 
+            // User list container
             userListContainer = new VBox();
             userListContainer.setSpacing(10);
             userListContainer.setStyle("-fx-padding: 16px;");
@@ -77,18 +86,27 @@ public class AccessGroupView extends VBox {
             pageBody.setAlignment(Pos.TOP_LEFT);
             VBox.setVgrow(pageBody, Priority.ALWAYS);
 
-            this.getChildren().add(pageBody);
+            // Main layout with NavBar and page content
+            HBox mainLayout = new HBox(navBar, pageBody);
+            mainLayout.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(pageBody, Priority.ALWAYS);
+            VBox.setVgrow(mainLayout, Priority.ALWAYS);
+
+            // Add the main layout to the root container
+            this.getChildren().add(mainLayout);
             this.setStyle("-fx-background-color: #101011;");
         } catch (Exception e) {
             e.printStackTrace();
             displayError("Failed to load Access Groups view.");
         }
     }
+    
+
 
     private void openCreateGroupPanel(SendDesk360 mainApp) {
-    	System.out.print("openCreateGroupPanel");
+        System.out.print("openCreateGroupPanel");
         if (accessGroupViewModel.isAdmin()) {
-            VBox mainPageBody = (VBox) this.getChildren().get(0);
+            HBox mainPageBody = (HBox) this.getChildren().get(0); // Fixed to match the actual container type
 
             // Check if the edit panel is already open
             if (editAccessGroupPanel != null) {
@@ -96,7 +114,7 @@ public class AccessGroupView extends VBox {
                 mainPageBody.getChildren().remove(editAccessGroupPanel);
                 editAccessGroupPanel = null; // Set to null to indicate it's closed
             } else {
-            	// Create and open the panel
+                // Create and open the panel
                 editAccessGroupPanel = new EditAccessGroupPanel(() -> {
                     // Define the save callback
                     String groupName = editAccessGroupPanel.getAccessGroupName();
@@ -131,20 +149,20 @@ public class AccessGroupView extends VBox {
 
                     // Close the panel after saving
                     mainPageBody.getChildren().remove(editAccessGroupPanel);
-                    refreshUserList(); 
+                    refreshUserList();
                     editAccessGroupPanel = null;
                 });
-                
+
                 mainPageBody.getChildren().add(editAccessGroupPanel);
             }
         }
-         
     }
+         
 
 
     private void openAddUserToGroupPanel(SendDesk360 mainApp) {
-        if (accessGroupViewModel.isAdmin()) {
-            VBox mainPageBody = (VBox) this.getChildren().get(0);
+        if (accessGroupViewModel.isAdmin() ) {
+            VBox mainPageBody = new VBox();
 
             if (editUserAccessPanel != null) {
                 // Close the panel if already open
@@ -182,10 +200,6 @@ public class AccessGroupView extends VBox {
     }
 
 
-
-    private void openDashboard(SendDesk360 mainApp) {
-    	mainApp.showDashboard(); 
-    }
     
     private void refreshUserList() {
     	try {
@@ -219,7 +233,12 @@ public class AccessGroupView extends VBox {
                  // Create the "Remove" button
                     SmallButton removeButton = new SmallButton("Remove", event ->{
                         // Handle removal logic
-                        accessGroupViewModel.removeUserFromAccessGroup(user, group);
+                        try {
+							accessGroupViewModel.removeUserFromAccessGroup(user, group);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
                         refreshUserList(); // Refresh the list after removal
                     });
                     

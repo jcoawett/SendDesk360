@@ -11,14 +11,17 @@ import sendDesk360.view.LoginView;
 import sendDesk360.view.TestPage;
 import sendDesk360.view.SignUpView;
 import sendDesk360.view.OneTimeCodeView;
+import sendDesk360.view.ProfileView;
 import sendDesk360.view.AccessGroupView;
 import sendDesk360.view.ArticleDetailView;
 import sendDesk360.view.RoleDropdownView; 
 
 // VIEW MODELS
 import sendDesk360.viewModel.SignUpViewModel;
+import sendDesk360.viewModel.UserViewModel;
 import sendDesk360.viewModel.LoginViewModel;
 import sendDesk360.viewModel.OneTimeCodeViewModel;
+import sendDesk360.viewModel.ProfileViewModel;
 import sendDesk360.viewModel.AccessGroupViewModel;
 import sendDesk360.viewModel.ArticleViewModel;
 import sendDesk360.viewModel.RoleDropdownViewModel; 
@@ -30,6 +33,8 @@ import sendDesk360.model.User;
 import sendDesk360.model.database.ArticleManager;
 import sendDesk360.model.database.DatabaseManager;
 import sendDesk360.model.database.UserManager;
+
+
 
 public class SendDesk360 extends Application {
 
@@ -91,9 +96,7 @@ public class SendDesk360 extends Application {
         return dbManager;
     }
     
-    
-    
-
+   
     // Initialize the SignUpViewModel with a new User and UserManager
     private void initializeViewModel() {
         this.signUpViewModel = new SignUpViewModel(this, new User(), userManager);
@@ -131,12 +134,13 @@ public class SendDesk360 extends Application {
     }
 
     public void showDashboard() {
-        DashboardView dashboardView = new DashboardView(this);
+        ArticleViewModel articleViewModel = new ArticleViewModel(articleManager, userManager.getCurrentUser());
+        DashboardView dashboardView = new DashboardView(this, articleViewModel);
         scene.setRoot(dashboardView);
     }
     
     public void showRoleDropdownView() {
-    	RoleDropdownViewModel roleDropdownViewModel = new RoleDropdownViewModel(this, new User(), userManager); 
+    	RoleDropdownViewModel roleDropdownViewModel = new RoleDropdownViewModel(this, userManager); 
     	RoleDropdownView roleDropdownView = new RoleDropdownView(roleDropdownViewModel);
     	scene.setRoot(roleDropdownView);
     }
@@ -154,27 +158,39 @@ public class SendDesk360 extends Application {
             return;
         }
 
-        // Create the ArticleViewModel, load the article, and set up the view
         ArticleViewModel viewModel = new ArticleViewModel(articleManager, currentUser);
-        viewModel.loadArticle(article);  // Load article details here
+        viewModel.loadArticle(article);
         ArticleDetailView articleDetailView = new ArticleDetailView(viewModel, this);
-
-        // Set the article detail view as the root of the existing scene
         scene.setRoot(articleDetailView);
     }
     
     public void showAccessGroupView() {
-    	User currentUser = userManager.getCurrentUser();
-    	
-    	if (currentUser == null) {
+        User currentUser = userManager.getCurrentUser();
+        
+        if (currentUser == null) {
             System.out.println("Error: No current user found. Redirecting to login.");
             showLoginView();
             return;
         }
-    	
-    	AccessGroupViewModel viewModel = new AccessGroupViewModel(userManager, currentUser); 
-    	AccessGroupView accessGroupView = new AccessGroupView(this, viewModel); 
-    	scene.setRoot(accessGroupView);
+        
+        AccessGroupViewModel accessGroupViewModel = new AccessGroupViewModel(userManager, currentUser);
+        ArticleViewModel articleViewModel = new ArticleViewModel(articleManager, currentUser); // Pass ArticleViewModel here
+        AccessGroupView accessGroupView = new AccessGroupView(this, accessGroupViewModel, articleViewModel);
+        scene.setRoot(accessGroupView);
+    }
+    
+    public void showProfileView() {
+        User currentUser = userManager.getCurrentUser();
+        if (currentUser == null) {
+            System.out.println("Error: No current user found. Redirecting to login.");
+            showLoginView();
+            return;
+        }
+
+        ProfileViewModel profileViewModel = new ProfileViewModel(userManager, currentUser);
+        ArticleViewModel articleViewModel = new ArticleViewModel(articleManager, currentUser);
+        ProfileView profileView = new ProfileView(this, profileViewModel, articleViewModel);
+        scene.setRoot(profileView);
     }
 
     @Override
@@ -184,6 +200,15 @@ public class SendDesk360 extends Application {
             dbManager.close();
             System.out.println("Database connection closed.");
         }
+    }
+
+    public void logout() {
+        // Clear the current user session
+        userManager.setCurrentUser(null); // Assuming setCurrentUser is a method in UserManager to clear the user session
+        System.out.println("User logged out successfully.");
+        
+        // Redirect to the login view
+        showLoginView();
     }
 
 }

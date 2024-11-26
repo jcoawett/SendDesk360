@@ -1,7 +1,8 @@
 package sendDesk360.viewModel;
 
 import java.sql.SQLException;
-import java.util.Vector;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -15,27 +16,29 @@ import sendDesk360.model.database.UserManager;
 public class RoleDropdownViewModel {
 
     private final SendDesk360 mainApp;
-    private final User user; 
-    private final UserManager userManager; 
+    private final User user;
+    private final UserManager userManager;
     private final StringProperty selectedRole = new SimpleStringProperty();
-    
- // Observable list for roles
-    private Vector<Role> roles;
+    private List<Role> roles;
 
-    public RoleDropdownViewModel(SendDesk360 mainApp, User user, UserManager userManager) {
-    	this.mainApp = mainApp;
+    private ObservableList<String> roleNames = FXCollections.observableArrayList();
+
+    public RoleDropdownViewModel(SendDesk360 mainApp, UserManager userManager) {
+        this.mainApp = mainApp;
         this.userManager = userManager;
         this.user = userManager.getCurrentUser();
-        
-        
-        try {
-			roles = userManager.getRolesForUser(userManager.getCurrentUser().getUserID());
-			System.out.println("Number of roles fetched: " + roles.size());
 
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try {
+            roles = userManager.getRolesForUser(user.getUserID());
+            roleNames.addAll(roles.stream().map(Role::getName).collect(Collectors.toList()));
+            System.out.println("Number of roles fetched: " + roles.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ObservableList<String> getRoleNames() {
+        return roleNames;
     }
 
     public StringProperty selectedRoleProperty() {
@@ -50,51 +53,29 @@ public class RoleDropdownViewModel {
         selectedRole.set(role);
     }
 
-    public void handleLogin(String selectedRole) {
-    	
-    	System.out.print("looking for selected role: " + selectedRole);
-    	//check if the user has this role
-    	boolean proceed = hasRole(selectedRole.toLowerCase()); 
-    	System.out.println(user.getUsername());
-    	System.out.print(roles.toString());
-    	if (selectedRole != null && proceed) {
-            switch (selectedRole) {
-                case "Admin":
-                    mainApp.showDashboard();
-                    break;
-                case "Instructor":
-                    mainApp.showDashboard();
-                    break;
-                case "User":
-                    mainApp.showDashboard();
-                    break;
-                default:
-                    System.out.println("Please select a valid role.");
-            }
-        } else if (proceed){
-            System.out.println("No role selected. Please choose a role to log in.");
-        }
-        else {
-        	System.out.println("You do not have this role. Please contact your administrator if you beleive this to be an error.");
-        }
-    }
-    
-    public void proceedToDashboard() {
-    	
-    }
-    
-    public boolean processSelection() {
-    	return false; 
-    }
-    
+
     public boolean hasRole(String selected) {
-    	//check the roles that the user ha
-    	for (Role r: roles) {
-    		//System.out.println("User has Role: " + r.getName()); 
-    		if (r.getName().equalsIgnoreCase(selected)) {
-    			return true; 
-    		}
-    	}
-    	return false; 
+        for (Role r : roles) {
+            System.out.println("Checking role: " + r.getName() + " against selected: " + selected);
+            if (r.getName().equalsIgnoreCase(selected)) {
+                return true;
+            }
+        }
+        System.out.println("Role not found: " + selected);
+        return false;
+    }
+    
+    public void handleLogin(String selectedRole) {
+        System.out.println("Looking for selected role: " + selectedRole);
+
+        if (hasRole(selectedRole)) {
+            try {
+                mainApp.showDashboard();
+            } catch (IllegalArgumentException e) {
+                System.out.println("Unknown role. Please select a valid role.");
+            }
+        } else {
+            System.out.println("You do not have this role. Please contact your administrator.");
+        }
     }
 }

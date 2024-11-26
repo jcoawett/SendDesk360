@@ -38,6 +38,13 @@ public class DashboardViewModel {
         this.mainApp = mainApp;
         this.articleManager = articleManager;
         this.userManager = userManager;
+        
+        
+        if (userManager.getCurrentUser() == null) {
+            System.err.println("Error: No user is logged in. Redirecting to login.");
+            mainApp.showLoginView();  // Redirect to login if no user
+            return;
+        }
 
         // Debugging: Ensure articleManager is not null
         if (this.articleManager == null) {
@@ -105,6 +112,7 @@ public class DashboardViewModel {
         newArticleBody.set("");
         newArticleDifficulty.set("beginner");
     }
+    
 
     // Create a new user with the provided name and email
     public boolean createNewUser() {
@@ -153,21 +161,24 @@ public class DashboardViewModel {
     }
     
     public List<Article> filterUnencryptedArticles(List<Article> articles) {
-        // Get the current user
         User currentUser = userManager.getCurrentUser();
 
-        // Check if the user has the "view-article-bodies" access tag
-        boolean canViewBodies = userManager.getAccessTagsForUser(currentUser).stream()
-                .anyMatch(tag -> tag.equalsIgnoreCase("\"view-article-bodies\""));
-
-        // If the user cannot view article bodies, filter out encrypted articles
-        if (!canViewBodies) {
+        if (currentUser == null) {
+            System.err.println("Error: currentUser is null. Returning only unencrypted articles.");
             return articles.stream()
-                    .filter(article -> !article.getEncrypted())  // Assuming 'isEncrypted' method exists in Article class
+                    .filter(article -> !article.getEncrypted())  // Assuming 'getEncrypted' exists
                     .collect(Collectors.toList());
         }
 
-        // If the user has the tag, return all articles (even encrypted)
+        boolean canViewBodies = userManager.getAccessTagsForUser(currentUser).stream()
+                .anyMatch(tag -> tag.equalsIgnoreCase("\"view-article-bodies\""));
+
+        if (!canViewBodies) {
+            return articles.stream()
+                    .filter(article -> !article.getEncrypted())
+                    .collect(Collectors.toList());
+        }
+
         return articles;
     }
 
@@ -192,8 +203,32 @@ public class DashboardViewModel {
     	
     }
     
+    
+    public String welcomeMessage() {
+    	
+    	String prefName = userManager.getCurrentUser().getName().getPref();
+    	
+    	String welcomeMessage = "Welcome " + prefName; 
+    	
+    	
+    	if (prefName != null) {
+    		
+    		return welcomeMessage;
+    		
+    	} else {
+    		
+    		return "Dashboard";
+    	}
+    }
+    
     public boolean isAdmin() {
         User currentUser = userManager.getCurrentUser();
+        
+        if(currentUser == null) {
+        	System.err.println("Error: currentUser is null.");
+        	return false;
+        }
+        
         return currentUser.getRoles().stream()
             .anyMatch(role -> role.getName().equalsIgnoreCase("admin"));
     }

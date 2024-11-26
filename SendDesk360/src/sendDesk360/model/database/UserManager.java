@@ -490,6 +490,36 @@ public class UserManager {
             return value.substring(0, length - 3) + "...";
         }
     }
+    
+    
+    public List<String> getCommentsForArticle(long articleID) throws SQLException {
+        String query = "SELECT Users.username, commentText, timestamp FROM Comments " +
+                       "INNER JOIN Users ON Comments.userID = Users.userID " +
+                       "WHERE articleID = ? ORDER BY timestamp ASC";
+        List<String> comments = new ArrayList<>();
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setLong(1, articleID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String comment = "[" + rs.getTimestamp("timestamp") + "] "
+                            + rs.getString("username") + ": " + rs.getString("commentText");
+                    comments.add(comment);
+                }
+            }
+        }
+        return comments;
+    }
+    
+    
+    public void addCommentToArticle(long articleID, long userID, String commentText) throws SQLException {
+        String insertSQL = "INSERT INTO Comments (articleID, userID, commentText) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
+            pstmt.setLong(1, articleID);
+            pstmt.setLong(2, userID);
+            pstmt.setString(3, commentText);
+            pstmt.executeUpdate();
+        }
+    }
 
     /**
      * Retrieves a list of all users from the database.
@@ -583,17 +613,27 @@ public class UserManager {
     	return result;
     }
 
-    public void createAccessTag(String tagName, Role role) throws SQLException {
-        String query = "INSERT INTO AccessTags (tagName, roleName) VALUES (?, ?)";
+    public void createAccessTag(String tagName, String roleName) throws SQLException {
+        String checkSQL = "SELECT COUNT(*) FROM AccessTags WHERE tagName = ? AND roleName = ?";
+        String insertSQL = "INSERT INTO AccessTags (tagName, roleName) VALUES (?, ?)";
+        
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkSQL)) {
+            checkStmt.setString(1, tagName);
+            checkStmt.setString(2, roleName);
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // Tag already exists for this role, no need to insert
+                    System.out.println("Access tag already exists: " + tagName + " for role " + roleName);
+                    return;
+                }
+            }
+        }
 
-        System.out.println("Adding in " + tagName + " to role " + role.getName()); 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, tagName);
-            stmt.setString(2, role.getName());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Error creating access tag: " + e.getMessage());
-            throw e;
+        try (PreparedStatement insertStmt = connection.prepareStatement(insertSQL)) {
+            insertStmt.setString(1, tagName);
+            insertStmt.setString(2, roleName);
+            insertStmt.executeUpdate();
+            System.out.println("Access tag created: " + tagName + " for role " + roleName);
         }
     }
 

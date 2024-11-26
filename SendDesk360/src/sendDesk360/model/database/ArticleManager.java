@@ -101,17 +101,13 @@ public class ArticleManager {
      * @throws Exception if updating the article fails 
      */
     public void updateArticle(Article article) throws Exception {
-    	System.out.println("Updating article"); 
         String sql = "UPDATE Articles SET "
                    + "title = ?, title_iv = ?, "
                    + "shortDescription = ?, shortDescription_iv = ?, "
                    + "difficulty = ?, "
                    + "body = ?, body_iv = ? "
-                   + "WHERE articleID = ?"
-                   + "WHERE ISENCRYPTED = ?;";
+                   + "WHERE articleID = ? AND ISENCRYPTED = ?;";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            
-            // Encrypt fields and generate random IVs
             byte[] titleIV = EncryptionUtils.generateRandomIV();
             String encryptedTitle = encryptField(article.getTitle(), titleIV);
             String titleIVBase64 = Base64.getEncoder().encodeToString(titleIV);
@@ -124,7 +120,6 @@ public class ArticleManager {
             String encryptedBody = encryptField(article.getBody(), bodyIV);
             String bodyIVBase64 = Base64.getEncoder().encodeToString(bodyIV);
 
-            // Set parameters in SQL statement as strings
             pstmt.setString(1, encryptedTitle);
             pstmt.setString(2, titleIVBase64);
             pstmt.setString(3, encryptedShortDesc);
@@ -134,11 +129,8 @@ public class ArticleManager {
             pstmt.setString(7, bodyIVBase64);
             pstmt.setLong(8, article.getArticleID());
             pstmt.setBoolean(9, article.getEncrypted());
-
             pstmt.executeUpdate();
-
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new Exception("Error updating article in database", e);
         }
     }
@@ -335,20 +327,21 @@ public class ArticleManager {
      * @throws SQLException if there is an error writing and executing the search on the SQL database 
      */
     public List<Article> searchArticles(String searchTerm) throws Exception {
-        String sql = "SELECT * FROM Articles;";
+        String sql = "SELECT * FROM Articles WHERE title LIKE ? OR articleID IN "
+                   + "(SELECT articleID FROM Keywords WHERE keyword LIKE ?);";
         List<Article> articles = new ArrayList<>();
-        try (PreparedStatement pstmt = connection.prepareStatement(sql);
-                ResultSet resultSet = pstmt.executeQuery()) {
-               while (resultSet.next()) {
-                   Article article = mapArticle(resultSet);
-                   if (article.getTitle().contains(searchTerm) || article.getKeywords().contains(searchTerm)) {
-                       articles.add(article);
-                   }
-               }
-           } catch (SQLException e) {
-               e.printStackTrace();
-               throw new Exception("Error searching articles", e);
-           }
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + searchTerm + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    articles.add(mapArticle(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new Exception("Error searching articles", e);
+        }
         return articles;
     }
     
@@ -388,25 +381,36 @@ public class ArticleManager {
         }
     }
 
-    /**
-     * Backs up articles to a specified file.
-     *
-     * @param fileName the name of the file to which articles should be backed up
-     */
-    public void backupArticles(String fileName) {
-        // Implement backup logic (e.g., serialize articles to JSON file)
+
+    
+    public List<String> getCommentsForArticle(long articleID) throws SQLException {
+        String query = "SELECT Users.username, commentText, timestamp FROM Comments "
+                     + "INNER JOIN Users ON Comments.userID = Users.userID "
+                     + "WHERE articleID = ? ORDER BY timestamp ASC";
+        List<String> comments = new ArrayList<>();
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setLong(1, articleID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String comment = "[" + rs.getTimestamp("timestamp") + "] "
+                                   + rs.getString("username") + ": " + rs.getString("commentText");
+                    comments.add(comment);
+                }
+            }
+        }
+        return comments;
     }
 
-    /**
-     * Restores articles from a backup file.
-     *
-     * @param fileName       the name of the backup file
-     * @param removeExisting whether to remove existing articles before restoring
-     */
-    public void restoreArticles(String fileName, boolean removeExisting) {
-        // Implement restore logic, ensuring no duplicates based on uniqueID
+    public void addCommentToArticle(long articleID, long userID, String commentText) throws SQLException {
+        String insertSQL = "INSERT INTO Comments (articleID, userID, commentText) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
+            pstmt.setLong(1, articleID);
+            pstmt.setLong(2, userID);
+            pstmt.setString(3, commentText);
+            pstmt.executeUpdate();
+        }
     }
-
+    
     /**
      * Fetches an article by its unique ID.
      *

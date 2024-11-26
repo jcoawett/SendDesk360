@@ -80,107 +80,118 @@ public class DatabaseManager {
      * @throws SQLException if a database access error occurs during table creation
      */
     private void createTables() throws SQLException {
-    	
-    	//USERS TABLE
-    	String createUsersTable = "CREATE TABLE IF NOT EXISTS Users ("
-    	        + "userID BIGINT AUTO_INCREMENT PRIMARY KEY, "
-    	        + "username VARCHAR(255) UNIQUE NOT NULL, "
-    	        + "password VARCHAR(512) NOT NULL, "
-    	        + "password_iv VARCHAR(24) NOT NULL, "
-    	        + "email VARCHAR(255), "
-    	        + "flag BOOLEAN, "
-    	        + "expireTime BIGINT, "
-    	        + "firstName VARCHAR(255), "
-    	        + "middleName VARCHAR(255), "
-    	        + "lastName VARCHAR(255), "
-    	        + "preferredName VARCHAR(255)"
-    	        + ");";
+        
+        // USERS TABLE
+        String createUsersTable = "CREATE TABLE IF NOT EXISTS Users ("
+                + "userID BIGINT AUTO_INCREMENT PRIMARY KEY, "
+                + "username VARCHAR(255) UNIQUE NOT NULL, "
+                + "password VARCHAR(512) NOT NULL, "
+                + "password_iv VARCHAR(24) NOT NULL, "
+                + "email VARCHAR(255), "
+                + "flag BOOLEAN, "
+                + "expireTime BIGINT, "
+                + "firstName VARCHAR(255), "
+                + "middleName VARCHAR(255), "
+                + "lastName VARCHAR(255), "
+                + "preferredName VARCHAR(255)"
+                + ");";
 
-    	// ROLES TABLE
-    	String createRolesTable = "CREATE TABLE IF NOT EXISTS Roles ("
-    	        + "name VARCHAR(255) PRIMARY KEY, "  // Role name as unique identifier
-    	        + "privilege INT "
-    	        + ");";
+        // ROLES TABLE
+        String createRolesTable = "CREATE TABLE IF NOT EXISTS Roles ("
+                + "name VARCHAR(255) PRIMARY KEY, "
+                + "privilege INT "
+                + ");";
 
 
-    	// USER ROLES TABLE
-    	String createUserRolesTable = "CREATE TABLE IF NOT EXISTS UserRoles ( "
-    	        + "userID BIGINT, "
-    	        + "roleName VARCHAR(255), " // Role name instead of roleID
-    	        + "PRIMARY KEY (userID, roleName), " // Ensure unique user-role association
-    	        + "FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE, "
-    	        + "FOREIGN KEY (roleName) REFERENCES Roles(name) ON DELETE CASCADE "
-    	        + ");";
+        // USER ROLES TABLE
+        String createUserRolesTable = "CREATE TABLE IF NOT EXISTS UserRoles ( "
+                + "userID BIGINT, "
+                + "roleName VARCHAR(255), " // Role name instead of roleID
+                + "PRIMARY KEY (userID, roleName), " // Ensure unique user-role association
+                + "FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE, "
+                + "FOREIGN KEY (roleName) REFERENCES Roles(name) ON DELETE CASCADE "
+                + ");";
 
-    	// ACCESS TAGS TABLE
-    	String createAccessTagsTable = "CREATE TABLE IF NOT EXISTS AccessTags ("
-    	        + "tagName VARCHAR(255) NOT NULL, "  // Access tag name
-    	        + "roleName VARCHAR(255) NOT NULL, " // Role name as the foreign key
-    	        + "FOREIGN KEY (roleName) REFERENCES Roles(name) ON DELETE CASCADE, "
-    	        + "PRIMARY KEY (tagName, roleName) " // Unique tag-role pairing
-    	        + ");";
+        // ACCESS TAGS TABLE
+        String createAccessTagsTable = "CREATE TABLE IF NOT EXISTS AccessTags ("
+                + "tagName VARCHAR(255) NOT NULL, "  // Access tag name
+                + "roleName VARCHAR(255) NOT NULL, " // Role name as the foreign key
+                + "FOREIGN KEY (roleName) REFERENCES Roles(name) ON DELETE CASCADE, "
+                + "PRIMARY KEY (tagName, roleName) " // Unique tag-role pairing
+                + ");";
 
-    	// USER ACCESS TAGS TABLE
-    	String createUserAccessTagsTable = "CREATE TABLE IF NOT EXISTS UserAccessTags ("
-    	        + "userID BIGINT NOT NULL, " // User identifier
-    	        + "roleName VARCHAR(255) NOT NULL, " // Role name instead of roleID
-    	        + "tagName VARCHAR(255) NOT NULL, " // Access tag name
-    	        + "PRIMARY KEY (userID, roleName, tagName), " // Uniqueness constraint
-    	        + "FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE, " // Cascade deletion for users
-    	        + "FOREIGN KEY (roleName) REFERENCES Roles(name) ON DELETE CASCADE, " // Ensure roleName matches Roles
-    	        + "FOREIGN KEY (tagName, roleName) REFERENCES AccessTags(tagName, roleName) ON DELETE CASCADE " // Tag-role pairing
-    	        + ");";
+        // USER ACCESS TAGS TABLE
+        String createUserAccessTagsTable = "CREATE TABLE IF NOT EXISTS UserAccessTags ("
+                + "userID BIGINT NOT NULL, " // User identifier
+                + "roleName VARCHAR(255) NOT NULL, " // Role name instead of roleID
+                + "tagName VARCHAR(255) NOT NULL, " // Access tag name
+                + "PRIMARY KEY (userID, roleName, tagName), " // Uniqueness constraint
+                + "FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE, " // Cascade deletion for users
+                + "FOREIGN KEY (roleName) REFERENCES Roles(name) ON DELETE CASCADE, " // Ensure roleName matches Roles
+                + "FOREIGN KEY (tagName, roleName) REFERENCES AccessTags(tagName, roleName) ON DELETE CASCADE " // Tag-role pairing
+                + ");";
 
-    	// ARTICLES TABLE
-    	String createArticlesTable = "CREATE TABLE IF NOT EXISTS Articles ("
-    	        + "articleID BIGINT AUTO_INCREMENT PRIMARY KEY, "
-    	        + "uniqueID BIGINT UNIQUE NOT NULL, "
-    	        + "title VARCHAR(1024) NOT NULL, "
-    	        + "title_iv VARCHAR(24) NOT NULL, "
-    	        + "shortDescription VARCHAR(2048), "
-    	        + "shortDescription_iv VARCHAR(24), "
-    	        + "difficulty VARCHAR(20) NOT NULL CHECK (difficulty IN ('beginner', 'intermediate', 'advanced', 'expert')), "
-    	        + "body TEXT NOT NULL, "
-    	        + "body_iv VARCHAR(24) NOT NULL, "
-    	        + "ISENCRYPTED BOOLEAN NOT NULL DEFAULT FALSE"
-    	        + ");";
+        // ARTICLES TABLE
+        String createArticlesTable = "CREATE TABLE IF NOT EXISTS Articles ("
+                + "articleID BIGINT AUTO_INCREMENT PRIMARY KEY, "
+                + "uniqueID BIGINT UNIQUE NOT NULL, "
+                + "title VARCHAR(1024) NOT NULL, "
+                + "title_iv VARCHAR(24) NOT NULL, "
+                + "shortDescription VARCHAR(2048), "
+                + "shortDescription_iv VARCHAR(24), "
+                + "difficulty VARCHAR(20) NOT NULL CHECK (difficulty IN ('beginner', 'intermediate', 'advanced', 'expert')), "
+                + "body TEXT NOT NULL, "
+                + "body_iv VARCHAR(24) NOT NULL, "
+                + "ISENCRYPTED BOOLEAN NOT NULL DEFAULT FALSE"
+                + ");";
 
-    	// KEYWORDS TABLE
-    	String createKeywordsTable = "CREATE TABLE IF NOT EXISTS Keywords ("
-    	        + "articleID BIGINT NOT NULL, "
-    	        + "keyword VARCHAR(255), "
-    	        + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
-    	        + ");";
+        // KEYWORDS TABLE
+        String createKeywordsTable = "CREATE TABLE IF NOT EXISTS Keywords ("
+                + "articleID BIGINT NOT NULL, "
+                + "keyword VARCHAR(255), "
+                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
+                + ");";
 
-    	// REFERENCES TABLE
-    	String createReferencesTable = "CREATE TABLE IF NOT EXISTS References ("
-    	        + "articleID BIGINT NOT NULL, "
-    	        + "referenceLink VARCHAR(500), "
-    	        + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
-    	        + ");";
+        // REFERENCES TABLE
+        String createReferencesTable = "CREATE TABLE IF NOT EXISTS References ("
+                + "articleID BIGINT NOT NULL, "
+                + "referenceLink VARCHAR(500), "
+                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
+                + ");";
 
-    	// RELATED ARTICLES TABLE
-    	String createRelatedArticlesTable = "CREATE TABLE IF NOT EXISTS RelatedArticles ("
-    	        + "articleID BIGINT NOT NULL,"
-    	        + "relatedArticleID BIGINT NOT NULL,"
-    	        + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE,"
-    	        + "FOREIGN KEY (relatedArticleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
-    	        + ");";
+        // RELATED ARTICLES TABLE
+        String createRelatedArticlesTable = "CREATE TABLE IF NOT EXISTS RelatedArticles ("
+                + "articleID BIGINT NOT NULL,"
+                + "relatedArticleID BIGINT NOT NULL,"
+                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE,"
+                + "FOREIGN KEY (relatedArticleID) REFERENCES Articles(articleID) ON DELETE CASCADE"
+                + ");";
 
-    	// GROUPS TABLE
-    	String createGroupsTable = "CREATE TABLE IF NOT EXISTS Groups ("
-    	        + "groupID BIGINT AUTO_INCREMENT PRIMARY KEY, "
-    	        + "name VARCHAR(255) NOT NULL"
-    	        + ");";
+        // GROUPS TABLE
+        String createGroupsTable = "CREATE TABLE IF NOT EXISTS Groups ("
+                + "groupID BIGINT AUTO_INCREMENT PRIMARY KEY, "
+                + "name VARCHAR(255) NOT NULL"
+                + ");";
 
-    	// ARTICLE GROUPS TABLE
-    	String createArticleGroupsTable = "CREATE TABLE IF NOT EXISTS ArticleGroups ("
-    	        + "articleID BIGINT NOT NULL, "
-    	        + "groupID BIGINT NOT NULL, "
-    	        + "PRIMARY KEY (articleID, groupID), "
-    	        + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE, "
-    	        + "FOREIGN KEY (groupID) REFERENCES Groups(groupID) ON DELETE CASCADE"
-    	        + ");";
+        // ARTICLE GROUPS TABLE
+        String createArticleGroupsTable = "CREATE TABLE IF NOT EXISTS ArticleGroups ("
+                + "articleID BIGINT NOT NULL, "
+                + "groupID BIGINT NOT NULL, "
+                + "PRIMARY KEY (articleID, groupID), "
+                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE, "
+                + "FOREIGN KEY (groupID) REFERENCES Groups(groupID) ON DELETE CASCADE"
+                + ");";
+        
+        
+        String createCommentsTable = "CREATE TABLE IF NOT EXISTS Comments ("
+                + "commentID BIGINT AUTO_INCREMENT PRIMARY KEY, "
+                + "articleID BIGINT NOT NULL, "
+                + "userID BIGINT NOT NULL, "
+                + "commentText TEXT NOT NULL, "
+                + "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                + "FOREIGN KEY (articleID) REFERENCES Articles(articleID) ON DELETE CASCADE, "
+                + "FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE"
+                + ");";
 
 
 
@@ -188,19 +199,38 @@ public class DatabaseManager {
             stmt.execute(createUsersTable);
             stmt.execute(createRolesTable);
             stmt.execute(createUserRolesTable);
-            stmt.execute(createAccessTagsTable); 
-            stmt.execute(createUserAccessTagsTable); 
+            stmt.execute(createAccessTagsTable);
+            stmt.execute(createUserAccessTagsTable);
             stmt.execute(createArticlesTable);
             stmt.execute(createKeywordsTable);
             stmt.execute(createReferencesTable);
             stmt.execute(createRelatedArticlesTable);
-            stmt.execute(createGroupsTable); 
-            stmt.execute(createArticleGroupsTable); 
-        } catch (SQLException e) {
-            System.err.println("Error creating tables: " + e.getMessage());
-            throw e; // Rethrow to let the caller know about the failure
+            stmt.execute(createGroupsTable);
+            stmt.execute(createCommentsTable);
+            stmt.execute(createArticleGroupsTable);
+        }
+
+        // Initialize roles
+        createInitialRoles();
+    }
+    
+    
+    private void createInitialRoles() throws SQLException {
+        String insertOrUpdateRoleSQL = "MERGE INTO Roles (name, privilege) KEY (name) VALUES (?, ?);";
+        String[] roles = {"admin", "instructor", "user"};
+        try (PreparedStatement pstmt = connection.prepareStatement(insertOrUpdateRoleSQL)) {
+            for (int i = 0; i < roles.length; i++) {
+                pstmt.setString(1, roles[i]);
+                pstmt.setInt(2, i); // Privilege levels (0 = User, 1 = Instructor, 2 = Admin)
+                pstmt.addBatch();
+            }
+            pstmt.executeBatch();
         }
     }
+    
+    
+    
+
 
     // Get the database connection
     public Connection getConnection() {

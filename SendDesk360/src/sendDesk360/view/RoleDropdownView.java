@@ -52,9 +52,16 @@ public class RoleDropdownView extends VBox {
         titleLabel.setStyle("-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #F8F8F8;");
 
         // Create and style the dropdown menu
-        roleDropdown = new ComboBox<>();
-        roleDropdown.getItems().addAll("Admin", "Instructor", "User");
+        roleDropdown = new ComboBox<>(roleDropdownViewModel.getRoleNames());
         roleDropdown.setPromptText("Select role");
+        roleDropdown.getItems().forEach(role -> System.out.println("Dropdown Role: " + role));
+        
+        roleDropdown.valueProperty().addListener((obs, oldVal, newVal) -> {
+            System.out.println("Selected role: " + newVal);
+            roleDropdownViewModel.setSelectedRole(newVal);
+        });
+        
+        
 
         // Dropdown styling for a dark theme
         roleDropdown.setStyle(
