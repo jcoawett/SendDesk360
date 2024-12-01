@@ -96,6 +96,7 @@ public class User {
     private long userID; // Added userID field
     private FullName name = new FullName();
     private Vector<Role> roles = new Vector<>();
+    private Role activeRole;
     private String username;
     private String email;
     private String password;
@@ -111,6 +112,14 @@ public class User {
         this.roles = new Vector<>();
         this.flag = true;
         this.expireTime = System.currentTimeMillis() + (60000 * 5);
+    }
+    
+    public Role getActiveRole() {
+        return activeRole;
+    }
+    
+    public void setActiveRole(Role activeRole) {
+        this.activeRole = activeRole;
     }
 
     // Overloaded Constructor

@@ -11,6 +11,7 @@ import sendDesk360.view.components.PrimaryButton;
 import sendDesk360.view.components.SmallButton;
 import sendDesk360.viewModel.AccessGroupViewModel;
 import sendDesk360.viewModel.ArticleViewModel;
+import sendDesk360.viewModel.DashboardViewModel;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -37,19 +38,19 @@ public class AccessGroupView extends VBox {
     private User currentUser; 
     private UserManager userManager; 
     
-    public AccessGroupView(SendDesk360 mainApp, AccessGroupViewModel accessGroupViewModel, ArticleViewModel articleViewModel) {
+    public AccessGroupView(SendDesk360 mainApp, AccessGroupViewModel accessGroupViewModel, DashboardViewModel dashboardViewModel) {
         this.currentUser = mainApp.getUserManager().getCurrentUser();
         this.userManager = mainApp.getUserManager();
         this.accessGroupViewModel = accessGroupViewModel;
-        initializeUI(mainApp, articleViewModel);
+        initializeUI(mainApp, dashboardViewModel);
     }
     
 
 
-    private void initializeUI(SendDesk360 mainApp, ArticleViewModel articleViewModel) {
+    private void initializeUI(SendDesk360 mainApp, DashboardViewModel dashboardViewModel) {
         try {
             // Initialize the NavBar
-        	NavBar navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), () -> mainApp.showProfileView(), articleViewModel);
+            NavBar navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), () -> mainApp.showProfileView(), dashboardViewModel);
             navBar.setAlignment(Pos.TOP_LEFT);
             VBox.setVgrow(navBar, Priority.ALWAYS);
             navBar.setMaxWidth(300);

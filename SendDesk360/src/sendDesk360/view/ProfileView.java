@@ -12,6 +12,7 @@ import sendDesk360.view.components.PrimaryButton;
 import sendDesk360.view.components.PrimaryField;
 import sendDesk360.view.components.PrimaryButton.ButtonVariant;
 import sendDesk360.viewModel.ArticleViewModel;
+import sendDesk360.viewModel.DashboardViewModel;
 import sendDesk360.viewModel.ProfileViewModel;
 
 public class ProfileView extends VBox {
@@ -20,16 +21,16 @@ public class ProfileView extends VBox {
     private NavBar navBar;
     private Runnable onAccessGroupButtonClicked;
 
-    public ProfileView(SendDesk360 mainApp, ProfileViewModel profileViewModel, ArticleViewModel articleViewModel) {
+    public ProfileView(SendDesk360 mainApp, ProfileViewModel profileViewModel, DashboardViewModel dashboardViewModel) {
         this.profileViewModel = profileViewModel;
 
         Runnable onProfileClicked = () -> mainApp.showProfileView();
-        initializeUI(profileViewModel, articleViewModel, mainApp, onProfileClicked);
+        initializeUI(profileViewModel, dashboardViewModel, mainApp, onProfileClicked);
     }
 
-    private void initializeUI(ProfileViewModel profileViewModel, ArticleViewModel articleViewModel, SendDesk360 mainApp, Runnable onProfileClicked) {
+    private void initializeUI(ProfileViewModel profileViewModel, DashboardViewModel dashboardViewModel, SendDesk360 mainApp, Runnable onProfileClicked) {
         // Navigation bar
-        navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), onProfileClicked, articleViewModel);
+        navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), onProfileClicked, dashboardViewModel);
         navBar.setAlignment(Pos.TOP_LEFT);
         VBox.setVgrow(navBar, Priority.ALWAYS);
         navBar.setMaxWidth(300);

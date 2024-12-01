@@ -6,6 +6,7 @@ import sendDesk360.SendDesk360;
 import sendDesk360.model.Article;
 import sendDesk360.model.Group;
 import sendDesk360.model.User;
+import sendDesk360.model.User.Role;
 import sendDesk360.model.database.ArticleManager;
 import sendDesk360.model.database.UserManager;
 
@@ -223,14 +224,38 @@ public class DashboardViewModel {
     
     public boolean isAdmin() {
         User currentUser = userManager.getCurrentUser();
-        
-        if(currentUser == null) {
-        	System.err.println("Error: currentUser is null.");
-        	return false;
+
+        if (currentUser == null) {
+            System.err.println("Error: currentUser is null.");
+            return false;
         }
-        
-        return currentUser.getRoles().stream()
-            .anyMatch(role -> role.getName().equalsIgnoreCase("admin"));
+
+        Role activeRole = currentUser.getActiveRole();
+        return activeRole != null && activeRole.getName().equalsIgnoreCase("admin");
+    }
+    
+    public boolean isInstructor() {
+        User currentUser = userManager.getCurrentUser();
+
+        if (currentUser == null) {
+            System.err.println("Error: currentUser is null.");
+            return false;
+        }
+
+        Role activeRole = currentUser.getActiveRole();
+        return activeRole != null && activeRole.getName().equalsIgnoreCase("instructor");
+    }
+    
+    public boolean isUser() {
+    	User currentUser = userManager.getCurrentUser();
+    	
+    	if (currentUser == null) {
+    		System.err.println("Error: currentUser is null");
+    		return false;
+    	}
+    	
+    	Role activeRole = currentUser.getActiveRole();
+    	return activeRole != null && activeRole.getName().equalsIgnoreCase("user");
     }
 
     // Properties for article input binding

@@ -46,7 +46,7 @@ public class RoleDropdownViewModel {
     }
 
     public String getSelectedRole() {
-        return selectedRole.get();
+        return selectedRole.toString();
     }
 
     public void setSelectedRole(String role) {
@@ -65,11 +65,23 @@ public class RoleDropdownViewModel {
         return false;
     }
     
-    public void handleLogin(String selectedRole) {
-        System.out.println("Looking for selected role: " + selectedRole);
 
-        if (hasRole(selectedRole)) {
+    public void handleLogin(String selectedRoleName) {
+        if (hasRole(selectedRoleName)) {
             try {
+                // Set the user's active role
+                Role selectedRole = roles.stream()
+                    .filter(r -> r.getName().equalsIgnoreCase(selectedRoleName))
+                    .findFirst()
+                    .orElse(null);
+
+                if (selectedRole != null) {
+                    user.setActiveRole(selectedRole);
+                    System.out.println("Active role set to: " + selectedRole.getName());
+                } else {
+                    System.out.println("Selected role not found in user's roles.");
+                }
+
                 mainApp.showDashboard();
             } catch (IllegalArgumentException e) {
                 System.out.println("Unknown role. Please select a valid role.");

@@ -178,32 +178,41 @@ public class UserManager {
      * @throws Exception if an error occurs while updating the user information
      */
     public void updateUser(User user) throws Exception {
-        String sql = "UPDATE Users SET password = ?, password_iv = ?, email = ?, flag = ?, expireTime = ?, firstName = ?, middleName = ?, lastName = ?, preferredName = ? WHERE userID = ?;";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            // Encrypt the password
-            byte[] passwordIV = EncryptionUtils.generateRandomIV();
-            byte[] encryptedPasswordBytes = encryptionHelper.encrypt(user.getPassword().getBytes("UTF-8"), passwordIV);
-            String encryptedPassword = Base64.getEncoder().encodeToString(encryptedPasswordBytes);
-            String passwordIVBase64 = Base64.getEncoder().encodeToString(passwordIV);
+        boolean passwordChanged = user.getPassword() != null && !user.getPassword().isEmpty();
 
-            pstmt.setString(1, encryptedPassword);
-            pstmt.setString(2, passwordIVBase64);
-            pstmt.setString(3, user.getEmail());
-            pstmt.setBoolean(4, user.isFlag());
-            pstmt.setLong(5, user.getExpireTime());
-            pstmt.setString(6, user.getName().getFirst());
-            pstmt.setString(7, user.getName().getMiddle());
-            pstmt.setString(8, user.getName().getLast());
-            pstmt.setString(9, user.getName().getPref());
-            pstmt.setLong(10, user.getUserID());
+        String sql = passwordChanged
+            ? "UPDATE Users SET password = ?, password_iv = ?, email = ?, flag = ?, expireTime = ?, firstName = ?, middleName = ?, lastName = ?, preferredName = ? WHERE userID = ?;"
+            : "UPDATE Users SET email = ?, flag = ?, expireTime = ?, firstName = ?, middleName = ?, lastName = ?, preferredName = ? WHERE userID = ?;";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            int index = 1;
+
+            if (passwordChanged) {
+                // Encrypt the new password
+                byte[] passwordIV = EncryptionUtils.generateRandomIV();
+                byte[] encryptedPasswordBytes = encryptionHelper.encrypt(user.getPassword().getBytes("UTF-8"), passwordIV);
+                String encryptedPassword = Base64.getEncoder().encodeToString(encryptedPasswordBytes);
+                String passwordIVBase64 = Base64.getEncoder().encodeToString(passwordIV);
+
+                pstmt.setString(index++, encryptedPassword);
+                pstmt.setString(index++, passwordIVBase64);
+            }
+
+            pstmt.setString(index++, user.getEmail());
+            pstmt.setBoolean(index++, user.isFlag());
+            pstmt.setLong(index++, user.getExpireTime());
+            pstmt.setString(index++, user.getName().getFirst());
+            pstmt.setString(index++, user.getName().getMiddle());
+            pstmt.setString(index++, user.getName().getLast());
+            pstmt.setString(index++, user.getName().getPref());
+            pstmt.setLong(index++, user.getUserID());
 
             pstmt.executeUpdate();
 
-            // Update user roles
-            changeUserRoles(user.getUsername(), user.getRoles());
+            // Update user roles if necessary
+            // changeUserRoles(user.getUsername(), user.getRoles());
         } catch (SQLException e) {
             System.err.println("Error updating user information " + e.getMessage());
-            e.printStackTrace();
             throw e; // Rethrow for higher-level handling.
         }
     }
@@ -246,6 +255,12 @@ public class UserManager {
 
                     // Decrypt the stored password
                     String decryptedStoredPassword = decryptPassword(encryptedStoredPassword, passwordIVBase64);
+                    
+                    if (password.equals(decryptedStoredPassword)) {
+                        User user = getUserByUsername(username);
+                        setCurrentUser(user); // Set the current user upon successful authentication
+                        return true;
+                    }
 
                     // Compare passwords
                     boolean success =  password.equals(decryptedStoredPassword);

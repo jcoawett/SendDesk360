@@ -55,7 +55,7 @@ public class DashboardView extends VBox {
         	NavBar navBar = new NavBar(mainApp, 
         		    () -> mainApp.showDashboard(), // Home button
         		    () -> mainApp.showProfileView(), // Profile button
-        		    articleViewModel);       
+        		    dashboardViewModel);       
             navBar.setAlignment(Pos.TOP_LEFT);
             VBox.setVgrow(navBar, Priority.ALWAYS);
             navBar.setMaxWidth(300);

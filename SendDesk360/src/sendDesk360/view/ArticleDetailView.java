@@ -13,6 +13,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import sendDesk360.viewModel.ArticleViewModel;
+import sendDesk360.viewModel.DashboardViewModel;
 import sendDesk360.SendDesk360;
 import sendDesk360.view.components.NavBar;
 import sendDesk360.view.components.PrimaryButton;
@@ -29,13 +30,13 @@ public class ArticleDetailView extends VBox {
     private VBox pageBody;
     private VBox commentWrapper; // Class-level declaration for comments section
 
-    public ArticleDetailView(ArticleViewModel viewModel, SendDesk360 mainApp) {
-        initializeUI(viewModel, mainApp);
+    public ArticleDetailView(ArticleViewModel viewModel, SendDesk360 mainApp, DashboardViewModel dashboardViewModel) {
+        initializeUI(viewModel, mainApp, dashboardViewModel);
     }
 
-    private void initializeUI(ArticleViewModel viewModel, SendDesk360 mainApp) {
+    private void initializeUI(ArticleViewModel viewModel, SendDesk360 mainApp, DashboardViewModel dashboardViewModel) {
         // Navigation bar setup
-    	NavBar navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), () -> mainApp.showProfileView(), viewModel);
+        NavBar navBar = new NavBar(mainApp, () -> mainApp.showDashboard(), () -> mainApp.showProfileView(), dashboardViewModel);
         navBar.setAlignment(Pos.TOP_LEFT);
         VBox.setVgrow(navBar, Priority.ALWAYS);
         navBar.setMaxWidth(300);

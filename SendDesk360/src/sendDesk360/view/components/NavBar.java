@@ -8,7 +8,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import sendDesk360.SendDesk360;
-import sendDesk360.viewModel.ArticleViewModel;
+import sendDesk360.viewModel.DashboardViewModel;
 
 public class NavBar extends VBox {
 
@@ -22,13 +22,13 @@ public class NavBar extends VBox {
     private NavButton manageUsersButton;
     private NavButton homeButton;
     private VBox navButtonWrapper; // Wrapper for the buttons
-    private ArticleViewModel viewModel;
+    private DashboardViewModel viewModel;
 
     private Runnable onAccessGroupButtonClicked;
     
 
  // Constructor
-    public NavBar(SendDesk360 mainApp, Runnable onHomeClicked, Runnable onProfileClicked, ArticleViewModel viewModel) {
+    public NavBar(SendDesk360 mainApp, Runnable onHomeClicked, Runnable onProfileClicked, DashboardViewModel viewModel) {
         this.viewModel = viewModel;
 
         // Logo & Heading

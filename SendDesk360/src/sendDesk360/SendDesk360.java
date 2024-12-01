@@ -24,6 +24,7 @@ import sendDesk360.viewModel.OneTimeCodeViewModel;
 import sendDesk360.viewModel.ProfileViewModel;
 import sendDesk360.viewModel.AccessGroupViewModel;
 import sendDesk360.viewModel.ArticleViewModel;
+import sendDesk360.viewModel.DashboardViewModel;
 import sendDesk360.viewModel.RoleDropdownViewModel; 
 
 
@@ -159,23 +160,25 @@ public class SendDesk360 extends Application {
         }
 
         ArticleViewModel viewModel = new ArticleViewModel(articleManager, currentUser);
+        DashboardViewModel dashViewModel = new DashboardViewModel(this, articleManager, userManager);
+
         viewModel.loadArticle(article);
-        ArticleDetailView articleDetailView = new ArticleDetailView(viewModel, this);
+        ArticleDetailView articleDetailView = new ArticleDetailView(viewModel, this, dashViewModel);
         scene.setRoot(articleDetailView);
     }
     
     public void showAccessGroupView() {
         User currentUser = userManager.getCurrentUser();
-        
+
         if (currentUser == null) {
             System.out.println("Error: No current user found. Redirecting to login.");
             showLoginView();
             return;
         }
-        
+
         AccessGroupViewModel accessGroupViewModel = new AccessGroupViewModel(userManager, currentUser);
-        ArticleViewModel articleViewModel = new ArticleViewModel(articleManager, currentUser); // Pass ArticleViewModel here
-        AccessGroupView accessGroupView = new AccessGroupView(this, accessGroupViewModel, articleViewModel);
+        DashboardViewModel dashboardViewModel = new DashboardViewModel(this, articleManager, userManager);
+        AccessGroupView accessGroupView = new AccessGroupView(this, accessGroupViewModel, dashboardViewModel);
         scene.setRoot(accessGroupView);
     }
     
@@ -188,8 +191,8 @@ public class SendDesk360 extends Application {
         }
 
         ProfileViewModel profileViewModel = new ProfileViewModel(userManager, currentUser);
-        ArticleViewModel articleViewModel = new ArticleViewModel(articleManager, currentUser);
-        ProfileView profileView = new ProfileView(this, profileViewModel, articleViewModel);
+        DashboardViewModel dashboardViewModel = new DashboardViewModel(this, articleManager, userManager);
+        ProfileView profileView = new ProfileView(this, profileViewModel, dashboardViewModel);
         scene.setRoot(profileView);
     }
 
