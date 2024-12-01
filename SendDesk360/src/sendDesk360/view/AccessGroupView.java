@@ -162,8 +162,9 @@ public class AccessGroupView extends VBox {
 
 
     private void openAddUserToGroupPanel(SendDesk360 mainApp) {
+    	//this is true as expected 
         if (accessGroupViewModel.isAdmin() ) {
-            VBox mainPageBody = new VBox();
+        	 HBox mainPageBody = (HBox) this.getChildren().get(0);
 
             if (editUserAccessPanel != null) {
                 // Close the panel if already open
@@ -219,7 +220,6 @@ public class AccessGroupView extends VBox {
 
                 // Add users to the container
                 List<User> usersInGroup = accessGroupViewModel.getAllUsersInAccessGroup(group);
-                System.out.println("Got " + usersInGroup.size() + " users in group " + group);
                 for (User user : usersInGroup) {
                     // Format user info
                     String userInfo = String.format("%s %s (%s)", 
@@ -248,7 +248,6 @@ public class AccessGroupView extends VBox {
                     		(accessGroupViewModel.isUserInAccessGroup(currentUser, "\"admin-rights\"", currentUser.getRoles())) 
                     			&& accessGroupViewModel.isUserInAccessGroup(currentUser, group, currentUser.getRoles())) {
                     	
-                    	System.out.println("User was deemed to be an admin or an instructor with special access rights");
                     	 removeButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-padding: 5px;");
 
                          // Create an HBox to hold both the user label and remove button

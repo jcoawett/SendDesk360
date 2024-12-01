@@ -70,14 +70,9 @@ public class AccessGroupViewModel{
 	
 	public void addUserToAccessGroup(User user, String group) {
 			try {
-				if (isUserInAccessGroup(user,group,user.getRoles())) {
-					System.out.println("User determined to already be in access group");
-					return; 
-				}
-				else for (Role r : user.getRoles()) {
-					if (userManager.getAccessTagsForRole(r).contains(group)) {
+				for (Role r : user.getRoles()) {
+					if (userManager.getAccessTagsForRole(r).contains(group) && !userManager.userHasAccessTag(user, group)) {
 						userManager.addAccessTagForUser(group, user, r);
-						System.out.println("Added access tag " + group + " for user in role: " + r.getName());
 						isFirstInstructorToAccessGroup(group, user, r); //check to see if this is the first instructor 
 					}
 				}
@@ -121,22 +116,17 @@ public class AccessGroupViewModel{
 	}
 	
 	public boolean isFirstInstructorToAccessGroup(String group, User user, Role r){
-		System.out.println("Checking if " +user.getName().getFirst() + "is the first instructor in acccess group " + group + " with role " + r.getName()); 
 		if (r.getName().equalsIgnoreCase("instructor")) {
 			try {
 				List<User> usersWithRole = userManager.getUsersWithAccessTag(group);
-				System.out.println("there is " + usersWithRole.size() + " user in group: " + group);
 				for (User tempUser : usersWithRole) {
-					if (isInstructor(tempUser)) {
+					if (isInstructor(tempUser) && !userManager.userHasAccessTag(user,"\"view-article-bodies\"") && !userManager.userHasAccessTag(user,"\"admin-rights\"")) {
 						System.out.println("Comparing " + tempUser.getUsername() + " with " + user.getUsername()); 
 						if (tempUser.getUsername().equalsIgnoreCase(user.getUsername())) {
 							System.out.println("This instructor was the first instructor in access group: " + group); 
 							userManager.addAccessTagForUser("\"view-article-bodies\"", user, r);
 							userManager.addAccessTagForUser("\"admin-rights\"", user, r);
 						}
-					}
-					else {
-						System.out.println("This user was found to not be an instructor"); 
 					}
 				}
 			} catch (Exception e) {

@@ -44,7 +44,6 @@ public class EditUserAccessPanel extends VBox {
 
                 checkBox.setOnAction(event -> {
                     if (checkBox.isSelected()) {
-                    	System.out.print("adding user to access group"); 
                         viewModel.addUserToAccessGroup(user, group);
                     } else {
                         viewModel.removeUserFromAccessGroup(user, group);

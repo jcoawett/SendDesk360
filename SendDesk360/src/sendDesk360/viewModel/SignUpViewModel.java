@@ -215,7 +215,7 @@ public class SignUpViewModel {
             // Check if this is the first user to assign admin role
             if (userManager.isFirstUser()) {
                 Vector<Role> roles = new Vector<>();
-                String[] allRoles = {"Admin", "Instructor", "User"};
+                String[] allRoles = {"Admin"};
                 for (String roleName : allRoles) {
                     Role role = new Role();
                     role.setName(roleName);

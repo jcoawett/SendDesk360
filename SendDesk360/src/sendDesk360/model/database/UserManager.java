@@ -413,7 +413,6 @@ public class UserManager {
         ResultSet rs = pstmt.executeQuery();
         while (rs.next()) {
             String roleName = rs.getString("roleName"); // Correctly retrieve roleName
-            System.out.print("user has role: " + roleName); 
             int privilege = rs.getInt("privilege");
             Role tempRole = new Role(); 
             tempRole.setPrivilege(privilege);
@@ -601,7 +600,7 @@ public class UserManager {
         List<String> accessTags = new ArrayList<>();
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, role.getName());
+            stmt.setString(1, role.getName().toLowerCase());
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -661,7 +660,7 @@ public class UserManager {
              PreparedStatement addStmt = connection.prepareStatement(addTagQuery)) {
 
             checkStmt.setString(1, tag);
-            checkStmt.setString(2, role.getName());
+            checkStmt.setString(2, role.getName().toLowerCase());
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next() && rs.getInt("count") == 0) {
@@ -671,7 +670,7 @@ public class UserManager {
             }
 
             addStmt.setLong(1, user.getUserID());
-            addStmt.setString(2, role.getName());
+            addStmt.setString(2, role.getName().toLowerCase());
             addStmt.setString(3, tag);
             addStmt.executeUpdate();
 
@@ -688,7 +687,7 @@ public class UserManager {
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setLong(1, userID);
             stmt.setString(2, tagName);
-            stmt.setString(3, role.getName());
+            stmt.setString(3, role.getName().toLowerCase());
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -701,6 +700,18 @@ public class UserManager {
 
         return false;
     }
+    
+    
+    public boolean userHasAccessTag(User user, String tagName) throws SQLException {
+       for (Role r : user.getRoles()) {
+    	   if(userHasAccessTag(user.getUserID(), tagName, r)) {
+    		   return true; 
+    	   }
+       }
+
+        return false;
+    }
+
 
     public void removeAccessTagForUser(String tag, User user, Role role) throws Exception {
         String query = "DELETE FROM UserAccessTags WHERE userID = ? AND tagName = ? AND roleName = ?";
@@ -708,7 +719,7 @@ public class UserManager {
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setLong(1, user.getUserID());
             stmt.setString(2, tag);
-            stmt.setString(3, role.getName());
+            stmt.setString(3, role.getName().toLowerCase());
             int rowsAffected = stmt.executeUpdate();
 
             if (rowsAffected > 0) {
