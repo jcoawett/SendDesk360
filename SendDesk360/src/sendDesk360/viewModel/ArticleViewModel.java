@@ -7,6 +7,7 @@ import sendDesk360.model.Group;
 import sendDesk360.model.User;
 import sendDesk360.model.database.ArticleManager;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -218,6 +219,20 @@ public class ArticleViewModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    }
+    
+    public String backedUpArticles(File file) {
+    	try {
+			return articleManager.backupArticles();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return null; 
+    }
+    
+    public void restoreArticles(File file) {
+    	articleManager.restoreArticles(file);
     }
     
     // SETTERS

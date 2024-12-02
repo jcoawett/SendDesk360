@@ -200,9 +200,6 @@ public class DashboardViewModel {
         mainApp.showDashboard();
     }
     
-    public void filterArticlesBasedOnGroup(List<Group> filteredGroups) {
-    	
-    }
     
     
     public String welcomeMessage() {

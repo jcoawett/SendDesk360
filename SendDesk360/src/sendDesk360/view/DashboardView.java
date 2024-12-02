@@ -21,7 +21,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.application.Application;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 
@@ -30,6 +36,8 @@ public class DashboardView extends VBox {
     private VBox articleList;
     private PrimaryButton createNewArticle;
     private PrimaryButton addNewArticleGroup; 
+    private PrimaryButton restore; 
+    private PrimaryButton backup; 
     private EditArticlePannel editPannel;
     private EditGroupPannel editGroupPannel;
     private SearchBar searchBar;
@@ -105,6 +113,9 @@ public class DashboardView extends VBox {
                 pageTitleContainer.getChildren().addAll(spacer, createNewArticle, addNewArticleGroup);
             }
 
+            backup = new PrimaryButton(ButtonVariant.TEXT_ONLY, "Restore", event -> restoreArticles(mainApp)); 
+            restore = new PrimaryButton(ButtonVariant.TEXT_ONLY, "Backup", event -> backupArticles()); 
+            pageTitleContainer.getChildren().addAll(backup, restore); 
             // Main page body
             VBox pageBody = new VBox(pageTitleContainer, articleList);
             pageBody.setAlignment(Pos.TOP_LEFT);
@@ -271,4 +282,59 @@ public class DashboardView extends VBox {
         // Create the AccessGroupView
         mainApp.showAccessGroupView();
     }
+    
+    private void backupArticles() {
+    	  // Create a FileChooser for saving
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save File");
+
+        // Set the initial directory to the current user's directory
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+
+        // Set a default file name (optional)
+        fileChooser.setInitialFileName("default.txt");
+
+        // Set extension filters (optional)
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+            new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+
+        // Show the save file dialog (null means no owner window)
+        File file = fileChooser.showSaveDialog(null);
+
+        if (file != null) {
+            // Write something to the selected file
+            try (FileWriter writer = new FileWriter(file)) {
+            	String currentArticles = articleViewModel.backedUpArticles(file); 
+                writer.write(currentArticles);
+                System.out.println("File saved to: " + file.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("File save operation canceled.");
+        }
+    }
+    
+    private void restoreArticles(SendDesk360 mainApp) {
+    	FileChooser fileChooser = new FileChooser();
+        
+        // Set the initial directory to the user's current directory
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+        
+        // Show the open file dialog
+        File selectedFile = fileChooser.showOpenDialog(null);
+        
+        if (selectedFile != null) {
+        	articleViewModel.restoreArticles(selectedFile); 
+        	
+        	articleList.getChildren().clear();
+        	initializeArticleDropdowns(mainApp);
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        } else {
+            System.out.println("File selection canceled.");
+        }
+    }
+    
 }

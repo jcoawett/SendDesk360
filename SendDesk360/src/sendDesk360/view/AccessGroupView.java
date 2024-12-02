@@ -167,6 +167,7 @@ public class AccessGroupView extends VBox {
         	 HBox mainPageBody = (HBox) this.getChildren().get(0);
 
             if (editUserAccessPanel != null) {
+            	System.out.println("editUserAccessPanel was determined to be already open"); 
                 // Close the panel if already open
                 Node scrollPane = editUserAccessPanel.getParent(); // Get the ScrollPane wrapping the panel
                 if (scrollPane != null) {
@@ -191,6 +192,7 @@ public class AccessGroupView extends VBox {
                 // Define save behavior
                 editUserAccessPanel.setOnSaveCallback(() -> {
                     // Remove the panel and refresh user list
+                	System.out.println("on save callback called for editUserAcessPanel"); 
                     mainPageBody.getChildren().remove(scrollPane);
                     refreshUserList();
                     editUserAccessPanel = null;

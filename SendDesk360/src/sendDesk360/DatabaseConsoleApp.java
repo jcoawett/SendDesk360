@@ -710,7 +710,7 @@ public class DatabaseConsoleApp {
             System.out.print("Enter the path for the backup file: ");
             String backupFilePath = scanner.nextLine();
             File backupFile = new File(backupFilePath);
-            articleManager.backupArticles(backupFile);
+            articleManager.backupArticles();
             
             
             System.out.println("Articles backed up successfully to " + backupFilePath + ".");

@@ -729,13 +729,12 @@ public class ArticleManager {
     }
      
     
-    public void backupArticles(File backupFile) throws Exception {
+    public String backupArticles() throws Exception {
         List<Article> articles = getAllArticles(); // Fetch all articles
+        StringBuilder articleData = new StringBuilder();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(backupFile))) {
+        try {
             for (Article article : articles) {
-                StringBuilder articleData = new StringBuilder();
-
                 // Encrypt fields and generate random IVs
                 byte[] titleIV = EncryptionUtils.generateRandomIV();
                 String encryptedTitle = encryptField(article.getTitle(), titleIV);
@@ -753,100 +752,118 @@ public class ArticleManager {
                 String keywordsString = String.join("|", article.getKeywords()); // Use '|' as separator
                 String referencesString = String.join("|", article.getReferenceLinks()); // Use '|' as separator
                 List<Long> relatedArticleIDs = article.getRelatedArticleIDs();
-                String relatedIDsString = relatedArticleIDs.isEmpty() ? "0" : relatedArticleIDs.stream()
+                String relatedIDsString = relatedArticleIDs.stream()
                         .map(String::valueOf)
                         .collect(Collectors.joining("|")); // Use '|' as separator
 
-                // Append the encrypted data and IVs to the StringBuilder
-                articleData.append(article.getUniqueID()).append(",")
-                           .append(encryptedTitle).append(",")
-                           .append(titleIVBase64).append(",")
-                           .append(encryptedShortDesc).append(",")
-                           .append(shortDescIVBase64).append(",")
-                           .append(article.getDifficulty()).append(",")
-                           .append(encryptedBody).append(",")
-                           .append(bodyIVBase64).append(",")
-                           .append(keywordsString).append(",")
-                           .append(referencesString).append(",")
-                           .append(relatedIDsString).append(","); // Add references and related IDs
+                // Include ISENCRYPTED property
+                boolean isEncrypted = article.getEncrypted();
 
-                // Write to the backup file
-                writer.write(articleData.toString());
-                writer.newLine(); // Write a new line after each article
+                // Format and append the data
+                String articleRecord = String.format(
+                        "%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%b%n",
+                        article.getUniqueID(),
+                        encryptedTitle,
+                        titleIVBase64,
+                        encryptedShortDesc,
+                        shortDescIVBase64,
+                        article.getDifficulty(),
+                        encryptedBody,
+                        bodyIVBase64,
+                        keywordsString,
+                        referencesString,
+                        relatedIDsString,
+                        isEncrypted
+                );
+
+                articleData.append(articleRecord);
             }
-            System.out.println("Articles backed up successfully to " + backupFile.getAbsolutePath());
-        } catch (IOException e) {
-            System.out.println("Error writing to the backup file: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error fetching articles for backup: " + e.getMessage());
+            throw new Exception("Error generating backup data: " + e.getMessage(), e);
         }
+
+        // Return the accumulated data as a single string
+        return articleData.toString();
     }
 
+
     public void restoreArticles(File backupFile) {
-        String insertSQL = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+        String insertSQL = "INSERT INTO Articles (uniqueID, title, title_iv, shortDescription, shortDescription_iv, difficulty, body, body_iv, ISENCRYPTED) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String checkDuplicateSQL = "SELECT COUNT(*) FROM Articles WHERE uniqueID = ?;";
+
         try (BufferedReader reader = new BufferedReader(new FileReader(backupFile))) {
             String line;
-            try (PreparedStatement pstmt = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
+            try (
+                PreparedStatement checkStmt = connection.prepareStatement(checkDuplicateSQL);
+                PreparedStatement insertStmt = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)
+            ) {
                 while ((line = reader.readLine()) != null) {
                     String[] articleData = line.split(",");
-                    if (articleData.length < 11) { // Expecting at least 11 fields (including keywords, references, and related IDs)
+                    if (articleData.length < 12) { // Expecting at least 12 fields (including ISENCRYPTED)
                         System.out.println("Skipping invalid article data: " + line);
                         continue;
                     }
 
-                    // Create Article object and set values
-                    Article article = new Article();
-                    article.setUniqueID(Long.parseLong(articleData[0].trim()));
+                    // Parse the data
+                    long uniqueID = Long.parseLong(articleData[0].trim());
                     String encryptedTitle = articleData[1].trim();
                     String titleIVBase64 = articleData[2].trim();
                     String encryptedShortDesc = articleData[3].trim();
                     String shortDescIVBase64 = articleData[4].trim();
-                    article.setDifficulty(articleData[5].trim());
+                    String difficulty = articleData[5].trim();
                     String encryptedBody = articleData[6].trim();
                     String bodyIVBase64 = articleData[7].trim();
-                    String keywordsString = articleData[8].trim(); // Keywords string
-                    String referencesString = articleData[9].trim(); // References string
-                    String relatedIDsString = articleData[10].trim(); // Related IDs string
+                    String keywordsString = articleData[8].trim();
+                    String referencesString = articleData[9].trim();
+                    String relatedIDsString = articleData[10].trim(); // Related IDs as a string
+                    boolean isEncrypted = Boolean.parseBoolean(articleData[11].trim());
 
-                    // Set encrypted values and IVs in the Article object
-                    article.setTitle(encryptedTitle);
-                    article.setShortDescription(encryptedShortDesc);
-                    article.setBody(encryptedBody);
+                    // Check for duplicates
+                    checkStmt.setLong(1, uniqueID);
+                    ResultSet duplicateCheck = checkStmt.executeQuery();
+                    if (duplicateCheck.next() && duplicateCheck.getInt(1) > 0) {
+                        System.out.println("Skipping duplicate article with uniqueID: " + uniqueID);
+                        continue;
+                    }
 
-                    // Set keywords, references, and related articles in the Article object
-                    List<String> keywords = Arrays.asList(keywordsString.split("\\|")); // Split by the pipe '|'
-                    article.setKeywords(keywords);
-                    
-                    List<String> references = Arrays.asList(referencesString.split("\\|")); // Split by the pipe '|'
-                    article.setReferenceLinks(references);
-                    
-                    List<Long> relatedIDs = Arrays.stream(relatedIDsString.split("\\|")) // Split by the pipe '|'
-                                                   .map(Long::parseLong)
-                                                   .collect(Collectors.toList());
-                    article.setRelatedArticleIDs(relatedIDs);
+                    // Handle related article IDs
+                    List<Long> relatedIDs = new ArrayList<>();
+                    if (!relatedIDsString.isEmpty()) {
+                        relatedIDs = Arrays.stream(relatedIDsString.split("\\|"))
+                                           .map(Long::parseLong)
+                                           .collect(Collectors.toList());
+                    }
 
-                    // Set parameters for the SQL statement
-                    pstmt.setLong(1, article.getUniqueID());
-                    pstmt.setString(2, encryptedTitle);
-                    pstmt.setString(3, titleIVBase64);
-                    pstmt.setString(4, encryptedShortDesc);
-                    pstmt.setString(5, shortDescIVBase64);
-                    pstmt.setString(6, article.getDifficulty());
-                    pstmt.setString(7, encryptedBody);
-                    pstmt.setString(8, bodyIVBase64);
+                    // Set parameters for the insert statement
+                    insertStmt.setLong(1, uniqueID);
+                    insertStmt.setString(2, encryptedTitle);
+                    insertStmt.setString(3, titleIVBase64);
+                    insertStmt.setString(4, encryptedShortDesc);
+                    insertStmt.setString(5, shortDescIVBase64);
+                    insertStmt.setString(6, difficulty);
+                    insertStmt.setString(7, encryptedBody);
+                    insertStmt.setString(8, bodyIVBase64);
+                    insertStmt.setBoolean(9, isEncrypted);
 
                     // Execute the insert
-                    pstmt.executeUpdate();
+                    insertStmt.executeUpdate();
 
                     // Get the generated keys if necessary
-                    ResultSet keys = pstmt.getGeneratedKeys();
+                    ResultSet keys = insertStmt.getGeneratedKeys();
                     if (keys.next()) {
                         long articleID = keys.getLong(1);
-                        article.setArticleID(articleID);
 
-                        addKeywords(article); // Ensure this method handles the keywords
-                        addReferences(article); // Ensure this method handles the references
-                        addRelatedArticles(article); // Ensure this method handles the related articles
+                        // Create an Article object to store related data
+                        Article article = new Article();
+                        article.setArticleID(articleID);
+                        article.setUniqueID(uniqueID);
+                        article.setKeywords(Arrays.asList(keywordsString.split("\\|")));
+                        article.setReferenceLinks(Arrays.asList(referencesString.split("\\|")));
+                        article.setRelatedArticleIDs(relatedIDs);
+
+                        addKeywords(article);
+                        addReferences(article);
+                        addRelatedArticles(article);
                     }
                 }
                 System.out.println("Articles restored successfully from " + backupFile.getAbsolutePath());
@@ -855,4 +872,6 @@ public class ArticleManager {
             System.out.println("Error reading the backup file: " + e.getMessage());
         }
     }
+
+
 }
