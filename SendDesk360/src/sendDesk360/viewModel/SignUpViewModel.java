@@ -257,7 +257,7 @@ public class SignUpViewModel {
     }
 
     public void proceedToDashboard() {
-        mainApp.showDashboard();
+    	mainApp.showDashboard();
     }
 
     public void goToOTC() {

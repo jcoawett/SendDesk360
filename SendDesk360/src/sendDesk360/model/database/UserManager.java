@@ -255,22 +255,16 @@ public class UserManager {
 
                     // Decrypt the stored password
                     String decryptedStoredPassword = decryptPassword(encryptedStoredPassword, passwordIVBase64);
-                    
-                    if (password.equals(decryptedStoredPassword)) {
-                        User user = getUserByUsername(username);
-                        setCurrentUser(user); // Set the current user upon successful authentication
-                        return true;
-                    }
 
                     // Compare passwords
-                    boolean success =  password.equals(decryptedStoredPassword);
-                    if (!success) {
-                    	System.out.println("Password: " + password + " did not match stored password: " + decryptedStoredPassword);
+                    if (password.equals(decryptedStoredPassword)) {
+                        // Set the current user
+                        User user = getUserByUsername(username);
+                        setCurrentUser(user); // Add this line
+                        return true;
                     }
-                    else {return success;} 
-                }
-                else {
-                	System.out.println("No users with the given username found, are we sure it's in the database?"); 
+                } else {
+                    System.out.println("No users with the given username found, are we sure it's in the database?");
                 }
             }
         } catch (SQLException e) {

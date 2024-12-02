@@ -52,6 +52,17 @@ public class RoleDropdownViewModel {
     public void setSelectedRole(String role) {
         selectedRole.set(role);
     }
+    
+    public boolean isAdmin() {
+        User currentUser = userManager.getCurrentUser();
+        if (currentUser == null) {
+            System.err.println("Error: currentUser is null.");
+            return false;
+        }
+
+        Role activeRole = currentUser.getActiveRole();
+        return activeRole != null && activeRole.getName().equalsIgnoreCase("admin");
+    }
 
 
     public boolean hasRole(String selected) {

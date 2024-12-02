@@ -2,6 +2,8 @@ package sendDesk360.viewModel;
 
 import javafx.beans.property.*;
 import sendDesk360.SendDesk360;
+import sendDesk360.model.User;
+import sendDesk360.model.database.UserManager;
 
 public class OneTimeCodeViewModel {
 
@@ -9,10 +11,14 @@ public class OneTimeCodeViewModel {
     private final StringProperty[] digitProperties;
     private final StringProperty errorProperty;
     private String generatedCode;
+    private UserManager userManager;
+    private User user;
     
     public OneTimeCodeViewModel(SendDesk360 mainApp, String generatedCode) {
         this.mainApp = mainApp;
         this.generatedCode = generatedCode;
+        this.userManager = mainApp.getUserManager(); // Initialize userManager
+        this.user = userManager.getCurrentUser();    // Initialize user
 
         // Initialize properties for each digit
         digitProperties = new StringProperty[6];
@@ -59,9 +65,17 @@ public class OneTimeCodeViewModel {
 
     // Method to navigate to the dashboard
     public void proceedToDashboard() {
+        if (user == null) {
+            user = userManager.getCurrentUser();
+        }
+        if (user == null) {
+            System.err.println("Error: No user is logged in. Redirecting to login.");
+            mainApp.showLoginView();
+            return;
+        }
+        userManager.setCurrentUser(user);
         mainApp.showDashboard();
     }
-
     // Method to handle back to login
     public void goToLogin() {
         mainApp.showLoginView();

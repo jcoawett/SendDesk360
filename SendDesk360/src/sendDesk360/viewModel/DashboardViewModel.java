@@ -206,20 +206,15 @@ public class DashboardViewModel {
     
     
     public String welcomeMessage() {
-    	
-    	String prefName = userManager.getCurrentUser().getName().getPref();
-    	
-    	String welcomeMessage = "Welcome " + prefName; 
-    	
-    	
-    	if (prefName != null) {
-    		
-    		return welcomeMessage;
-    		
-    	} else {
-    		
-    		return "Dashboard";
-    	}
+    	User currentUser = userManager.getCurrentUser();
+        if (currentUser == null) {
+            return "Welcome!";
+        }
+
+        String firstName = currentUser.getName().getFirst();
+        String prefName = currentUser.getName().getPref();
+        String displayName = (prefName != null && !prefName.isEmpty()) ? prefName : firstName;
+        return "Welcome, " + displayName + "!";
     }
     
     public boolean isAdmin() {

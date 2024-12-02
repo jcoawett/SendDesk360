@@ -44,6 +44,10 @@ public class DashboardView extends VBox {
             mainApp.getUserManager()
         );
         this.articleViewModel = articleViewModel;
+
+        // Initialize articleList early
+        articleList = new VBox();
+
         initializeUI(mainApp);
         articleList.getChildren().clear();
         initializeArticleDropdowns(mainApp);
@@ -120,6 +124,11 @@ public class DashboardView extends VBox {
         } catch (Exception e) {
             e.printStackTrace();
             display403Error();
+
+            // Initialize articleList to prevent NullPointerException
+            if (articleList == null) {
+                articleList = new VBox();
+            }
         }
     }
     
